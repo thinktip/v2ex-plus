@@ -1,0 +1,625 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 110;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		D2ADC17A300F5EE500D13ACC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2ADC179300F5EE500D13ACC /* AppDelegate.swift */; };
+		D2ADC17E300F5EE500D13ACC /* Main.html in Resources */ = {isa = PBXBuildFile; fileRef = D2ADC17C300F5EE500D13ACC /* Main.html */; };
+		D2ADC180300F5EE500D13ACC /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = D2ADC17F300F5EE500D13ACC /* Icon.png */; };
+		D2ADC182300F5EE500D13ACC /* Style.css in Resources */ = {isa = PBXBuildFile; fileRef = D2ADC181300F5EE500D13ACC /* Style.css */; };
+		D2ADC184300F5EE500D13ACC /* Script.js in Resources */ = {isa = PBXBuildFile; fileRef = D2ADC183300F5EE500D13ACC /* Script.js */; };
+		D2ADC186300F5EE500D13ACC /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2ADC185300F5EE500D13ACC /* ViewController.swift */; };
+		D2ADC189300F5EE500D13ACC /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D2ADC187300F5EE500D13ACC /* Main.storyboard */; };
+		D2ADC18B300F5EE700D13ACC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D2ADC18A300F5EE700D13ACC /* Assets.xcassets */; };
+		D2ADC192300F5EE700D13ACC /* V2EX Plus Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D2ADC191300F5EE700D13ACC /* V2EX Plus Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		D2ADC197300F5EE700D13ACC /* SafariWebExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2ADC196300F5EE700D13ACC /* SafariWebExtensionHandler.swift */; };
+		D2ADC1AB300F5EE700D13ACC /* icon16.png in Resources */ = {isa = PBXBuildFile; fileRef = D2ADC1A3300F5EE700D13ACC /* icon16.png */; };
+		D2ADC1AC300F5EE700D13ACC /* icon48.png in Resources */ = {isa = PBXBuildFile; fileRef = D2ADC1A4300F5EE700D13ACC /* icon48.png */; };
+		D2ADC1AD300F5EE700D13ACC /* lite.css in Resources */ = {isa = PBXBuildFile; fileRef = D2ADC1A5300F5EE700D13ACC /* lite.css */; };
+		D2ADC1AE300F5EE700D13ACC /* icon128.png in Resources */ = {isa = PBXBuildFile; fileRef = D2ADC1A6300F5EE700D13ACC /* icon128.png */; };
+		D2ADC1AF300F5EE700D13ACC /* preflight.js in Resources */ = {isa = PBXBuildFile; fileRef = D2ADC1A7300F5EE700D13ACC /* preflight.js */; };
+		D2ADC1B0300F5EE700D13ACC /* manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = D2ADC1A8300F5EE700D13ACC /* manifest.json */; };
+		D2ADC1B1300F5EE700D13ACC /* lite.js in Resources */ = {isa = PBXBuildFile; fileRef = D2ADC1A9300F5EE700D13ACC /* lite.js */; };
+		D2ADC1B2300F5EE700D13ACC /* icon32.png in Resources */ = {isa = PBXBuildFile; fileRef = D2ADC1AA300F5EE700D13ACC /* icon32.png */; };
+		D2ADC1B3300F5EE700D13ACC /* page-bridge.js in Resources */ = {isa = PBXBuildFile; fileRef = D2ADC1B4300F5EE700D13ACC /* page-bridge.js */; };
+		D2ADC1B8300F5EE700D13ACC /* popup.html in Resources */ = {isa = PBXBuildFile; fileRef = D2ADC1B5300F5EE700D13ACC /* popup.html */; };
+		D2ADC1B9300F5EE700D13ACC /* popup.css in Resources */ = {isa = PBXBuildFile; fileRef = D2ADC1B6300F5EE700D13ACC /* popup.css */; };
+		D2ADC1BA300F5EE700D13ACC /* popup.js in Resources */ = {isa = PBXBuildFile; fileRef = D2ADC1B7300F5EE700D13ACC /* popup.js */; };
+		D2ADC1BC300F5EE700D13ACC /* logo.svg in Resources */ = {isa = PBXBuildFile; fileRef = D2ADC1BB300F5EE700D13ACC /* logo.svg */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D2ADC193300F5EE700D13ACC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D2ADC16E300F5EE500D13ACC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D2ADC190300F5EE700D13ACC;
+			remoteInfo = "V2EX Plus Extension";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		D2ADC19E300F5EE700D13ACC /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			dstPath = "";
+			dstSubfolder = PlugIns;
+			files = (
+				D2ADC192300F5EE700D13ACC /* V2EX Plus Extension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		D2ADC176300F5EE500D13ACC /* V2EX Plus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "V2EX Plus.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D2ADC179300F5EE500D13ACC /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		D2ADC17D300F5EE500D13ACC /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = Base; path = Base.lproj/Main.html; sourceTree = "<group>"; };
+		D2ADC17F300F5EE500D13ACC /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Icon.png; sourceTree = "<group>"; };
+		D2ADC181300F5EE500D13ACC /* Style.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; path = Style.css; sourceTree = "<group>"; };
+		D2ADC183300F5EE500D13ACC /* Script.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = Script.js; sourceTree = "<group>"; };
+		D2ADC185300F5EE500D13ACC /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		D2ADC188300F5EE500D13ACC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		D2ADC18A300F5EE700D13ACC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		D2ADC18C300F5EE700D13ACC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D2ADC191300F5EE700D13ACC /* V2EX Plus Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "V2EX Plus Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D2ADC196300F5EE700D13ACC /* SafariWebExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariWebExtensionHandler.swift; sourceTree = "<group>"; };
+		D2ADC198300F5EE700D13ACC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D2ADC1A3300F5EE700D13ACC /* icon16.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icon16.png; path = Resources/icon16.png; sourceTree = "<group>"; };
+		D2ADC1A4300F5EE700D13ACC /* icon48.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icon48.png; path = Resources/icon48.png; sourceTree = "<group>"; };
+		D2ADC1A5300F5EE700D13ACC /* lite.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; name = lite.css; path = Resources/lite.css; sourceTree = "<group>"; };
+		D2ADC1A6300F5EE700D13ACC /* icon128.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icon128.png; path = Resources/icon128.png; sourceTree = "<group>"; };
+		D2ADC1A7300F5EE700D13ACC /* preflight.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = preflight.js; path = Resources/preflight.js; sourceTree = "<group>"; };
+		D2ADC1A8300F5EE700D13ACC /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = manifest.json; path = Resources/manifest.json; sourceTree = "<group>"; };
+		D2ADC1A9300F5EE700D13ACC /* lite.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = lite.js; path = Resources/lite.js; sourceTree = "<group>"; };
+		D2ADC1AA300F5EE700D13ACC /* icon32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icon32.png; path = Resources/icon32.png; sourceTree = "<group>"; };
+		D2ADC1B4300F5EE700D13ACC /* page-bridge.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = page-bridge.js; path = Resources/page-bridge.js; sourceTree = "<group>"; };
+		D2ADC1B5300F5EE700D13ACC /* popup.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = popup.html; path = Resources/popup.html; sourceTree = "<group>"; };
+		D2ADC1B6300F5EE700D13ACC /* popup.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; name = popup.css; path = Resources/popup.css; sourceTree = "<group>"; };
+		D2ADC1B7300F5EE700D13ACC /* popup.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = popup.js; path = Resources/popup.js; sourceTree = "<group>"; };
+		D2ADC1BB300F5EE700D13ACC /* logo.svg */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = logo.svg; path = Resources/logo.svg; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D2ADC173300F5EE500D13ACC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+		D2ADC18E300F5EE700D13ACC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D2ADC16D300F5EE500D13ACC = {
+			isa = PBXGroup;
+			children = (
+				D2ADC178300F5EE500D13ACC /* V2EX Plus */,
+				D2ADC195300F5EE700D13ACC /* V2EX Plus Extension */,
+				D2ADC177300F5EE500D13ACC /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D2ADC177300F5EE500D13ACC /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D2ADC176300F5EE500D13ACC /* V2EX Plus.app */,
+				D2ADC191300F5EE700D13ACC /* V2EX Plus Extension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D2ADC178300F5EE500D13ACC /* V2EX Plus */ = {
+			isa = PBXGroup;
+			children = (
+				D2ADC179300F5EE500D13ACC /* AppDelegate.swift */,
+				D2ADC185300F5EE500D13ACC /* ViewController.swift */,
+				D2ADC187300F5EE500D13ACC /* Main.storyboard */,
+				D2ADC18A300F5EE700D13ACC /* Assets.xcassets */,
+				D2ADC18C300F5EE700D13ACC /* Info.plist */,
+				D2ADC17B300F5EE500D13ACC /* Resources */,
+			);
+			path = "V2EX Plus";
+			sourceTree = "<group>";
+		};
+		D2ADC17B300F5EE500D13ACC /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				D2ADC17C300F5EE500D13ACC /* Main.html */,
+				D2ADC17F300F5EE500D13ACC /* Icon.png */,
+				D2ADC181300F5EE500D13ACC /* Style.css */,
+				D2ADC183300F5EE500D13ACC /* Script.js */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		D2ADC195300F5EE700D13ACC /* V2EX Plus Extension */ = {
+			isa = PBXGroup;
+			children = (
+				D2ADC1A2300F5EE700D13ACC /* Resources */,
+				D2ADC196300F5EE700D13ACC /* SafariWebExtensionHandler.swift */,
+				D2ADC198300F5EE700D13ACC /* Info.plist */,
+			);
+			path = "V2EX Plus Extension";
+			sourceTree = "<group>";
+		};
+		D2ADC1A2300F5EE700D13ACC /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				D2ADC1A3300F5EE700D13ACC /* icon16.png */,
+				D2ADC1A4300F5EE700D13ACC /* icon48.png */,
+				D2ADC1A5300F5EE700D13ACC /* lite.css */,
+				D2ADC1A6300F5EE700D13ACC /* icon128.png */,
+				D2ADC1A7300F5EE700D13ACC /* preflight.js */,
+				D2ADC1A8300F5EE700D13ACC /* manifest.json */,
+				D2ADC1A9300F5EE700D13ACC /* lite.js */,
+				D2ADC1AA300F5EE700D13ACC /* icon32.png */,
+				D2ADC1B4300F5EE700D13ACC /* page-bridge.js */,
+				D2ADC1B5300F5EE700D13ACC /* popup.html */,
+				D2ADC1B6300F5EE700D13ACC /* popup.css */,
+				D2ADC1B7300F5EE700D13ACC /* popup.js */,
+				D2ADC1BB300F5EE700D13ACC /* logo.svg */,
+			);
+			name = Resources;
+			path = "V2EX Plus Extension";
+			sourceTree = SOURCE_ROOT;
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		D2ADC175300F5EE500D13ACC /* V2EX Plus */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D2ADC19F300F5EE700D13ACC /* Build configuration list for PBXNativeTarget "V2EX Plus" */;
+			buildPhases = (
+				D2ADC172300F5EE500D13ACC /* Sources */,
+				D2ADC173300F5EE500D13ACC /* Frameworks */,
+				D2ADC174300F5EE500D13ACC /* Resources */,
+				D2ADC19E300F5EE700D13ACC /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D2ADC194300F5EE700D13ACC /* PBXTargetDependency */,
+			);
+			name = "V2EX Plus";
+			productName = "V2EX Plus";
+			productReference = D2ADC176300F5EE500D13ACC /* V2EX Plus.app */;
+			productType = "com.apple.product-type.application";
+		};
+		D2ADC190300F5EE700D13ACC /* V2EX Plus Extension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D2ADC19B300F5EE700D13ACC /* Build configuration list for PBXNativeTarget "V2EX Plus Extension" */;
+			buildPhases = (
+				D2ADC18D300F5EE700D13ACC /* Sources */,
+				D2ADC18E300F5EE700D13ACC /* Frameworks */,
+				D2ADC18F300F5EE700D13ACC /* Resources */,
+			);
+			buildRules = (
+			);
+			name = "V2EX Plus Extension";
+			productName = "V2EX Plus Extension";
+			productReference = D2ADC191300F5EE700D13ACC /* V2EX Plus Extension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D2ADC16E300F5EE500D13ACC /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2700;
+				LastUpgradeCheck = 2700;
+				TargetAttributes = {
+					D2ADC175300F5EE500D13ACC = {
+						CreatedOnToolsVersion = 27.0;
+					};
+					D2ADC190300F5EE700D13ACC = {
+						CreatedOnToolsVersion = 27.0;
+					};
+				};
+			};
+			buildConfigurationList = D2ADC171300F5EE500D13ACC /* Build configuration list for PBXProject "V2EX Plus" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = D2ADC16D300F5EE500D13ACC;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = D2ADC177300F5EE500D13ACC /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D2ADC175300F5EE500D13ACC /* V2EX Plus */,
+				D2ADC190300F5EE700D13ACC /* V2EX Plus Extension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		D2ADC174300F5EE500D13ACC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+				D2ADC180300F5EE500D13ACC /* Icon.png in Resources */,
+				D2ADC189300F5EE500D13ACC /* Main.storyboard in Resources */,
+				D2ADC184300F5EE500D13ACC /* Script.js in Resources */,
+				D2ADC17E300F5EE500D13ACC /* Main.html in Resources */,
+				D2ADC18B300F5EE700D13ACC /* Assets.xcassets in Resources */,
+				D2ADC182300F5EE500D13ACC /* Style.css in Resources */,
+			);
+		};
+		D2ADC18F300F5EE700D13ACC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+				D2ADC1AC300F5EE700D13ACC /* icon48.png in Resources */,
+				D2ADC1AB300F5EE700D13ACC /* icon16.png in Resources */,
+				D2ADC1AE300F5EE700D13ACC /* icon128.png in Resources */,
+				D2ADC1B2300F5EE700D13ACC /* icon32.png in Resources */,
+				D2ADC1AF300F5EE700D13ACC /* preflight.js in Resources */,
+				D2ADC1B0300F5EE700D13ACC /* manifest.json in Resources */,
+				D2ADC1B1300F5EE700D13ACC /* lite.js in Resources */,
+				D2ADC1AD300F5EE700D13ACC /* lite.css in Resources */,
+				D2ADC1B3300F5EE700D13ACC /* page-bridge.js in Resources */,
+				D2ADC1B8300F5EE700D13ACC /* popup.html in Resources */,
+				D2ADC1B9300F5EE700D13ACC /* popup.css in Resources */,
+				D2ADC1BA300F5EE700D13ACC /* popup.js in Resources */,
+				D2ADC1BC300F5EE700D13ACC /* logo.svg in Resources */,
+			);
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D2ADC172300F5EE500D13ACC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+				D2ADC186300F5EE500D13ACC /* ViewController.swift in Sources */,
+				D2ADC17A300F5EE500D13ACC /* AppDelegate.swift in Sources */,
+			);
+		};
+		D2ADC18D300F5EE700D13ACC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+				D2ADC197300F5EE700D13ACC /* SafariWebExtensionHandler.swift in Sources */,
+			);
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D2ADC194300F5EE700D13ACC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D2ADC190300F5EE700D13ACC /* V2EX Plus Extension */;
+			targetProxy = D2ADC193300F5EE700D13ACC /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		D2ADC17C300F5EE500D13ACC /* Main.html */ = {
+			isa = PBXVariantGroup;
+			children = (
+				D2ADC17D300F5EE500D13ACC /* Base */,
+			);
+			name = Main.html;
+			sourceTree = "<group>";
+		};
+		D2ADC187300F5EE500D13ACC /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				D2ADC188300F5EE500D13ACC /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		D2ADC199300F5EE700D13ACC /* Debug configuration for PBXProject "V2EX Plus" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		D2ADC19A300F5EE700D13ACC /* Release configuration for PBXProject "V2EX Plus" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		D2ADC19C300F5EE700D13ACC /* Debug configuration for PBXNativeTarget "V2EX Plus Extension" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "V2EX Plus Extension/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "V2EX Plus Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MARKETING_VERSION = 1.13.33;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.thinktip.v2explus.Extension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		D2ADC19D300F5EE700D13ACC /* Release configuration for PBXNativeTarget "V2EX Plus Extension" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "V2EX Plus Extension/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "V2EX Plus Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MARKETING_VERSION = 1.13.33;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.thinktip.v2explus.Extension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		D2ADC1A0300F5EE700D13ACC /* Debug configuration for PBXNativeTarget "V2EX Plus" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "V2EX Plus/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "V2EX Plus";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				INFOPLIST_KEY_NSViewGestureRecognizerIsExclusive = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.13.33;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.thinktip.v2explus;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		D2ADC1A1300F5EE700D13ACC /* Release configuration for PBXNativeTarget "V2EX Plus" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "V2EX Plus/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "V2EX Plus";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				INFOPLIST_KEY_NSViewGestureRecognizerIsExclusive = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.13.33;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.thinktip.v2explus;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		D2ADC171300F5EE500D13ACC /* Build configuration list for PBXProject "V2EX Plus" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D2ADC199300F5EE700D13ACC /* Debug configuration for PBXProject "V2EX Plus" */,
+				D2ADC19A300F5EE700D13ACC /* Release configuration for PBXProject "V2EX Plus" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		D2ADC19B300F5EE700D13ACC /* Build configuration list for PBXNativeTarget "V2EX Plus Extension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D2ADC19C300F5EE700D13ACC /* Debug configuration for PBXNativeTarget "V2EX Plus Extension" */,
+				D2ADC19D300F5EE700D13ACC /* Release configuration for PBXNativeTarget "V2EX Plus Extension" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		D2ADC19F300F5EE700D13ACC /* Build configuration list for PBXNativeTarget "V2EX Plus" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D2ADC1A0300F5EE700D13ACC /* Debug configuration for PBXNativeTarget "V2EX Plus" */,
+				D2ADC1A1300F5EE700D13ACC /* Release configuration for PBXNativeTarget "V2EX Plus" */,
+			);
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = D2ADC16E300F5EE500D13ACC /* Project object */;
+	validationLevel = 1;
+}

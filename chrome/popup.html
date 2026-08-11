@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>V2EX Plus 设置</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main class="settings-shell">
+      <header class="settings-header">
+        <img src="logo.svg" width="88" height="25" alt="V2EX">
+        <span id="save-status" class="auto-save-indicator" role="status" aria-live="polite" hidden>
+          <span id="save-status-text" class="visually-hidden"></span>
+        </span>
+      </header>
+
+      <nav class="settings-tabs" role="tablist" aria-label="设置分类">
+        <button id="image-settings-tab" class="settings-tab is-active" type="button" role="tab" aria-selected="true" aria-controls="image-settings-panel">图床</button>
+        <button id="reading-settings-tab" class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="reading-settings-panel">阅读与回复</button>
+        <button id="display-settings-tab" class="settings-tab" type="button" role="tab" aria-selected="false" aria-controls="display-settings-panel">界面</button>
+      </nav>
+
+      <form id="settings-form">
+        <section id="image-settings-panel" class="settings-section" role="tabpanel" aria-labelledby="image-settings-tab">
+          <div class="provider-options" role="radiogroup" aria-label="图床选择">
+            <label class="provider-option">
+              <input type="radio" name="image-host" value="imgur" checked>
+              <span>Imgur</span>
+            </label>
+            <label class="provider-option">
+              <input type="radio" name="image-host" value="r2">
+              <span>Cloudflare R2</span>
+            </label>
+          </div>
+
+          <div id="imgur-settings" class="provider-settings">
+            <label class="field-label" for="imgur-client-id">Client ID</label>
+            <input id="imgur-client-id" class="text-input" type="text" autocomplete="off" spellcheck="false" placeholder="例如 3107b9ef8b316f3">
+          </div>
+
+          <div id="r2-settings" class="provider-settings" hidden>
+            <label class="field-label" for="r2-endpoint">上传地址</label>
+            <input id="r2-endpoint" class="text-input" type="url" inputmode="url" autocomplete="url" spellcheck="false" value="https://upload-cloud.2smile.top/upload">
+
+            <label class="field-label" for="r2-token">上传令牌</label>
+            <div class="password-field">
+              <input id="r2-token" class="text-input" type="password" autocomplete="off" spellcheck="false">
+              <button id="show-r2-token" class="password-toggle" type="button" title="显示令牌" aria-label="显示令牌" aria-pressed="false">
+                <svg class="password-eye password-eye-show" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.06 12.35a1 1 0 0 1 0-.7C3.73 7.6 7.67 5 12 5c4.33 0 8.27 2.6 9.94 6.65a1 1 0 0 1 0 .7C20.27 16.4 16.33 19 12 19c-4.33 0-8.27-2.6-9.94-6.65Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <svg class="password-eye password-eye-hide" viewBox="0 0 24 24" aria-hidden="true"><path d="m2 2 20 20"></path><path d="M6.71 6.71C4.82 7.9 3.35 9.6 2.06 11.65a1 1 0 0 0 0 .7C3.73 16.4 7.67 19 12 19c1.44 0 2.83-.29 4.09-.81"></path><path d="M10.73 5.08C11.15 5.03 11.57 5 12 5c4.33 0 8.27 2.6 9.94 6.65a1 1 0 0 1 0 .7 14.8 14.8 0 0 1-2.03 3.22"></path><path d="M14.12 14.12A3 3 0 0 1 9.88 9.88"></path></svg>
+              </button>
+            </div>
+          </div>
+
+          <label class="toggle-row">
+            <span>上传前压缩图片</span>
+            <input id="compress-images" type="checkbox">
+            <span class="toggle-track" aria-hidden="true"></span>
+          </label>
+          <div id="compression-quality-row" class="quality-row" hidden>
+            <div class="quality-heading">
+              <label for="compression-quality">压缩质量</label>
+              <output id="compression-quality-value" for="compression-quality">82%</output>
+            </div>
+            <input id="compression-quality" type="range" min="40" max="95" step="1" value="82">
+          </div>
+
+          <label class="toggle-row">
+            <span>删除预览时同步删除云端图片</span>
+            <input id="delete-remote-image" type="checkbox">
+            <span class="toggle-track" aria-hidden="true"></span>
+          </label>
+        </section>
+
+        <section id="reading-settings-panel" class="settings-section feature-settings" role="tabpanel" aria-labelledby="reading-settings-tab" hidden>
+          <label class="toggle-row first-toggle-row">
+            <span>自动折叠长回复</span>
+            <input id="auto-fold-replies" type="checkbox" checked>
+            <span class="toggle-track" aria-hidden="true"></span>
+          </label>
+
+          <label class="toggle-row">
+            <span>启用回复预览</span>
+            <input id="reply-preview" type="checkbox" checked>
+            <span class="toggle-track" aria-hidden="true"></span>
+          </label>
+
+          <label class="toggle-row">
+            <span>翻页后定位回复区</span>
+            <input id="auto-jump-replies" type="checkbox" checked>
+            <span class="toggle-track" aria-hidden="true"></span>
+          </label>
+
+          <label class="toggle-row">
+            <span>显示楼中楼</span>
+            <input id="nested-replies" type="checkbox" checked>
+            <span class="toggle-track" aria-hidden="true"></span>
+          </label>
+
+          <label class="toggle-row">
+            <span>显示表情选择器</span>
+            <input id="emoji-picker" type="checkbox" checked>
+            <span class="toggle-track" aria-hidden="true"></span>
+          </label>
+
+          <label class="toggle-row">
+            <span>自动签到</span>
+            <input id="auto-daily-checkin" type="checkbox">
+            <span class="toggle-track" aria-hidden="true"></span>
+          </label>
+        </section>
+
+        <section id="display-settings-panel" class="settings-section feature-settings display-settings" role="tabpanel" aria-labelledby="display-settings-tab" hidden>
+          <fieldset class="setting-group first-setting-group">
+            <legend>主题列表行距</legend>
+            <div class="segmented-control">
+              <label>
+                <input type="radio" name="topic-row-spacing" value="compact">
+                <span>紧凑</span>
+              </label>
+              <label>
+                <input type="radio" name="topic-row-spacing" value="standard" checked>
+                <span>标准</span>
+              </label>
+              <label>
+                <input type="radio" name="topic-row-spacing" value="relaxed">
+                <span>宽松</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <label class="setting-select-row">
+            <span>回复内容行距</span>
+            <select id="reply-line-height" class="native-select">
+              <option value="1.4">1.4</option>
+              <option value="1.6" selected>1.6</option>
+              <option value="1.8">1.8</option>
+              <option value="2">2.0</option>
+            </select>
+          </label>
+
+          <label class="setting-select-row">
+            <span>内容卡片圆角</span>
+            <select id="content-card-radius" class="native-select">
+              <option value="0">0 px</option>
+              <option value="6">6 px</option>
+              <option value="10">10 px</option>
+              <option value="14">14 px</option>
+              <option value="18" selected>18 px</option>
+            </select>
+          </label>
+
+          <label class="toggle-row">
+            <span>显示回复楼层</span>
+            <input id="show-reply-floor" type="checkbox" checked>
+            <span class="toggle-track" aria-hidden="true"></span>
+          </label>
+
+          <label class="toggle-row">
+            <span>显示上传后的图片预览</span>
+            <input id="show-upload-preview" type="checkbox" checked>
+            <span class="toggle-track" aria-hidden="true"></span>
+          </label>
+
+          <label class="toggle-row">
+            <span>固定右侧头像工具卡</span>
+            <input id="fixed-sidebar-tools" type="checkbox" checked>
+            <span class="toggle-track" aria-hidden="true"></span>
+          </label>
+
+          <label class="toggle-row">
+            <span>默认展开回复工具栏</span>
+            <input id="expand-reply-toolbar" type="checkbox">
+            <span class="toggle-track" aria-hidden="true"></span>
+          </label>
+
+          <label class="toggle-row">
+            <span>显示节点图标</span>
+            <input id="node-icons" type="checkbox" checked>
+            <span class="toggle-track" aria-hidden="true"></span>
+          </label>
+
+          <label class="toggle-row">
+            <span>显示站内广告</span>
+            <input id="show-ads" type="checkbox">
+            <span class="toggle-track" aria-hidden="true"></span>
+          </label>
+
+          <div class="setting-action-row">
+            <span>节点顺序</span>
+            <button id="reset-node-order" class="setting-action-button" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path></svg>
+              <span>恢复默认</span>
+            </button>
+          </div>
+        </section>
+
+      </form>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

@@ -1,0 +1,26 @@
+.DS_Store
+.wrangler/
+*.log
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.mobileprovision
+
+# Generated build products
+chrome/build/
+safari/build/
+DerivedData/
+*.xcarchive
+
+# Xcode user state
+xcuserdata/
+*.xcuserstate
+
+# Dependencies and editor state
+node_modules/
+.idea/
+.vscode/

@@ -1,0 +1,4008 @@
+// Generated from userscript/v2ex-plus.user.js 1.13.33. Do not edit directly.
+(function boot() {
+  "use strict";
+
+  const STORAGE_KEY = "v2p_lite_theme_mode";
+  const LEGACY_STORAGE_KEY = "user_preferred_theme_mode";
+  const STYLE_ID = "v2p-lite-theme-style";
+  const PREPAINT_STYLE_ID = "v2p-lite-prepaint-style";
+  const RUNTIME_MARKER = "v2pLiteRuntime";
+  const THEME_META_ID = "v2p-lite-theme-color";
+  const TOGGLE_ID = "v2p-lite-theme-toggle";
+  const NATIVE_TOGGLE_SELECTOR = 'a[href*="/settings/night/toggle"]';
+  const STRUCTURE_MARKER_SELECTOR = [
+    "#Singleton",
+    '#Main form[action="/write"]',
+    "#Main #syntax-selector",
+    "#Main #reply-box > .cell form",
+    "#Main #notifications .payload .embedded_video_wrapper",
+    '.box a[href^="/advertise"]',
+  ].join(",");
+  const NAV_STORAGE_KEY = "v2p_nav_config";
+  const LAST_TAB_STORAGE_KEY = "v2p_last_tab_id";
+  const MODES = ["light", "dark", "auto"];
+  const THEME_META_COLORS = {
+    light: "#f2f3f5",
+    dark: "#1c2128",
+  };
+  const LABELS = {
+    light: "浅色",
+    dark: "深色",
+    auto: "自动",
+  };
+  const ICONS = {
+    light:
+      '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path></svg>',
+    dark:
+      '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>',
+    auto:
+      '<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="8" x2="16" y1="21" y2="21"></line><line x1="12" x2="12" y1="17" y2="21"></line></svg>',
+  };
+  const IMAGE_HOST_KEY = "v2p_image_host";
+  const R2_UPLOAD_ENDPOINT_KEY = "v2p_r2_upload_endpoint";
+  const DEFAULT_R2_UPLOAD_ENDPOINT = "https://upload-cloud.2smile.top/upload";
+  const R2_UPLOAD_TOKEN_KEY = "v2p_r2_upload_token";
+  const IMGUR_CLIENT_ID_KEY = "v2p_imgur_client_id";
+  const DELETE_REMOTE_IMAGE_KEY = "v2p_delete_remote_image";
+  const COMPRESS_IMAGES_KEY = "v2p_compress_images";
+  const COMPRESSION_QUALITY_KEY = "v2p_compression_quality";
+  const AUTO_FOLD_REPLIES_KEY = "v2p_auto_fold_replies";
+  const REPLY_PREVIEW_KEY = "v2p_reply_preview";
+  const AUTO_JUMP_REPLIES_KEY = "v2p_auto_jump_replies";
+  const TOPIC_ROW_SPACING_KEY = "v2p_topic_row_spacing";
+  const REPLY_LINE_HEIGHT_KEY = "v2p_reply_line_height";
+  const CONTENT_CARD_RADIUS_KEY = "v2p_content_card_radius";
+  const SHOW_REPLY_FLOOR_KEY = "v2p_show_reply_floor";
+  const SHOW_UPLOAD_PREVIEW_KEY = "v2p_show_upload_preview";
+  const NESTED_REPLIES_KEY = "v2p_nested_replies";
+  const EMOJI_PICKER_KEY = "v2p_emoji_picker";
+  const AUTO_DAILY_CHECKIN_KEY = "v2p_auto_daily_checkin";
+  const FIXED_SIDEBAR_TOOLS_KEY = "v2p_fixed_sidebar_tools";
+  const EXPAND_REPLY_TOOLBAR_KEY = "v2p_expand_reply_toolbar";
+  const NODE_ICONS_KEY = "v2p_node_icons";
+  const SHOW_ADS_KEY = "v2p_show_ads";
+  const DISPLAY_SETTINGS_UPDATED = "v2p-display-settings-updated";
+  const PAGINATION_JUMP_MARKER_KEY = "v2p_pending_reply_jump";
+  const CHECKIN_DATE_KEY = "v2p_checkin_date";
+  const CHECKIN_USER_KEY = "v2p_checkin_user";
+  const CHECKIN_LOCK_KEY = "v2p_checkin_lock";
+  const CHECKIN_STATE_KEY = "v2p_checkin_state";
+  const CHECKIN_STATE_MAX_AGE = 5 * 60 * 1000;
+  const LONG_REPLY_COLLAPSED_HEIGHT = 250;
+  const LONG_REPLY_THRESHOLD = 550;
+  const UPLOAD_TIP = "选择、粘贴、拖放上传图片。";
+  const EMOJI_LINKS = Object.fromEntries(
+    [
+      ["[脱单doge]", "L62ZP7V", "3mPhudo"],
+      ["[doge]", "agAJ0Rd", "HZL0hOa"],
+      ["[辣眼睛]", "n119Wvk", "A5WXoZJ"],
+      ["[疑惑]", "U3hKhrT", "3gCygBS"],
+      ["[捂脸]", "14cwgsI", "fLp3t8s"],
+      ["[哦呼]", "km62MY2", "CXXgF4E"],
+      ["[傲娇]", "TkdeN49", "m7IlCrD"],
+      ["[思考]", "MAyk5GN", "eRJTCx7"],
+      ["[吃瓜]", "Ug1iMq4", "Gy3nwkC"],
+      ["[无语]", "e1q9ScT", "wMfcBqD"],
+      ["[大哭]", "YGIx7lh", "SNHJxtv"],
+      ["[酸了]", "5FDsp6L", "wnQBodT"],
+      ["[打call]", "pmNOo2w", "4GfTlV0"],
+      ["[歪嘴]", "XzEYBoY", "84ycU43"],
+      ["[星星眼]", "2spsghH", "oEIJRru"],
+      ["[OK]", "6DMydmQ", "PE2dyjY"],
+      ["[跪了]", "TYtySHv", "0pjsMf0"],
+      ["[响指]", "Ac88cMm", "nkoevMu"],
+      ["[调皮]", "O6ZZSLk", "ggHTLzH"],
+      ["[笑哭]", "NIvxivj", "h8edr5G"],
+      ["[嗑瓜子]", "rjR4rdr", "GMzq0tq"],
+      ["[喜极而泣]", "N9E3iZ2", "L1N27tb"],
+      ["[惊讶]", "aptfuiN", "cuzxGOI"],
+      ["[给心心]", "4aXVwxJ", "q663Mor"],
+      ["[呆]", "c1Q76Cd", "xMXlmxm"],
+      ["[哭惹R]", "HgxsUD2", "0aOdQJd"],
+      ["[哇R]", "OZySWIG", "ngoi2I6"],
+      ["[汗颜R]", "jrVZoLi", "O8alqc1"],
+      ["[害羞R]", "OVQjxIr", "1PeoVR5"],
+      ["[萌萌哒R]", "Ue1kikn", "vOHzwus"],
+      ["[偷笑R]", "aF7QiE5", "WneGpK9"],
+      ["[买爆R]", "2JhZFtb", "za9t585"],
+      ["[色色R]", "ZA1jRv1", "mEGRKJy"],
+      ["[抠鼻R]", "pYtTFnj", "ErnQrMJ"],
+      ["[黑薯问号R]", "aCjmFLD", "i4Wgtyv"],
+      ["[扶墙R]", "RV7y6tR", "PjhjZsJ"],
+      ["[鄙视R]", "LaO5dh3", "StrGaFx"],
+      ["[蹲R]", "t876WSv", "jdTq0YI"],
+      ["[庆祝R]", "wQw2kD0", "lx6jrkm"],
+      ["[六R]", "JqoC4L5", "cUVWKc2"],
+      ["[可R]", "I70yy88", "nRgXwUT"],
+      ["[加一R]", "hpVvbVh", "abBCCK9"],
+    ].map(([token, ld, hd]) => [
+      token,
+      { ld: `https://i.imgur.com/${ld}.png`, hd: `https://i.imgur.com/${hd}.png` },
+    ]),
+  );
+  const EMOJI_GROUPS = [
+    {
+      title: "流行",
+      list: [
+        "[脱单doge]", "[doge]", "[打call]", "[星星眼]", "[吃瓜]", "[OK]", "[哦呼]",
+        "[思考]", "[疑惑]", "[辣眼睛]", "[傲娇]", "[捂脸]", "[无语]", "[大哭]",
+        "[酸了]", "[歪嘴]", "[调皮]", "[笑哭]", "[嗑瓜子]", "[喜极而泣]", "[惊讶]",
+        "[给心心]", "[呆]", "[跪了]", "[响指]", "[哇R]", "[萌萌哒R]", "[害羞R]",
+        "[偷笑R]", "[哭惹R]", "[汗颜R]", "[色色R]", "[抠鼻R]", "[鄙视R]", "[买爆R]",
+        "[黑薯问号R]", "[扶墙R]", "[蹲R]", "[可R]", "[六R]", "[加一R]", "[庆祝R]",
+      ],
+    },
+    {
+      title: "小黄脸",
+      list: [
+        "😀", "😁", "😂", "🤣", "😅", "😊", "😋", "😘", "🥰", "😗", "🤩", "🤔", "🤨",
+        "😐", "😑", "🙄", "😏", "😪", "😫", "🥱", "😜", "😒", "😔", "😨", "😰", "😱",
+        "🥵", "😡", "🥳", "🥺", "🤭", "🧐", "😎", "🤓", "😭", "🤑", "🤮",
+      ],
+    },
+    {
+      title: "手势",
+      list: ["🙋", "🙎", "🙅", "🙇", "🤷", "🤏", "👉", "✌️", "🤘", "🤙", "👌", "🤌", "👍", "👎", "👋", "🤝", "🙏", "👏"],
+    },
+    { title: "庆祝", list: ["✨", "🎉", "🎊"] },
+    { title: "其他", list: ["👻", "🤡", "🐔", "👀", "💩", "🐴", "🦄", "🐧", "🐶", "🐒", "🙈", "🙉", "🙊", "🐵"] },
+  ];
+  const DEFAULT_NAV = [
+    { name: "技术", href: "/?tab=tech", visible: true },
+    { name: "创意", href: "/?tab=creative", visible: true },
+    { name: "好玩", href: "/?tab=play", visible: true },
+    { name: "Apple", href: "/?tab=apple", visible: true },
+    { name: "酷工作", href: "/?tab=jobs", visible: true },
+    { name: "交易", href: "/?tab=deals", visible: true },
+    { name: "城市", href: "/?tab=city", visible: true },
+    { name: "问与答", href: "/?tab=qna", visible: true },
+    { name: "最热", href: "/?tab=hot", visible: true },
+    { name: "全部", href: "/?tab=all", visible: true },
+    { name: "R2", href: "/?tab=r2", visible: true },
+    { name: "VXNA", href: "/xna", visible: true },
+    { name: "节点", href: "/?tab=nodes", visible: true },
+    { name: "Planet", href: "/planet", visible: true },
+  ];
+  const TAB_ICONS = {
+    技术: '<polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" />',
+    创意: '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-1 1.5-2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" /><path d="M9 18h6" /><path d="M10 22h4" />',
+    好玩: '<line x1="6" x2="10" y1="12" y2="12" /><line x1="8" x2="8" y1="10" y2="14" /><line x1="15" x2="15.01" y1="13" y2="13" /><line x1="18" x2="18.01" y1="11" y2="11" /><rect width="20" height="12" x="2" y="6" rx="2" />',
+    Apple:
+      '<svg width="14" height="14" viewBox="-1.5 0 20 20" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="currentColor" aria-hidden="true"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g transform="translate(-102.000000, -7439.000000)" fill="currentColor"><g transform="translate(56.000000, 160.000000)"><path d="M57.5708873,7282.19296 C58.2999598,7281.34797 58.7914012,7280.17098 58.6569121,7279 C57.6062792,7279.04 56.3352055,7279.67099 55.5818643,7280.51498 C54.905374,7281.26397 54.3148354,7282.46095 54.4735932,7283.60894 C55.6455696,7283.69593 56.8418148,7283.03894 57.5708873,7282.19296 M60.1989864,7289.62485 C60.2283111,7292.65181 62.9696641,7293.65879 63,7293.67179 C62.9777537,7293.74279 62.562152,7295.10677 61.5560117,7296.51675 C60.6853718,7297.73474 59.7823735,7298.94772 58.3596204,7298.97372 C56.9621472,7298.99872 56.5121648,7298.17973 54.9134635,7298.17973 C53.3157735,7298.17973 52.8162425,7298.94772 51.4935978,7298.99872 C50.1203933,7299.04772 49.0738052,7297.68074 48.197098,7296.46676 C46.4032359,7293.98379 45.0330649,7289.44985 46.8734421,7286.3899 C47.7875635,7284.87092 49.4206455,7283.90793 51.1942837,7283.88393 C52.5422083,7283.85893 53.8153044,7284.75292 54.6394294,7284.75292 C55.4635543,7284.75292 57.0106846,7283.67793 58.6366882,7283.83593 C59.3172232,7283.86293 61.2283842,7284.09893 62.4549652,7285.8199 C62.355868,7285.8789 60.1747177,7287.09489 60.1989864,7289.62485"></path></g></g></g></svg>',
+    酷工作: '<path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /><rect width="20" height="14" x="2" y="6" rx="2" />',
+    交易: '<path d="m21 16-2 6H5l-2-6" /><path d="M3 6v10c0 1.1.9 2 2 2h14a2 2 0 0 0 2-2V6" /><path d="M10 6V4a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2" />',
+    城市: '<rect width="16" height="20" x="4" y="2" rx="2" ry="2" /><path d="M9 22v-4h6v4" /><path d="M8 6h.01" /><path d="M16 6h.01" /><path d="M12 6h.01" /><path d="M12 10h.01" /><path d="M12 14h.01" /><path d="M16 10h.01" /><path d="M16 14h.01" /><path d="M8 10h.01" /><path d="M8 14h.01" />',
+    问与答: '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><path d="M12 17h.01" />',
+    最热: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.1.243-2.143.5-3.5a6 6 0 0 1 1.5-2.5c-.002 1.25.502 2.5 1.5 3.5.5.5 1 1.5 1 3a2 2 0 0 1-2 2z" />',
+    全部: '<rect width="7" height="7" x="3" y="3" rx="1" /><rect width="7" height="7" x="14" y="3" rx="1" /><rect width="7" height="7" x="14" y="14" rx="1" /><rect width="7" height="7" x="3" y="14" rx="1" />',
+    R2: '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" x2="12" y1="22.08" y2="12" />',
+    VXNA: '<path d="M4 11a9 9 0 0 1 9 9" /><path d="M4 4a16 16 0 0 1 16 16" /><circle cx="5" cy="19" r="1" />',
+    节点: '<line x1="4" x2="20" y1="9" y2="9" /><line x1="4" x2="20" y1="15" y2="15" /><line x1="10" x2="8" y1="3" y2="21" /><line x1="16" x2="14" y1="3" y2="21" />',
+    关注: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />',
+    Planet: '<circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><line x1="2" x2="22" y1="12" y2="12"/>',
+  };
+
+  const docEl = document.documentElement;
+  if (!docEl) {
+    // Injected before <html> exists; retry briefly instead of giving up.
+    if ((boot.retries = (boot.retries || 0) + 1) <= 50) setTimeout(boot, 10);
+    return;
+  }
+  if (docEl.dataset[RUNTIME_MARKER] === "1") return;
+  docEl.dataset[RUNTIME_MARKER] = "1";
+
+  let currentMode = readMode();
+  let effectiveMode = resolveMode(currentMode);
+
+  applyDocumentPrepaint(effectiveMode);
+
+
+
+  let bootObserver = null;
+  let bootSyncScheduled = false;
+  let pageInitialized = false;
+  let nestedReplyApplied = false;
+  let nestedReplyRoot = null;
+  let nestedReplyAnchor = null;
+  let nestedReplyOrder = [];
+  let emojiPickerEnabled = true;
+  let replySubmitShortcutBound = false;
+  let editorImageUploadObserver = null;
+  let editorImageUploadStopTimer = null;
+  let topicToolsInitialized = false;
+  let defaultReplyToolbarExpanded = null;
+  let autoDailyCheckinEnabled = false;
+  let dailyCheckinRunning = false;
+  let dailyCheckinTimer = null;
+  let topicMemberRefsVisible = false;
+  let topicBase64Decoded = false;
+  let liteToastTimer = null;
+  let nativeNight = null;
+  let nativeToggleOnceUsed = false;
+  let nativeNightSyncQueue = Promise.resolve();
+
+  docEl.classList.add("v2p-tabs-pending");
+  docEl.classList.add("v2p-topnav-pending");
+  setTimeout(() => docEl.classList.remove("v2p-topnav-pending"), 1500);
+  setTimeout(() => docEl.classList.remove("v2p-tabs-pending"), 1500);
+  void applyDisplaySettings();
+  bindDisplaySettingChanges();
+  bindDisplaySettingsMessages();
+  try {
+    applyTheme();
+    bindEvents();
+    startBootObserver();
+    onReady(initializePage);
+  } catch (error) {
+    // Fail open: whatever breaks during boot, never leave the page in prepaint state.
+    docEl.classList.remove("v2p-lite-prepaint", "v2p-tabs-pending", "v2p-topnav-pending");
+    docEl.classList.add("v2p-loaded");
+    console.error("V2EX Plus boot failed:", error);
+  }
+  window.addEventListener("pageshow", (event) => {
+    if (!event.persisted) return;
+
+    applyTheme();
+    ensureToggle();
+    initTopNavigationIcons();
+    initMemberActivityRing();
+    initMemberStatsCapsule();
+    initBalanceFooter();
+    initMemberShortcuts();
+    initReplyFooterIcons();
+    initNotificationIndicator();
+    initCheckinIndicator();
+    configureAutoDailyCheckin(autoDailyCheckinEnabled);
+    void syncNativeNight(currentMode);
+  });
+
+  function initializePage() {
+    if (pageInitialized) return;
+    pageInitialized = true;
+    markPageStructure(document);
+    stopBootObserver();
+    applyTheme();
+    ensureToggle();
+    initTopNavigationIcons();
+    void syncNativeNight(currentMode);
+    initNodeNavigation();
+    initReplyActionIcons();
+    initImageUpload();
+    initReplySubmitShortcut();
+    initMemberActivityRing();
+    initMemberStatsCapsule();
+    initBalanceFooter();
+    initMemberShortcuts();
+    initReplyFooterIcons();
+    initTopicSidebarTools();
+    initNotificationIndicator();
+    initCheckinIndicator();
+    replaceEmojiImagesWithHD(document);
+    void applyDisplaySettings();
+    void initConfigurableTopicFeatures();
+  }
+
+  function normalizeMode(mode) {
+    return MODES.includes(mode) ? mode : "auto";
+  }
+
+  function readMode() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (MODES.includes(saved)) return saved;
+
+      const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (MODES.includes(legacy)) return legacy;
+    } catch (error) {
+      // Ignore storage failures in private or restricted browsing modes.
+    }
+    return "auto";
+  }
+
+  function writeMode(mode) {
+    currentMode = normalizeMode(mode);
+    try {
+      localStorage.setItem(STORAGE_KEY, currentMode);
+    } catch (error) {
+      // Keep the in-memory mode for this page even when storage is unavailable.
+    }
+  }
+
+  function isSystemDark() {
+    try {
+      return (
+        typeof window.matchMedia === "function" &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches
+      );
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function resolveMode(mode) {
+    return normalizeMode(mode) === "auto" ? (isSystemDark() ? "dark" : "light") : mode;
+  }
+
+  function detectNativeNight() {
+    if (nativeNight !== null) return nativeNight;
+
+    try {
+      if (typeof window.SITE_NIGHT === "number") {
+        nativeNight = window.SITE_NIGHT === 1 ? 1 : 0;
+        return nativeNight;
+      }
+    } catch (error) {
+      // SITE_NIGHT may not be exposed to the userscript world.
+    }
+
+    try {
+      const scripts = document.querySelectorAll("script");
+      for (const script of scripts) {
+        const match = (script.textContent || "").match(/SITE_NIGHT\s*=\s*(\d)/);
+        if (match) {
+          nativeNight = Number(match[1]) === 1 ? 1 : 0;
+          return nativeNight;
+        }
+      }
+
+      const nativeToggleImage = document.querySelector(NATIVE_TOGGLE_SELECTOR + " img");
+      if (nativeToggleImage) {
+        const src = nativeToggleImage.getAttribute("src") || "";
+        const alt = (nativeToggleImage.getAttribute("alt") || "").toLowerCase();
+        if (src.includes("toggle-light") || alt.includes("light")) {
+          nativeNight = 1;
+          return nativeNight;
+        }
+        if (src.includes("toggle-dark") || alt.includes("dark")) {
+          nativeNight = 0;
+          return nativeNight;
+        }
+      }
+    } catch (error) {
+      // Leave the state unknown instead of risking an inverted server toggle.
+    }
+
+    return null;
+  }
+
+  async function getV2exOnce() {
+    if (!nativeToggleOnceUsed) {
+      const nativeToggle = document.querySelector(NATIVE_TOGGLE_SELECTOR);
+      const href = nativeToggle && nativeToggle.getAttribute("href");
+      if (href) {
+        try {
+          const once = new URL(href, window.location.origin).searchParams.get("once");
+          if (once) {
+            nativeToggleOnceUsed = true;
+            return once;
+          }
+        } catch (error) {
+          // Fall through to /poll_once.
+        }
+      }
+    }
+
+    const response = await fetch("/poll_once", {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store",
+    });
+    if (!response.ok) throw new Error("Unable to fetch V2EX once token");
+
+    const once = Number.parseInt(await response.text(), 10);
+    if (!Number.isFinite(once)) throw new Error("Invalid V2EX once token");
+    return String(once);
+  }
+
+  function updateNativeToggleIndicator(target) {
+    const image = document.querySelector(NATIVE_TOGGLE_SELECTOR + " img");
+    if (!image) return;
+
+    const nextMode = target === 1 ? "light" : "dark";
+    image.setAttribute("src", "/static/img/toggle-" + nextMode + ".png");
+    image.setAttribute("alt", nextMode === "light" ? "Light" : "Dark");
+  }
+
+  function hideNativeThemeToggle() {
+    document.querySelectorAll(NATIVE_TOGGLE_SELECTOR).forEach((link) => {
+      const container = link.closest(".fr");
+      const target = container || link;
+      target.classList.add("v2p-native-theme-toggle-container");
+      target.hidden = true;
+      target.setAttribute("aria-hidden", "true");
+    });
+  }
+
+  function syncNativeNight(mode) {
+    const target = resolveMode(mode) === "dark" ? 1 : 0;
+
+    nativeNightSyncQueue = nativeNightSyncQueue
+      .catch(() => undefined)
+      .then(async () => {
+        const current = detectNativeNight();
+        if (current === null || current === target) return;
+
+        const once = await getV2exOnce();
+        const response = await fetch("/settings/night/toggle?once=" + encodeURIComponent(once), {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+        });
+        if (!response.ok) throw new Error("Unable to sync V2EX native theme");
+
+        nativeNight = target;
+        updateNativeToggleIndicator(target);
+      })
+      .catch((error) => {
+        console.warn("V2EX Plus native theme sync failed:", error);
+      });
+
+    return nativeNightSyncQueue;
+  }
+
+  function applyThemeClassState(target, mode) {
+    if (!target || !target.classList) return;
+    const isDark = mode === "dark";
+    target.classList.toggle("v2p-theme-light-default", !isDark);
+    target.classList.toggle("v2p-theme-dark-default", isDark);
+    target.classList.toggle("Night", isDark);
+  }
+
+  function applyDocumentPrepaint(mode) {
+    const isDark = mode === "dark";
+    applyThemeClassState(docEl, mode);
+    docEl.classList.add("v2p-lite-prepaint");
+    docEl.dataset.v2pLiteMode = currentMode;
+    docEl.dataset.v2pLiteTheme = mode;
+    docEl.style.colorScheme = isDark ? "dark" : "light";
+    docEl.style.backgroundColor = THEME_META_COLORS[mode];
+  }
+
+  function applyThemeClasses(mode) {
+    const isDark = mode === "dark";
+    const themeChanged = docEl.dataset.v2pLiteTheme !== mode;
+    const targets = [docEl, document.body, document.getElementById("Wrapper")];
+
+    targets.forEach((target) => applyThemeClassState(target, mode));
+
+    if (docEl.dataset.v2pLiteMode !== currentMode) docEl.dataset.v2pLiteMode = currentMode;
+    if (docEl.dataset.v2pLiteTheme !== mode) docEl.dataset.v2pLiteTheme = mode;
+
+    if (themeChanged || !docEl.style.colorScheme) {
+      docEl.style.colorScheme = isDark ? "dark" : "light";
+      docEl.style.backgroundColor = THEME_META_COLORS[mode];
+    }
+  }
+
+  function applyTheme() {
+    effectiveMode = resolveMode(currentMode);
+    applyThemeClasses(effectiveMode);
+    syncCodeHighlight(effectiveMode);
+    updateThemeColor(effectiveMode);
+    updateToggle();
+    docEl.classList.remove("v2p-lite-prepaint");
+    docEl.classList.add("v2p-loaded");
+  }
+
+  function scheduleBootSync() {
+    if (bootSyncScheduled) return;
+    bootSyncScheduled = true;
+    const run = () => {
+      bootSyncScheduled = false;
+      if (!bootObserver) return;
+
+      applyThemeClasses(effectiveMode);
+      markPageStructure(document);
+      const topTools = document.querySelector("#Top .tools");
+      if (topTools) ensureToggle();
+      const tabsReady = attemptEarlyNodeNavigation();
+      if (
+        document.body &&
+        document.getElementById("Wrapper") &&
+        topTools &&
+        (tabsReady || document.readyState !== "loading")
+      ) {
+        stopBootObserver();
+      }
+    };
+    if (typeof requestAnimationFrame === "function") {
+      requestAnimationFrame(run);
+    } else {
+      setTimeout(run, 16);
+    }
+  }
+
+  function injectStyle(id, css) {
+    if (document.getElementById(id)) return;
+    const style = document.createElement("style");
+    style.id = id;
+    style.type = "text/css";
+    style.textContent = css;
+    (document.head || docEl).appendChild(style);
+  }
+
+  function observePageStructure() {
+    if (!window.MutationObserver) return;
+
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType !== 1) return;
+          markPageStructure(node);
+        });
+      });
+    });
+
+    let stopped = false;
+    let stopTimer = null;
+    const stop = () => {
+      if (stopped) return;
+      stopped = true;
+      observer.disconnect();
+      if (stopTimer !== null) clearTimeout(stopTimer);
+    };
+    const observeTarget = (target) => {
+      if (!target || stopped) return;
+      observer.disconnect();
+      observer.observe(target, { childList: true, subtree: true });
+    };
+    const observeBody = () => {
+      if (!document.body || stopped) return;
+      markPageStructure(document.body);
+      observeTarget(document.body);
+      stopTimer = setTimeout(stop, 8000);
+    };
+
+    if (document.body) {
+      observeBody();
+    } else {
+      observeTarget(docEl);
+      document.addEventListener("DOMContentLoaded", observeBody, { once: true });
+    }
+  }
+
+  observePageStructure();
+
+  function findStructureMatches(root, selector) {
+    const matches = [];
+    if (root && root.nodeType === 1 && root.matches && root.matches(selector)) matches.push(root);
+    if (root && root.querySelectorAll) matches.push(...root.querySelectorAll(selector));
+    return matches;
+  }
+
+  function markPageStructure(root) {
+    findStructureMatches(root, STRUCTURE_MARKER_SELECTOR).forEach((element) => {
+      if (element.id === "Singleton") {
+        const wrapper = element.closest("#Wrapper");
+        if (wrapper) wrapper.classList.add("v2p-has-singleton");
+        return;
+      }
+
+      if (element.id === "syntax-selector") {
+        const cell = element.closest(".cell");
+        if (cell) cell.classList.add("v2p-syntax-cell");
+        return;
+      }
+
+      if (element.classList.contains("embedded_video_wrapper")) {
+        const payload = element.closest(".payload");
+        if (payload) payload.classList.add("v2p-has-embedded-video");
+        return;
+      }
+
+      if (element.tagName === "FORM") {
+        if (element.getAttribute("action") === "/write") {
+          const box = element.closest(".box");
+          if (box) box.classList.add("v2p-write-box");
+        }
+        const replyCell = element.closest("#reply-box > .cell");
+        if (replyCell) replyCell.classList.add("v2p-reply-form-cell");
+        return;
+      }
+
+      if (element.tagName === "A") {
+        const box = element.closest(".box");
+        if (box) box.classList.add("v2p-advertise-box");
+      }
+    });
+  }
+
+  function attemptEarlyNodeNavigation() {
+    if (pageInitialized) return true;
+    const tabsContainer = document.getElementById("Tabs");
+    if (!tabsContainer) return false;
+    if (tabsContainer.dataset.v2pLiteNavReady === "1") return true;
+    // Only rebuild once the parser has moved past #Tabs, otherwise the native
+    // links still streaming in would be appended after our rebuilt list.
+    if (!tabsContainer.nextElementSibling && document.readyState === "loading") return false;
+    initNodeNavigation();
+    return tabsContainer.dataset.v2pLiteNavReady === "1";
+  }
+
+  function initNodeNavigation() {
+    try {
+      const tabsContainer = document.querySelector("#Tabs");
+      if (!tabsContainer) return false;
+      if (tabsContainer.dataset.v2pLiteNavReady === "1") return false;
+
+      const currentData = captureCurrentNavItems(tabsContainer);
+      const config = readNavConfig(currentData);
+      saveNavConfig(config);
+      renderTabs(tabsContainer, config);
+      tabsContainer.dataset.v2pLiteNavReady = "1";
+      return true;
+    } catch (error) {
+      console.error("V2EX Plus navigation failed:", error);
+      return false;
+    } finally {
+      docEl.classList.remove("v2p-tabs-pending");
+    }
+  }
+
+  function captureCurrentNavItems(tabsContainer) {
+    const items = Array.from(tabsContainer.querySelectorAll("a.tab, a.tab_current"))
+      .map((link) => ({
+        name: (link.textContent || link.getAttribute("aria-label") || link.title || "").trim(),
+        href: link.getAttribute("href") || "",
+        visible: true,
+      }))
+      .filter((item) => item.name && item.href && item.name !== "拼车");
+
+    const planetLink = tabsContainer.querySelector('a[href="/planet"]');
+    if (planetLink && !items.some((item) => item.href === "/planet")) {
+      items.push({ name: "Planet", href: "/planet", visible: true });
+    }
+
+    return items;
+  }
+
+  function readNavConfig(currentData) {
+    let saved = null;
+    try {
+      saved = JSON.parse(localStorage.getItem(NAV_STORAGE_KEY) || "null");
+    } catch (error) {
+      saved = null;
+    }
+
+    const base = Array.isArray(saved) && saved.length > 0 ? saved : currentData.length > 0 ? currentData : DEFAULT_NAV;
+    return normalizeNavConfig(base, currentData);
+  }
+
+  function normalizeNavConfig(base, currentData) {
+    const result = [];
+    const seen = new Set();
+    const source = base.concat(currentData, DEFAULT_NAV);
+
+    source.forEach((item) => {
+      if (!item || typeof item.name !== "string" || typeof item.href !== "string") return;
+      const name = item.name.trim();
+      const href = item.href.trim();
+      if (!name || !href || name === "拼车" || seen.has(href)) return;
+      seen.add(href);
+      result.push({
+        name,
+        href,
+        visible: item.visible !== false,
+      });
+    });
+
+    return result;
+  }
+
+  function saveNavConfig(config) {
+    try {
+      const value = JSON.stringify(config);
+      if (localStorage.getItem(NAV_STORAGE_KEY) !== value) {
+        localStorage.setItem(NAV_STORAGE_KEY, value);
+      }
+    } catch (error) {
+      // Navigation customization still works for this page when storage is unavailable.
+    }
+  }
+
+  function renderTabs(container, config) {
+    const activeHref = getActiveTabHref(container);
+    const nextChildren = [];
+    const extras = Array.from(container.childNodes).filter((node) => {
+      if (node.nodeType !== 1) return false;
+      if (node.classList.contains("tab") || node.classList.contains("tab_current")) return false;
+      if (node.classList.contains("v2p-nav-settings-btn")) return false;
+      if (node.id === "v2p-nav-menu") return false;
+      if (node.tagName === "A" && node.getAttribute("href") === "/planet") return false;
+      return true;
+    });
+
+    const urlTab = new URLSearchParams(window.location.search).get("tab");
+    if (urlTab) {
+      try {
+        if (localStorage.getItem(LAST_TAB_STORAGE_KEY) !== urlTab) {
+          localStorage.setItem(LAST_TAB_STORAGE_KEY, urlTab);
+        }
+      } catch (error) {
+        // Ignore storage failures.
+      }
+    }
+
+    config.forEach((item) => {
+      if (!item.visible) return;
+
+      const link = document.createElement("a");
+      link.href = item.href;
+      link.className = isCurrentNavItem(item, activeHref, urlTab) ? "tab_current" : "tab v2p-hover-btn";
+
+      if (item.name === "Planet") {
+        link.innerHTML = buildSvgIcon(TAB_ICONS.Planet);
+        link.title = "Planet";
+        link.setAttribute("aria-label", "Planet");
+      } else {
+        link.innerHTML = buildTabIcon(item.name) + escapeHtml(item.name);
+      }
+
+      nextChildren.push(link);
+    });
+
+    nextChildren.push(...extras, createNavSettingsButton(config));
+    container.replaceChildren(...nextChildren);
+  }
+
+  function getActiveTabHref(container) {
+    const active = container.querySelector("a.tab_current");
+    return active ? active.getAttribute("href") || "" : "";
+  }
+
+  function isCurrentNavItem(item, activeHref, urlTab) {
+    if (activeHref && normalizeHref(activeHref) === normalizeHref(item.href)) return true;
+
+    const itemUrl = new URL(item.href, location.origin);
+    const itemTab = itemUrl.searchParams.get("tab");
+    if (itemTab) {
+      let currentTab = urlTab;
+      if (!currentTab) {
+        try {
+          currentTab = localStorage.getItem(LAST_TAB_STORAGE_KEY);
+        } catch (error) {
+          currentTab = null;
+        }
+      }
+      return currentTab === itemTab;
+    }
+
+    return location.pathname === itemUrl.pathname && !itemUrl.search;
+  }
+
+  function normalizeHref(href) {
+    try {
+      const url = new URL(href, location.origin);
+      return url.pathname + url.search;
+    } catch (error) {
+      return href || "";
+    }
+  }
+
+  function buildTabIcon(name) {
+    const icon = TAB_ICONS[name];
+    if (!icon) return "";
+    if (icon.trim().startsWith("<svg")) return icon;
+    return buildSvgIcon(icon);
+  }
+
+  function buildSvgIcon(paths) {
+    return (
+      '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      paths +
+      "</svg>"
+    );
+  }
+
+  function initReplyFooterIcons() {
+    const replyBox = document.getElementById("reply-box");
+    if (!replyBox) return;
+
+    const undockButton = replyBox.querySelector("#undock-button");
+    decorateReplyFooterIcon(
+      undockButton,
+      "取消回复框停靠",
+      '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 15h18"/><path d="m9 9 3 3 3-3"/>',
+    );
+
+    const backToTopButton = Array.from(replyBox.querySelectorAll("a")).find(
+      (link) => (link.textContent || "").trim() === "回到顶部" || link.dataset.v2pReplyFooterAction === "top",
+    );
+    decorateReplyFooterIcon(
+      backToTopButton,
+      "回到顶部",
+      '<path d="M5 3h14"/><path d="m18 13-6-6-6 6"/><path d="M12 7v14"/>',
+      "top",
+    );
+  }
+
+  function decorateReplyFooterIcon(link, label, iconPaths, action = "undock") {
+    if (!link) return;
+    link.classList.add("v2p-lite-reply-footer-icon");
+    link.dataset.v2pReplyFooterAction = action;
+    link.title = label;
+    link.setAttribute("aria-label", label);
+    if (!link.querySelector("svg")) link.innerHTML = buildSvgIcon(iconPaths);
+  }
+
+  function createNavSettingsButton(config) {
+    const button = document.createElement("span");
+    button.className = "v2p-nav-settings-btn";
+    button.title = "自定义导航";
+    button.setAttribute("role", "button");
+    button.setAttribute("aria-label", "自定义导航");
+    button.innerHTML = buildSvgIcon(
+      '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+    );
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      openNavSettings(config);
+    });
+    return button;
+  }
+
+  function openNavSettings(config) {
+    const existingMenu = document.getElementById("v2p-nav-menu");
+    if (existingMenu) {
+      existingMenu.remove();
+      return;
+    }
+
+    const settingsBtn = document.querySelector(".v2p-nav-settings-btn");
+    if (!settingsBtn || !document.body) return;
+
+    const menu = document.createElement("div");
+    menu.id = "v2p-nav-menu";
+    const rect = settingsBtn.getBoundingClientRect();
+    menu.style.top = window.scrollY + rect.bottom + 5 + "px";
+    menu.style.left = Math.max(8, window.scrollX + rect.right - 220) + "px";
+
+    const list = document.createElement("div");
+    list.className = "v2p-nav-menu-list";
+    menu.appendChild(list);
+
+    let dragSrcIndex = null;
+    let dragDestinationIndex = null;
+
+    const saveAndRefresh = () => {
+      saveNavConfig(config);
+      const tabsContainer = document.querySelector("#Tabs");
+      if (tabsContainer) renderTabs(tabsContainer, config);
+    };
+
+    const reorderConfig = (fromIndex, destinationIndex) => {
+      if (fromIndex == null || destinationIndex == null || fromIndex === destinationIndex) return;
+      const next = config.slice();
+      const moved = next.splice(fromIndex, 1)[0];
+      const insertIndex = Math.max(0, Math.min(next.length, destinationIndex));
+      next.splice(insertIndex, 0, moved);
+      config.splice(0, config.length, ...next);
+    };
+
+    const clearDropStyles = () => {
+      list.querySelectorAll(".v2p-nav-drop-before, .v2p-nav-drop-after").forEach((row) => {
+        row.classList.remove("v2p-nav-drop-before", "v2p-nav-drop-after");
+      });
+      dragDestinationIndex = null;
+    };
+
+    const showDropPosition = (destinationIndex) => {
+      clearDropStyles();
+      if (dragSrcIndex == null || destinationIndex === dragSrcIndex) return;
+
+      const rows = Array.from(list.querySelectorAll(".v2p-nav-menu-row"));
+      const remainingRows = rows.filter((_, index) => index !== dragSrcIndex);
+      const nextRow = remainingRows[destinationIndex];
+      if (nextRow) {
+        nextRow.classList.add("v2p-nav-drop-before");
+      } else if (remainingRows.length > 0) {
+        remainingRows[remainingRows.length - 1].classList.add("v2p-nav-drop-after");
+      }
+      dragDestinationIndex = destinationIndex;
+    };
+
+    const renderList = () => {
+      list.innerHTML = "";
+      config.forEach((item, index) => {
+        const row = document.createElement("div");
+        row.className = "v2p-nav-menu-row";
+
+        const left = document.createElement("div");
+        left.className = "v2p-nav-menu-left";
+
+        const dragHandle = document.createElement("span");
+        dragHandle.className = "v2p-nav-drag-handle";
+        dragHandle.title = "拖拽排序";
+        dragHandle.innerHTML = buildSvgIcon(
+          '<circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/>',
+        );
+        dragHandle.addEventListener("mousedown", () => {
+          row.draggable = true;
+          document.addEventListener(
+            "mouseup",
+            () => {
+              if (dragSrcIndex !== index) row.draggable = false;
+            },
+            { once: true },
+          );
+        });
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = item.visible;
+        checkbox.addEventListener("click", (event) => event.stopPropagation());
+        checkbox.addEventListener("change", () => {
+          item.visible = checkbox.checked;
+          saveAndRefresh();
+        });
+
+        const name = document.createElement("span");
+        name.className = "v2p-nav-menu-name";
+        name.textContent = item.name;
+
+        left.appendChild(dragHandle);
+        left.appendChild(checkbox);
+        left.appendChild(name);
+        row.appendChild(left);
+        list.appendChild(row);
+
+        row.addEventListener("dragstart", (event) => {
+          dragSrcIndex = index;
+          row.classList.add("v2p-nav-dragging");
+          row.setAttribute("aria-grabbed", "true");
+          if (event.dataTransfer) {
+            event.dataTransfer.effectAllowed = "move";
+            event.dataTransfer.setData("text/plain", item.name);
+          }
+        });
+
+        row.addEventListener("dragover", (event) => {
+          if (dragSrcIndex == null) return;
+          event.preventDefault();
+          if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
+          const rowRect = row.getBoundingClientRect();
+          const dropAfter = event.clientY >= rowRect.top + rowRect.height / 2;
+          const sourceSlot = index + (dropAfter ? 1 : 0);
+          const destinationIndex = sourceSlot > dragSrcIndex ? sourceSlot - 1 : sourceSlot;
+          showDropPosition(destinationIndex);
+        });
+
+        row.addEventListener("drop", (event) => {
+          if (dragSrcIndex == null) return;
+          event.preventDefault();
+          event.stopPropagation();
+          if (dragDestinationIndex == null || dragDestinationIndex === dragSrcIndex) {
+            clearDropStyles();
+            return;
+          }
+          reorderConfig(dragSrcIndex, dragDestinationIndex);
+          dragSrcIndex = null;
+          clearDropStyles();
+          renderList();
+          saveAndRefresh();
+        });
+
+        row.addEventListener("dragend", () => {
+          row.draggable = false;
+          row.classList.remove("v2p-nav-dragging");
+          row.removeAttribute("aria-grabbed");
+          dragSrcIndex = null;
+          clearDropStyles();
+        });
+      });
+    };
+
+    renderList();
+
+    const closeHandler = (event) => {
+      if (menu.contains(event.target) || settingsBtn.contains(event.target)) return;
+      menu.remove();
+      document.removeEventListener("click", closeHandler);
+    };
+
+    setTimeout(() => {
+      document.addEventListener("click", closeHandler);
+    }, 0);
+
+    document.body.appendChild(menu);
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function initTopNavigationIcons() {
+    const iconPaths = {
+      home: '<path d="M15 21v-8a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+      user: '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+      notes: '<path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/>',
+      planet: '<circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><line x1="2" x2="22" y1="12" y2="12"/>',
+      settings: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+      logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>',
+    };
+
+    const links = Array.from(document.querySelectorAll("#Top .tools > a.top"));
+    let changed = false;
+
+    links.forEach((link) => {
+      if (link.id === TOGGLE_ID || link.dataset.v2pLiteTopnavIcon || link.querySelector("svg")) return;
+
+      const text = (link.textContent || "").trim();
+      const href = link.getAttribute("href") || "";
+      let iconName = "";
+
+      if (text === "首页" || href === "/") iconName = "home";
+      else if (href.startsWith("/member/")) iconName = "user";
+      else if (text === "记事本" || href === "/notes") iconName = "notes";
+      else if (text === "Planet" || href === "/planet") iconName = "planet";
+      else if (text === "设置" || href === "/settings") iconName = "settings";
+      else if (text === "登出" || href.includes("signout")) iconName = "logout";
+
+      if (!iconName) return;
+      link.dataset.v2pLiteTopnavIcon = iconName;
+      link.classList.add("v2p-lite-topnav-icon");
+      link.insertAdjacentHTML("afterbegin", buildSvgIcon(iconPaths[iconName]));
+      changed = true;
+    });
+
+    docEl.classList.remove("v2p-topnav-pending");
+    return changed;
+  }
+
+  function initReplyActionIcons() {
+    if (!/^\/t\/\d+/.test(window.location.pathname)) return false;
+
+    const iconPaths = {
+      hide: '<path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-5 0-9.27-3.11-11-8 1.21-3.08 3.62-5.39 6.69-6.56"/><path d="M1 1l22 22"/><path d="M9.9 4.24A10.94 10.94 0 0 1 12 4c5 0 9.27 3.11 11 8a10.94 10.94 0 0 1-4.29 5.3"/><path d="M14.12 14.12a3 3 0 0 1-4.24-4.24"/>',
+      thank: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+      reply: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+    };
+
+    const setIcon = (control, type, label) => {
+      if (!control || control.dataset.v2pLiteReplyActionIcon) return false;
+      control.dataset.v2pLiteReplyActionIcon = type;
+      control.classList.add("v2p-lite-reply-action", "v2p-lite-reply-action-" + type);
+      control.title = label;
+      control.setAttribute("aria-label", label);
+      control.innerHTML = buildSvgIcon(iconPaths[type]);
+      return true;
+    };
+
+    let changed = false;
+    getCommentCells().forEach((cell) => {
+      const table = getDirectTable(cell);
+      const contentCell = table && getContentCell(table);
+      const actions = contentCell
+        ? Array.from(contentCell.children).find((child) => child.classList && child.classList.contains("fr"))
+        : null;
+      if (!actions) return;
+      if (actions.dataset.v2pLiteReplyActionsReady === "1") return;
+      const floorNumber = Array.from(actions.children).find(
+        (child) => child.classList && child.classList.contains("no"),
+      );
+
+      let rowChanged = false;
+      let controls = Array.from(actions.children).find(
+        (child) => child.classList && child.classList.contains("v2p-lite-reply-controls"),
+      );
+      if (!controls) {
+        controls = document.createElement("span");
+        controls.className = "v2p-lite-reply-controls";
+        rowChanged = true;
+      }
+
+      const thankArea = Array.from(actions.children).find(
+        (child) => child.classList && child.classList.contains("thank_area"),
+      );
+
+      if (thankArea) {
+        const directElements = Array.from(thankArea.children);
+        const nativeThankControls = directElements.filter(
+          (child) => child.classList && child.classList.contains("thank"),
+        );
+        const actionLinks = directElements.filter((child) => child.matches("a, button"));
+        const hideControl = nativeThankControls[0] || actionLinks.find((control) => {
+          const onclick = control.getAttribute("onclick") || "";
+          return onclick.includes("hideReply") || (control.textContent || "").trim().includes("隐藏");
+        });
+        const thankControl = nativeThankControls[1] || actionLinks.find((control) => {
+          const onclick = control.getAttribute("onclick") || "";
+          return onclick.includes("thankReply") || !!control.querySelector('img[src*="heart_neue.png"]');
+        });
+
+        if (hideControl) {
+          hideControl.classList.remove("thank");
+          rowChanged = setIcon(hideControl, "hide", "隐藏回复") || rowChanged;
+          controls.appendChild(hideControl);
+        }
+        if (thankControl) {
+          thankControl.classList.remove("thank");
+          rowChanged = setIcon(thankControl, "thank", "感谢回复") || rowChanged;
+          bindThankFeedback(thankControl);
+          controls.appendChild(thankControl);
+        }
+
+        const existingThankedIcon = thankArea.querySelector(
+          ".v2p-lite-reply-action-thank.v2p-thanked",
+        );
+        if (thankArea.classList.contains("thanked") && !thankControl && !existingThankedIcon) {
+          const thankedIcon = document.createElement("span");
+          thankedIcon.className = "v2p-thanked";
+          rowChanged = setIcon(thankedIcon, "thank", "已感谢") || rowChanged;
+          controls.appendChild(thankedIcon);
+        }
+
+        thankArea.remove();
+      }
+
+      const replyImage = actions.querySelector('img[src*="reply_neue.png"]');
+      const replyLink = replyImage
+        ? replyImage.closest("a")
+        : Array.from(actions.querySelectorAll("a")).find((link) =>
+            (link.getAttribute("onclick") || "").includes("replyOne"),
+          );
+      bindReplyFloorReference(replyLink, floorNumber);
+      rowChanged = setIcon(replyLink, "reply", "回复") || rowChanged;
+      if (replyLink && replyLink.parentNode !== controls) {
+        controls.appendChild(replyLink);
+        rowChanged = true;
+      }
+
+      if (rowChanged) {
+        actions.replaceChildren(controls);
+        if (floorNumber) actions.appendChild(floorNumber);
+        actions.classList.add("v2p-lite-reply-actions");
+      }
+      actions.dataset.v2pLiteReplyActionsReady = "1";
+      changed = rowChanged || changed;
+    });
+
+    return changed;
+  }
+
+  function bindThankFeedback(thankControl) {
+    if (!thankControl || thankControl.dataset.v2pLiteThankBound === "1") return;
+
+    thankControl.dataset.v2pLiteThankBound = "1";
+    thankControl.addEventListener(
+      "click",
+      () => {
+        thankControl.classList.add("v2p-thanked");
+        thankControl.title = "已感谢";
+        thankControl.setAttribute("aria-label", "已感谢");
+        thankControl.setAttribute("aria-pressed", "true");
+      },
+      { once: true },
+    );
+  }
+
+  function bindReplyFloorReference(replyLink, floorNumber) {
+    if (!replyLink || !floorNumber || replyLink.dataset.v2pLiteFloorBound === "1") return;
+
+    const floorMatch = (floorNumber.textContent || "").match(/\d+/);
+    if (!floorMatch) return;
+
+    const floor = floorMatch[0];
+    replyLink.dataset.v2pLiteFloorBound = "1";
+    replyLink.addEventListener("click", () => {
+      queueMicrotask(() => {
+        const textarea = document.querySelector("#reply_content");
+        if (!(textarea instanceof HTMLTextAreaElement)) return;
+
+        const cursor = textarea.selectionStart;
+        const valueBeforeCursor = textarea.value.slice(0, cursor);
+        const floorAtCursor = new RegExp("(?:^|\\s)#" + floor + "\\s*$");
+        if (floorAtCursor.test(valueBeforeCursor)) return;
+
+        insertTextToTextarea(textarea, "#" + floor + " ");
+      });
+    });
+  }
+
+  function initImageUpload() {
+    bindReplyImageUpload();
+    initEditorImageUpload();
+  }
+
+  function initEditorImageUpload() {
+    if (bindEditorImageUpload()) {
+      stopEditorImageUploadObserver();
+      return;
+    }
+    if (editorImageUploadObserver || !window.MutationObserver) return;
+
+    editorImageUploadObserver = new MutationObserver(() => {
+      if (bindEditorImageUpload()) stopEditorImageUploadObserver();
+    });
+    editorImageUploadObserver.observe(document.body || docEl, {
+      childList: true,
+      subtree: true,
+    });
+    editorImageUploadStopTimer = setTimeout(stopEditorImageUploadObserver, 8000);
+  }
+
+  function stopEditorImageUploadObserver() {
+    if (editorImageUploadObserver) {
+      editorImageUploadObserver.disconnect();
+      editorImageUploadObserver = null;
+    }
+    if (editorImageUploadStopTimer !== null) {
+      clearTimeout(editorImageUploadStopTimer);
+      editorImageUploadStopTimer = null;
+    }
+  }
+
+  function initReplySubmitShortcut() {
+    enhanceReplySubmitButton();
+    if (replySubmitShortcutBound) return;
+
+    document.addEventListener("keydown", handleReplySubmitShortcut, true);
+    replySubmitShortcutBound = true;
+  }
+
+  function isMacPlatform() {
+    return /mac|iphone|ipad|ipod/i.test(
+      (navigator.userAgentData && navigator.userAgentData.platform) ||
+        navigator.platform ||
+        navigator.userAgent,
+    );
+  }
+
+  function enhanceReplySubmitButton() {
+    const form = document.querySelector("#reply-box form");
+    if (!form) return false;
+
+    let submitter = form.querySelector(
+      'button[type="submit"], input[type="submit"]',
+    );
+    if (!submitter) return false;
+
+    if (submitter.tagName === "INPUT") {
+      const input = submitter;
+      const button = document.createElement("button");
+
+      Array.from(input.attributes).forEach((attribute) => {
+        if (attribute.name === "type" || attribute.name === "value") return;
+        button.setAttribute(attribute.name, attribute.value);
+      });
+      button.type = "submit";
+      button.value = input.value;
+      button.disabled = input.disabled;
+      input.replaceWith(button);
+      submitter = button;
+    }
+
+    if (submitter.dataset.v2pLiteShortcutReady === "1") return false;
+
+    const shortcut = isMacPlatform() ? "⌘ Enter" : "Ctrl Enter";
+    const label = submitter.value || submitter.textContent.trim() || "回复";
+    const keycap = document.createElement("kbd");
+
+    keycap.textContent = shortcut;
+    submitter.replaceChildren(document.createTextNode(label), keycap);
+    submitter.classList.add("v2p-lite-reply-submit");
+    submitter.dataset.v2pLiteShortcutReady = "1";
+    submitter.title = "快捷键：" + shortcut;
+    submitter.setAttribute("aria-label", label + "，快捷键 " + shortcut);
+    return true;
+  }
+
+  function handleReplySubmitShortcut(event) {
+    const shortcutPressed = isMacPlatform() ? event.metaKey : event.ctrlKey;
+    if (
+      event.key !== "Enter" ||
+      !shortcutPressed ||
+      event.altKey ||
+      event.shiftKey ||
+      event.isComposing ||
+      event.keyCode === 229
+    ) {
+      return;
+    }
+
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+
+    const replyBox = target.closest("#reply-box");
+    if (!replyBox) return;
+
+    const textarea = replyBox.querySelector("#reply_content");
+    if (target !== textarea && !target.closest(".CodeMirror")) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.repeat) return;
+
+    const form =
+      (textarea && textarea.form) ||
+      target.closest("form") ||
+      replyBox.querySelector('form[action^="/t"]');
+    if (!form) return;
+
+    const submitter = form.querySelector(
+      'button[type="submit"]:not(:disabled), input[type="submit"]:not(:disabled)',
+    );
+    const disabledSubmitter = form.querySelector(
+      'button[type="submit"]:disabled, input[type="submit"]:disabled',
+    );
+    if (!submitter && disabledSubmitter) return;
+
+    if (typeof form.requestSubmit === "function") {
+      if (submitter) form.requestSubmit(submitter);
+      else form.requestSubmit();
+      return;
+    }
+
+    if (submitter) submitter.click();
+  }
+
+  async function initConfigurableTopicFeatures() {
+    if (!/^\/t\/\d+/.test(window.location.pathname)) return;
+
+    const [autoFoldReplies, replyPreview, autoJumpReplies] = await Promise.all([
+      readBooleanSetting(AUTO_FOLD_REPLIES_KEY, true),
+      readBooleanSetting(REPLY_PREVIEW_KEY, true),
+      readBooleanSetting(AUTO_JUMP_REPLIES_KEY, true),
+    ]);
+
+    if (autoFoldReplies) initLongReplyFolding();
+    if (replyPreview) initReplyPreview();
+    if (autoJumpReplies) initPaginationReplyJump();
+  }
+
+  function initLongReplyFolding() {
+    getCommentCells().forEach((cell) => {
+      const table = getDirectTable(cell);
+      const content = table && getReplyContentEl(table);
+      if (!content || content.dataset.v2pLiteFoldObserved === "1") return;
+
+      content.dataset.v2pLiteFoldObserved = "1";
+      const evaluate = () => foldLongReplyContent(content);
+      requestAnimationFrame(evaluate);
+      content.querySelectorAll("img").forEach((image) => {
+        if (!image.complete) image.addEventListener("load", evaluate, { once: true });
+      });
+    });
+  }
+
+  function foldLongReplyContent(content) {
+    if (!content || content.closest(".v2p-lite-long-reply")) return;
+    if (content.scrollHeight < LONG_REPLY_THRESHOLD) return;
+
+    const parent = content.parentNode;
+    if (!parent) return;
+
+    const wrapper = document.createElement("div");
+    const toggle = document.createElement("button");
+    wrapper.className = "v2p-lite-long-reply is-collapsed";
+    wrapper.style.setProperty(
+      "--v2p-lite-collapsed-reply-height",
+      LONG_REPLY_COLLAPSED_HEIGHT + "px",
+    );
+    toggle.type = "button";
+    toggle.className = "v2p-lite-long-reply-toggle";
+    toggle.textContent = "展开回复";
+    toggle.setAttribute("aria-expanded", "false");
+
+    parent.insertBefore(wrapper, content);
+    wrapper.append(content, toggle);
+    toggle.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const expanded = wrapper.classList.toggle("is-expanded");
+      wrapper.classList.toggle("is-collapsed", !expanded);
+      toggle.textContent = expanded ? "收起回复" : "展开回复";
+      toggle.setAttribute("aria-expanded", String(expanded));
+      if (!expanded && wrapper.getBoundingClientRect().top < 0) {
+        wrapper.scrollIntoView({ block: "start" });
+      }
+    });
+  }
+
+  function initReplyPreview() {
+    const textarea = document.querySelector("#reply_content");
+    const form = textarea && textarea.form;
+    const wrapper = textarea && textarea.closest(".v2p-reply-wrap");
+    if (!textarea || !form || !wrapper || form.dataset.v2pLitePreviewBound === "1") return false;
+
+    form.dataset.v2pLitePreviewBound = "1";
+    const tabs = document.createElement("div");
+    const editTab = createReplyPreviewTab("编辑", true);
+    const previewTab = createReplyPreviewTab("预览", false);
+    const preview = document.createElement("div");
+    let lastPreviewText = null;
+    let previewRequestId = 0;
+
+    tabs.className = "v2p-lite-reply-tabs";
+    tabs.setAttribute("role", "tablist");
+    tabs.setAttribute("aria-label", "回复编辑模式");
+    preview.className = "v2p-lite-reply-preview";
+    preview.hidden = true;
+    preview.setAttribute("role", "tabpanel");
+    preview.setAttribute("aria-live", "polite");
+    tabs.append(editTab, previewTab);
+    wrapper.insertAdjacentElement("beforebegin", tabs);
+    wrapper.insertAdjacentElement("afterend", preview);
+
+    const showEdit = () => {
+      editTab.classList.add("is-active");
+      previewTab.classList.remove("is-active");
+      editTab.setAttribute("aria-selected", "true");
+      previewTab.setAttribute("aria-selected", "false");
+      wrapper.hidden = false;
+      preview.hidden = true;
+    };
+    const showPreview = () => {
+      editTab.classList.remove("is-active");
+      previewTab.classList.add("is-active");
+      editTab.setAttribute("aria-selected", "false");
+      previewTab.setAttribute("aria-selected", "true");
+      wrapper.hidden = true;
+      preview.hidden = false;
+      void renderReplyPreview(textarea, preview, {
+        get lastText() {
+          return lastPreviewText;
+        },
+        set lastText(value) {
+          lastPreviewText = value;
+        },
+        nextRequestId() {
+          previewRequestId += 1;
+          return previewRequestId;
+        },
+        currentRequestId() {
+          return previewRequestId;
+        },
+      });
+    };
+
+    editTab.addEventListener("click", showEdit);
+    previewTab.addEventListener("click", showPreview);
+    return true;
+  }
+
+  function createReplyPreviewTab(label, active) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "v2p-lite-reply-tab" + (active ? " is-active" : "");
+    button.textContent = label;
+    button.setAttribute("role", "tab");
+    button.setAttribute("aria-selected", String(active));
+    return button;
+  }
+
+  async function renderReplyPreview(textarea, preview, state) {
+    const text = transformEmojiTokens(textarea.value).trim();
+    if (!text) {
+      preview.innerHTML = '<span class="v2p-lite-reply-preview-state">没有可预览的内容</span>';
+      return;
+    }
+    if (text === state.lastText && preview.dataset.v2pLiteLoaded === "1") return;
+
+    const requestId = state.nextRequestId();
+    preview.dataset.v2pLiteLoaded = "0";
+    preview.innerHTML = '<span class="v2p-lite-reply-preview-state">正在加载预览...</span>';
+    try {
+      const formData = new FormData();
+      formData.append("text", text);
+      const response = await fetch("/preview/default", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Reply preview failed with HTTP " + response.status);
+
+      const rendered = await response.text();
+      if (requestId !== state.currentRequestId()) return;
+      preview.innerHTML = rendered;
+      preview.dataset.v2pLiteLoaded = "1";
+      state.lastText = text;
+      renderImageLinksInPreview(preview);
+      replaceEmojiImagesWithHD(preview);
+    } catch (error) {
+      if (requestId !== state.currentRequestId()) return;
+      console.debug("V2EX Plus reply preview failed:", error);
+      const message = document.createElement("span");
+      const retry = document.createElement("button");
+      message.className = "v2p-lite-reply-preview-state";
+      message.textContent = "预览失败，";
+      retry.type = "button";
+      retry.className = "v2p-lite-preview-retry";
+      retry.textContent = "点击重试";
+      retry.addEventListener("click", () => void renderReplyPreview(textarea, preview, state));
+      preview.replaceChildren(message, retry, document.createTextNode("。"));
+    }
+  }
+
+  function renderImageLinksInPreview(preview) {
+    preview.querySelectorAll("a[href]").forEach((link) => {
+      if (link.querySelector("img")) return;
+      const imageUrl = normalizePreviewImageUrl(link.href);
+      if (!imageUrl) return;
+      link.classList.add("v2p-lite-preview-image-link");
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.replaceChildren(createPreviewImage(imageUrl));
+    });
+
+    const walker = document.createTreeWalker(preview, NodeFilter.SHOW_TEXT);
+    const textNodes = [];
+    while (walker.nextNode()) {
+      const textNode = walker.currentNode;
+      const parent = textNode.parentElement;
+      if (!parent || parent.closest("a, code, pre, script, style, textarea")) continue;
+      if (/https?:\/\/\S+/i.test(textNode.textContent || "")) textNodes.push(textNode);
+    }
+    textNodes.forEach(replacePreviewImageUrlsInTextNode);
+  }
+
+  function replacePreviewImageUrlsInTextNode(textNode) {
+    const text = textNode.textContent || "";
+    const matches = Array.from(text.matchAll(/https?:\/\/[^\s<>"']+/gi));
+    if (matches.length === 0) return;
+
+    const fragment = document.createDocumentFragment();
+    let cursor = 0;
+    let replaced = false;
+    matches.forEach((match) => {
+      const rawUrl = match[0];
+      const trailingMatch = rawUrl.match(/[),.;!?，。；！？]+$/);
+      const trailing = trailingMatch ? trailingMatch[0] : "";
+      const candidate = trailing ? rawUrl.slice(0, -trailing.length) : rawUrl;
+      const imageUrl = normalizePreviewImageUrl(candidate);
+      if (!imageUrl) return;
+
+      fragment.append(document.createTextNode(text.slice(cursor, match.index)));
+      fragment.append(createPreviewImageLink(imageUrl));
+      if (trailing) fragment.append(document.createTextNode(trailing));
+      cursor = match.index + rawUrl.length;
+      replaced = true;
+    });
+    if (!replaced) return;
+    fragment.append(document.createTextNode(text.slice(cursor)));
+    textNode.replaceWith(fragment);
+  }
+
+  function normalizePreviewImageUrl(value) {
+    try {
+      const url = new URL(value, window.location.origin);
+      if (!/^https?:$/.test(url.protocol)) return null;
+      return /\.(?:apng|avif|gif|jpe?g|png|webp)$/i.test(url.pathname) ? url.href : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function createPreviewImageLink(imageUrl) {
+    const link = document.createElement("a");
+    link.href = imageUrl;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.className = "v2p-lite-preview-image-link";
+    link.append(createPreviewImage(imageUrl));
+    return link;
+  }
+
+  function createPreviewImage(imageUrl) {
+    const image = document.createElement("img");
+    image.src = imageUrl;
+    image.alt = "";
+    image.loading = "lazy";
+    image.className = "embedded_image v2p-lite-preview-image";
+    return image;
+  }
+
+  function initPaginationReplyJump() {
+    const topicPath = window.location.pathname;
+    const shouldJump = consumePaginationJumpMarker(topicPath) || cameFromAnotherTopicPage(topicPath);
+
+    document.addEventListener(
+      "click",
+      (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+        const control = target.closest("a.page_normal, .ps_container .super.button");
+        if (!control || control.classList.contains("disable_now")) return;
+
+        try {
+          sessionStorage.setItem(
+            PAGINATION_JUMP_MARKER_KEY,
+            JSON.stringify({ path: topicPath, time: Date.now() }),
+          );
+        } catch (error) {
+          // Referrer detection remains available when session storage is restricted.
+        }
+      },
+      true,
+    );
+
+    if (!shouldJump) return;
+    const target = document.querySelector("#Main .topic_buttons") || getCommentCells()[0];
+    if (!target) return;
+    target.classList.add("v2p-lite-reply-jump-target");
+    requestAnimationFrame(() => target.scrollIntoView({ block: "start" }));
+  }
+
+  function consumePaginationJumpMarker(topicPath) {
+    try {
+      const raw = sessionStorage.getItem(PAGINATION_JUMP_MARKER_KEY);
+      sessionStorage.removeItem(PAGINATION_JUMP_MARKER_KEY);
+      if (!raw) return false;
+      const marker = JSON.parse(raw);
+      return marker.path === topicPath && Date.now() - Number(marker.time) < 15000;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function cameFromAnotherTopicPage(topicPath) {
+    if (!document.referrer) return false;
+    try {
+      const current = new URL(window.location.href);
+      const previous = new URL(document.referrer);
+      if (previous.origin !== current.origin || previous.pathname !== topicPath) return false;
+      const currentPage = current.searchParams.get("p") || "1";
+      const previousPage = previous.searchParams.get("p") || "1";
+      return currentPage !== previousPage;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function initEmojiPicker() {
+    bindReplyEmojiPicker();
+    replaceEmojiImagesWithHD(document);
+  }
+
+  function bindReplyEmojiPicker() {
+    const textarea = document.querySelector("#reply_content");
+    const form = textarea && textarea.form;
+    if (!textarea || !form || form.dataset.v2pLiteEmojiBound === "1") return false;
+
+    const submitter = form.querySelector('button[type="submit"], input[type="submit"]');
+    if (!submitter) return false;
+
+    const trigger = document.createElement("button");
+    trigger.type = "button";
+    trigger.className = "v2p-lite-emoji-trigger";
+    trigger.title = "插入表情";
+    trigger.setAttribute("aria-label", "插入表情");
+    trigger.setAttribute("aria-haspopup", "dialog");
+    trigger.setAttribute("aria-expanded", "false");
+    trigger.innerHTML =
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><path d="M9 9h.01M15 9h.01"></path></svg>';
+
+    const panel = createEmojiPanel((emoji) => insertTextToTextarea(textarea, emoji));
+    const panelId = "v2p-lite-emoji-panel";
+    panel.id = panelId;
+    trigger.setAttribute("aria-controls", panelId);
+    submitter.insertAdjacentElement("afterend", trigger);
+    document.body.appendChild(panel);
+
+    const closePanel = () => {
+      if (panel.hidden) return;
+      panel.hidden = true;
+      trigger.setAttribute("aria-expanded", "false");
+    };
+    const positionPanel = () => {
+      panel.style.visibility = "hidden";
+      panel.hidden = false;
+      const triggerRect = trigger.getBoundingClientRect();
+      const panelRect = panel.getBoundingClientRect();
+      const viewportPadding = 8;
+      const left = Math.min(
+        Math.max(viewportPadding, triggerRect.left),
+        Math.max(viewportPadding, window.innerWidth - panelRect.width - viewportPadding),
+      );
+      let top = triggerRect.top - panelRect.height - 8;
+      if (top < viewportPadding) top = triggerRect.bottom + 8;
+      top = Math.max(
+        viewportPadding,
+        Math.min(top, window.innerHeight - panelRect.height - viewportPadding),
+      );
+      panel.style.left = Math.round(left) + "px";
+      panel.style.top = Math.round(top) + "px";
+      panel.style.visibility = "";
+    };
+
+    trigger.addEventListener("click", (event) => {
+      event.stopPropagation();
+      if (panel.hidden) {
+        positionPanel();
+        trigger.setAttribute("aria-expanded", "true");
+      } else {
+        closePanel();
+      }
+    });
+    panel.addEventListener("click", (event) => event.stopPropagation());
+    document.addEventListener("click", closePanel);
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closePanel();
+    });
+    window.addEventListener("resize", closePanel, { passive: true });
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (!panel.hidden) positionPanel();
+      },
+      { passive: true },
+    );
+    form.addEventListener(
+      "submit",
+      () => {
+        if (!emojiPickerEnabled) return;
+        const transformed = transformEmojiTokens(textarea.value);
+        if (transformed === textarea.value) return;
+        textarea.value = transformed;
+        dispatchInput(textarea);
+      },
+      true,
+    );
+
+    form.dataset.v2pLiteEmojiBound = "1";
+    return true;
+  }
+
+  function createEmojiPanel(insertEmoji) {
+    const panel = document.createElement("div");
+    panel.className = "v2p-lite-emoji-panel";
+    panel.setAttribute("role", "dialog");
+    panel.setAttribute("aria-label", "选择表情");
+    panel.hidden = true;
+
+    EMOJI_GROUPS.forEach((emojiGroup) => {
+      const group = document.createElement("section");
+      group.className = "v2p-lite-emoji-group";
+
+      const title = document.createElement("div");
+      title.className = "v2p-lite-emoji-title";
+      title.textContent = emojiGroup.title;
+
+      const list = document.createElement("div");
+      list.className = "v2p-lite-emoji-list";
+      emojiGroup.list.forEach((emoji) => {
+        const item = document.createElement("button");
+        item.type = "button";
+        item.className = "v2p-lite-emoji-item";
+        item.title = emoji;
+        item.setAttribute("aria-label", emoji);
+
+        const imageLink = EMOJI_LINKS[emoji];
+        if (imageLink) {
+          const image = document.createElement("img");
+          image.src = imageLink.hd;
+          image.alt = "";
+          image.loading = "lazy";
+          item.appendChild(image);
+        } else {
+          item.textContent = emoji;
+        }
+        item.addEventListener("click", () => insertEmoji(emoji));
+        list.appendChild(item);
+      });
+
+      group.append(title, list);
+      panel.appendChild(group);
+    });
+    return panel;
+  }
+
+  function transformEmojiTokens(text) {
+    return String(text || "").replace(/\[[^\]]+\]/g, (token) => {
+      const imageLink = EMOJI_LINKS[token];
+      return imageLink ? imageLink.ld + " " : token;
+    });
+  }
+
+  function replaceEmojiImagesWithHD(root) {
+    const sourceMap = new Map(
+      Object.values(EMOJI_LINKS).map(({ ld, hd }) => [ld, hd]),
+    );
+    root
+      .querySelectorAll(".reply_content img.embedded_image, .payload img.embedded_image")
+      .forEach((image) => {
+        const hd = sourceMap.get(image.getAttribute("src") || "");
+        if (!hd) return;
+        image.src = hd;
+        image.classList.add("v2p-lite-emoji-image");
+      });
+  }
+
+  function bindReplyImageUpload() {
+    const textarea = document.querySelector("#reply_content");
+    if (!textarea || textarea.dataset.v2pLiteImageUploadBound === "1") return false;
+    if (!textarea.parentNode) return false;
+
+    let wrapper = textarea.parentElement;
+    if (!wrapper || !wrapper.classList.contains("v2p-reply-wrap")) {
+      wrapper = document.createElement("div");
+      wrapper.className = "v2p-reply-wrap";
+      textarea.parentNode.insertBefore(wrapper, textarea);
+      wrapper.appendChild(textarea);
+    }
+
+    bindImageUploadToWrapper({
+      wrapper,
+      pasteTarget: textarea,
+      insertText: (text) => insertTextToTextarea(textarea, text),
+      replaceText: (find, replace) => replaceTextInTextarea(textarea, find, replace),
+      removeText: (imgLink) => replaceTextInTextarea(textarea, imgLink, ""),
+    });
+    textarea.dataset.v2pLiteImageUploadBound = "1";
+    return true;
+  }
+
+  function bindEditorImageUpload() {
+    const wrapper = document.querySelector("#workspace");
+    if (!wrapper || wrapper.dataset.v2pLiteImageUploadBound === "1") return false;
+
+    bindImageUploadToWrapper({
+      wrapper,
+      pasteTarget: wrapper,
+      insertText: insertTextToWriteEditor,
+      replaceText: replaceTextInWriteEditor,
+      removeText: (imgLink) => {
+        replaceTextInWriteEditor("![](" + imgLink + ")", "");
+        replaceTextInWriteEditor(imgLink, "");
+      },
+    });
+    return true;
+  }
+
+  function bindImageUploadToWrapper({ wrapper, pasteTarget, insertText, replaceText, removeText }) {
+    if (!wrapper || wrapper.dataset.v2pLiteImageUploadBound === "1") return;
+
+    wrapper.dataset.v2pLiteImageUploadBound = "1";
+    let uploading = false;
+    let uploadBar = Array.from(wrapper.children).find((child) =>
+      child.classList && child.classList.contains("v2p-reply-upload-bar"),
+    );
+
+    if (!uploadBar) {
+      uploadBar = document.createElement("div");
+      uploadBar.className = "v2p-reply-upload-bar";
+      wrapper.appendChild(uploadBar);
+    }
+    uploadBar.textContent = UPLOAD_TIP;
+
+    let previewList = Array.from(wrapper.children).find((child) =>
+      child.classList && child.classList.contains("v2p-image-upload-previews"),
+    );
+    if (!previewList) {
+      previewList = document.createElement("div");
+      previewList.className = "v2p-image-upload-previews";
+      previewList.setAttribute("aria-live", "polite");
+      uploadBar.insertAdjacentElement("afterend", previewList);
+    }
+
+    const setUploading = (value) => {
+      uploading = value;
+      uploadBar.classList.toggle("v2p-reply-upload-bar-disabled", uploading);
+      uploadBar.textContent = uploading ? "正在上传图片..." : UPLOAD_TIP;
+    };
+
+    const handleUpload = async (file) => {
+      if (!isImageFile(file) || uploading) return;
+
+      const placeholder = "[上传图片中...]";
+      insertText(" " + placeholder + " ");
+      setUploading(true);
+      try {
+        uploadBar.textContent = "正在处理图片...";
+        const preparedImage = await prepareImageForUpload(file);
+        uploadBar.textContent = "正在上传图片...";
+        const uploadResult = await uploadImage(preparedImage.file);
+        replaceText(placeholder, uploadResult.url);
+        const showUploadPreview = await readBooleanSetting(SHOW_UPLOAD_PREVIEW_KEY, true);
+        if (showUploadPreview) {
+          addImageUploadPreview(previewList, file, preparedImage, uploadResult, removeText);
+        }
+      } catch (error) {
+        console.debug("V2EX Plus image upload was not completed:", error);
+        replaceText(placeholder, "");
+        const message = error && typeof error.userMessage === "string"
+          ? error.userMessage
+          : "上传图片失败，请稍后重试。";
+        window.alert(message);
+      } finally {
+        setUploading(false);
+      }
+    };
+
+    uploadBar.addEventListener("click", () => {
+      if (uploading) return;
+      const imgInput = document.createElement("input");
+      imgInput.type = "file";
+      imgInput.accept = "image/*";
+      imgInput.style.display = "none";
+      imgInput.addEventListener(
+        "change",
+        () => {
+          const selectedFile = imgInput.files && imgInput.files[0];
+          if (selectedFile) void handleUpload(selectedFile);
+          imgInput.remove();
+        },
+        { once: true },
+      );
+      document.body.appendChild(imgInput);
+      imgInput.click();
+    });
+
+    pasteTarget.addEventListener("paste", (event) => {
+      const file = getImageFileFromClipboard(event);
+      if (!file) return;
+      event.preventDefault();
+      void handleUpload(file);
+    });
+
+    wrapper.addEventListener("dragover", (event) => {
+      const types = event.dataTransfer && event.dataTransfer.types;
+      if (types && Array.from(types).includes("Files")) event.preventDefault();
+    });
+
+    wrapper.addEventListener("drop", (event) => {
+      const file = getImageFileFromDataTransfer(event);
+      if (!file) return;
+      event.preventDefault();
+      void handleUpload(file);
+    });
+  }
+
+  function addImageUploadPreview(previewList, originalFile, preparedImage, uploadResult, removeText) {
+    const file = preparedImage.file;
+    const imgLink = uploadResult.url;
+    const item = document.createElement("div");
+    item.className = "v2p-image-upload-preview";
+
+    const thumbLink = document.createElement("a");
+    thumbLink.className = "v2p-image-upload-thumb";
+    thumbLink.href = imgLink;
+    thumbLink.target = "_blank";
+    thumbLink.rel = "noopener noreferrer";
+    thumbLink.title = "查看原图";
+
+    const image = document.createElement("img");
+    image.alt = file.name || "已上传图片";
+    image.decoding = "async";
+
+    const info = document.createElement("div");
+    info.className = "v2p-image-upload-info";
+
+    const name = document.createElement("div");
+    name.className = "v2p-image-upload-name";
+    name.textContent = originalFile.name || "粘贴的图片";
+    name.title = name.textContent;
+
+    const meta = document.createElement("div");
+    meta.className = "v2p-image-upload-meta";
+    const sizeDescription = preparedImage.compressed
+      ? formatImageFileSize(file.size) + " · 原 " + formatImageFileSize(originalFile.size)
+      : formatImageFileSize(file.size);
+    meta.textContent = sizeDescription;
+
+    const status = document.createElement("div");
+    status.className = "v2p-image-upload-status";
+    status.textContent = (preparedImage.compressed ? "已压缩并上传到 " : "已上传到 ") + uploadResult.provider;
+
+    image.addEventListener("load", () => {
+      const dimensions = image.naturalWidth && image.naturalHeight
+        ? image.naturalWidth + " x " + image.naturalHeight
+        : "";
+      meta.textContent = [dimensions, sizeDescription].filter(Boolean).join(" · ");
+    });
+    image.addEventListener("error", () => {
+      item.classList.add("v2p-image-upload-preview-error");
+      status.textContent = "预览加载失败，请打开原图确认";
+    });
+    image.src = imgLink;
+    thumbLink.appendChild(image);
+
+    info.append(name, meta, status);
+
+    const actions = document.createElement("div");
+    actions.className = "v2p-image-upload-actions";
+
+    const openLink = document.createElement("a");
+    openLink.className = "v2p-image-upload-action";
+    openLink.href = imgLink;
+    openLink.target = "_blank";
+    openLink.rel = "noopener noreferrer";
+    openLink.title = "查看原图";
+    openLink.setAttribute("aria-label", "查看原图");
+    openLink.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3h7v7"></path><path d="M10 14 21 3"></path><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"></path></svg>';
+
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.className = "v2p-image-upload-action v2p-image-upload-remove";
+    removeButton.title = "删除图片";
+    removeButton.setAttribute("aria-label", "删除图片");
+    removeButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 15H6L5 6"></path><path d="M10 11v6M14 11v6"></path></svg>';
+    removeButton.addEventListener("click", async () => {
+      if (removeButton.disabled) return;
+      const deleteRemote = await readUploadSetting(DELETE_REMOTE_IMAGE_KEY, "false") === "true";
+      if (deleteRemote) {
+        removeButton.disabled = true;
+        status.textContent = "正在删除云端图片...";
+        try {
+          await deleteUploadedImage(uploadResult);
+        } catch (error) {
+          removeButton.disabled = false;
+          status.textContent = "云端删除失败";
+          console.debug("V2EX Plus remote image deletion failed:", error);
+          window.alert(error?.userMessage || "云端图片删除失败，请稍后重试。");
+          return;
+        }
+      }
+      removeText(imgLink);
+      item.remove();
+    });
+
+    actions.append(openLink, removeButton);
+    item.append(thumbLink, info, actions);
+    previewList.appendChild(item);
+  }
+
+  function formatImageFileSize(bytes) {
+    if (!Number.isFinite(bytes) || bytes <= 0) return "";
+    if (bytes < 1024) return bytes + " B";
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+    return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+  }
+
+  async function prepareImageForUpload(file) {
+    const compressionEnabled = await readUploadSetting(COMPRESS_IMAGES_KEY, "false") === "true";
+    if (!compressionEnabled || !canCompressImage(file)) {
+      return { file, compressed: false };
+    }
+    if (file.type === "image/png" && await isAnimatedPng(file)) {
+      return { file, compressed: false };
+    }
+
+    const qualitySetting = Number(await readUploadSetting(COMPRESSION_QUALITY_KEY, "82"));
+    const quality = Math.min(0.95, Math.max(0.4, (Number.isFinite(qualitySetting) ? qualitySetting : 82) / 100));
+    let decodedImage = null;
+    try {
+      decodedImage = await decodeImageForCanvas(file);
+      const canvas = document.createElement("canvas");
+      canvas.width = decodedImage.width;
+      canvas.height = decodedImage.height;
+      const context = canvas.getContext("2d", { alpha: true });
+      if (!context) return { file, compressed: false };
+      context.drawImage(decodedImage.source, 0, 0);
+
+      let outputType = supportsCanvasWebPEncoding() ? "image/webp" : "image/jpeg";
+      if (outputType === "image/jpeg" && file.type !== "image/jpeg") {
+        const canFlattenToJpeg = file.type === "image/png" && !(await pngHasTransparency(file));
+        if (!canFlattenToJpeg) return { file, compressed: false };
+      }
+
+      const blob = await canvasToBlob(canvas, outputType, quality);
+      if (!blob || blob.type !== outputType || blob.size >= file.size) {
+        return { file, compressed: false };
+      }
+
+      const baseName = (file.name || "image").replace(/\.[^.]+$/, "") || "image";
+      return {
+        file: new File([blob], baseName + (outputType === "image/webp" ? ".webp" : ".jpg"), {
+          type: outputType,
+          lastModified: Date.now(),
+        }),
+        compressed: true,
+      };
+    } catch (error) {
+      console.debug("V2EX Plus image compression was skipped:", error);
+      return { file, compressed: false };
+    } finally {
+      if (decodedImage) decodedImage.release();
+    }
+  }
+
+  async function decodeImageForCanvas(file) {
+    if (typeof createImageBitmap === "function") {
+      const bitmap = await createImageBitmap(file);
+      return {
+        source: bitmap,
+        width: bitmap.width,
+        height: bitmap.height,
+        release: () => bitmap.close(),
+      };
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    try {
+      const image = await new Promise((resolve, reject) => {
+        const element = new Image();
+        element.onload = () => resolve(element);
+        element.onerror = () => reject(new Error("Unable to decode image for compression."));
+        element.src = objectUrl;
+      });
+      return {
+        source: image,
+        width: image.naturalWidth,
+        height: image.naturalHeight,
+        release: () => URL.revokeObjectURL(objectUrl),
+      };
+    } catch (error) {
+      URL.revokeObjectURL(objectUrl);
+      throw error;
+    }
+  }
+
+  function canCompressImage(file) {
+    return ["image/png", "image/jpeg", "image/webp"].includes(file.type);
+  }
+
+  let canvasWebPSupport;
+  function supportsCanvasWebPEncoding() {
+    if (typeof canvasWebPSupport === "boolean") return canvasWebPSupport;
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1;
+      canvas.height = 1;
+      canvasWebPSupport = canvas.toDataURL("image/webp", 0.8).startsWith("data:image/webp");
+    } catch {
+      canvasWebPSupport = false;
+    }
+    return canvasWebPSupport;
+  }
+
+  async function pngHasTransparency(file) {
+    try {
+      const bytes = new Uint8Array(await file.slice(0, 256 * 1024).arrayBuffer());
+      if (bytes.length < 33 || bytes[25] === 4 || bytes[25] === 6) return true;
+
+      let offset = 8;
+      while (offset + 12 <= bytes.length) {
+        const length =
+          ((bytes[offset] << 24) >>> 0) +
+          (bytes[offset + 1] << 16) +
+          (bytes[offset + 2] << 8) +
+          bytes[offset + 3];
+        const type = String.fromCharCode(
+          bytes[offset + 4],
+          bytes[offset + 5],
+          bytes[offset + 6],
+          bytes[offset + 7],
+        );
+        if (type === "tRNS") return true;
+        if (type === "IDAT" || type === "IEND") return false;
+        offset += length + 12;
+      }
+    } catch {
+      return true;
+    }
+    return true;
+  }
+
+  async function isAnimatedPng(file) {
+    try {
+      const bytes = new Uint8Array(await file.slice(0, 64 * 1024).arrayBuffer());
+      for (let index = 8; index <= bytes.length - 4; index += 1) {
+        if (bytes[index] === 0x61 && bytes[index + 1] === 0x63 && bytes[index + 2] === 0x54 && bytes[index + 3] === 0x4c) {
+          return true;
+        }
+      }
+    } catch {
+      // If detection fails, the normal compression fallback still protects upload availability.
+    }
+    return false;
+  }
+
+  function canvasToBlob(canvas, type, quality) {
+    return new Promise((resolve) => canvas.toBlob(resolve, type, quality));
+  }
+
+  async function uploadImage(file) {
+    const imageHost = await readUploadSetting(IMAGE_HOST_KEY, "imgur");
+    if (imageHost === "r2") {
+      return { ...(await uploadImageToR2(file)), provider: "Cloudflare R2", imageHost: "r2" };
+    }
+    return { ...(await uploadImageToImgur(file)), provider: "Imgur", imageHost: "imgur" };
+  }
+
+  async function uploadImageToR2(file) {
+    let token = await readR2UploadToken();
+    if (!token) {
+      token = isExtensionRuntime()
+        ? ""
+        : window.prompt("首次上传需要输入 R2 上传令牌：")?.trim() || "";
+      if (!token) {
+        throw createImageUploadError(
+          "R2 upload token was not provided",
+          isExtensionRuntime()
+            ? "尚未配置 R2 上传令牌，请点击插件图标打开设置。"
+            : "未输入上传令牌，已取消上传。",
+        );
+      }
+      await writeR2UploadToken(token);
+    }
+
+    const endpoint = await readUploadSetting(R2_UPLOAD_ENDPOINT_KEY, DEFAULT_R2_UPLOAD_ENDPOINT);
+
+    const formData = new FormData();
+    formData.append("image", file);
+    let response;
+    try {
+      response = await fetch(endpoint, {
+        method: "POST",
+        headers: { Authorization: "Bearer " + token },
+        body: formData,
+      });
+    } catch (error) {
+      throw createImageUploadError(
+        "R2 upload network error: " + (error && error.message ? error.message : error),
+        "无法连接图片上传服务，请检查网络后重试。",
+      );
+    }
+
+    let responseData = null;
+    try {
+      responseData = await response.json();
+    } catch {
+      // Keep the HTTP status as the primary error when the response is not JSON.
+    }
+
+    if (response.ok && responseData && responseData.success && responseData.url) {
+      return { url: responseData.url, key: responseData.key, endpoint };
+    }
+
+    if (response.status === 401) {
+      await removeR2UploadToken();
+      throw createImageUploadError(
+        "R2 upload token was rejected",
+        "上传令牌无效，已从本机清除。请重新上传并输入新令牌。",
+      );
+    }
+
+    const apiMessage = responseData && typeof responseData.error === "string"
+      ? responseData.error
+      : "HTTP " + response.status;
+    const userMessage = response.status === 413
+      ? "图片超过 10 MB，无法上传。"
+      : response.status === 415
+        ? "仅支持 PNG、JPEG、GIF、WebP 和 AVIF 图片。"
+        : "上传图片失败：" + apiMessage;
+    throw createImageUploadError("R2 upload failed: " + apiMessage, userMessage);
+  }
+
+  async function uploadImageToImgur(file) {
+    const clientId = await readUploadSetting(IMGUR_CLIENT_ID_KEY, "");
+    if (!clientId) {
+      throw createImageUploadError(
+        "Imgur Client ID was not provided",
+        "尚未配置 Imgur Client ID，请点击插件图标打开设置。",
+      );
+    }
+
+    const formData = new FormData();
+    formData.append("image", file);
+    let response;
+    try {
+      response = await fetch("https://api.imgur.com/3/upload", {
+        method: "POST",
+        headers: { Authorization: "Client-ID " + clientId },
+        body: formData,
+      });
+    } catch (error) {
+      throw createImageUploadError(
+        "Imgur upload network error: " + (error && error.message ? error.message : error),
+        "无法连接 Imgur，请检查网络后重试。",
+      );
+    }
+
+    let responseData = null;
+    try {
+      responseData = await response.json();
+    } catch {
+      // Keep the HTTP status as the primary error when the response is not JSON.
+    }
+
+    if (response.ok && responseData && responseData.success && responseData.data?.link) {
+      return { url: responseData.data.link, deleteHash: responseData.data.deletehash || "" };
+    }
+
+    const imgurError = responseData?.data?.error;
+    const apiMessage = typeof imgurError === "string"
+      ? imgurError
+      : imgurError?.message || "HTTP " + response.status;
+    const userMessage = response.status === 401 || response.status === 403
+      ? "Imgur Client ID 无效，请点击插件图标重新设置。"
+      : response.status === 429
+        ? "Imgur 上传额度已用完，请稍后重试。"
+        : "Imgur 上传失败：" + apiMessage;
+    throw createImageUploadError("Imgur upload failed: " + apiMessage, userMessage);
+  }
+
+  async function deleteUploadedImage(uploadResult) {
+    if (uploadResult.imageHost === "imgur") {
+      return deleteImgurImage(uploadResult);
+    }
+    return deleteR2Image(uploadResult);
+  }
+
+  async function deleteR2Image(uploadResult) {
+    if (!uploadResult.key || !uploadResult.endpoint) {
+      throw createImageUploadError("R2 deletion metadata is missing", "缺少云端删除信息，无法删除图片。");
+    }
+    const token = await readR2UploadToken();
+    if (!token) {
+      throw createImageUploadError("R2 upload token is missing", "R2 上传令牌已丢失，无法删除图片。");
+    }
+
+    const deleteUrl = new URL(uploadResult.endpoint);
+    deleteUrl.searchParams.set("key", uploadResult.key);
+    let response;
+    try {
+      response = await fetch(deleteUrl, {
+        method: "DELETE",
+        headers: { Authorization: "Bearer " + token },
+      });
+    } catch (error) {
+      throw createImageUploadError(
+        "R2 deletion network error: " + (error?.message || error),
+        "无法连接 R2 删除服务，请检查网络后重试。",
+      );
+    }
+    if (response.ok) return;
+    if (response.status === 401) await removeR2UploadToken();
+    throw createImageUploadError(
+      "R2 deletion failed with HTTP " + response.status,
+      response.status === 401
+        ? "R2 上传令牌无效，已从本机清除。"
+        : "R2 云端图片删除失败（HTTP " + response.status + "）。",
+    );
+  }
+
+  async function deleteImgurImage(uploadResult) {
+    if (!uploadResult.deleteHash) {
+      throw createImageUploadError("Imgur delete hash is missing", "Imgur 未返回删除凭据，无法删除云端图片。");
+    }
+    const clientId = await readUploadSetting(IMGUR_CLIENT_ID_KEY, "");
+    let response;
+    try {
+      response = await fetch("https://api.imgur.com/3/image/" + encodeURIComponent(uploadResult.deleteHash), {
+        method: "DELETE",
+        headers: { Authorization: "Client-ID " + clientId },
+      });
+    } catch (error) {
+      throw createImageUploadError(
+        "Imgur deletion network error: " + (error?.message || error),
+        "无法连接 Imgur 删除服务，请检查网络后重试。",
+      );
+    }
+    if (response.ok) return;
+    throw createImageUploadError(
+      "Imgur deletion failed with HTTP " + response.status,
+      "Imgur 云端图片删除失败（HTTP " + response.status + "）。",
+    );
+  }
+
+  function createImageUploadError(message, userMessage) {
+    const error = new Error(message);
+    error.userMessage = userMessage;
+    return error;
+  }
+
+  function isExtensionRuntime() {
+    return Boolean(globalThis.browser?.runtime?.id || globalThis.chrome?.runtime?.id);
+  }
+
+  async function applyDisplaySettings() {
+    const [
+      topicRowSpacing,
+      replyLineHeight,
+      contentCardRadius,
+      showReplyFloor,
+      showUploadPreview,
+      nestedReplies,
+      emojiPicker,
+      autoDailyCheckin,
+      fixedSidebarTools,
+      expandReplyToolbar,
+      nodeIcons,
+      showAds,
+    ] = await Promise.all([
+      readUploadSetting(TOPIC_ROW_SPACING_KEY, "standard"),
+      readUploadSetting(REPLY_LINE_HEIGHT_KEY, "1.6"),
+      readUploadSetting(CONTENT_CARD_RADIUS_KEY, "18"),
+      readBooleanSetting(SHOW_REPLY_FLOOR_KEY, true),
+      readBooleanSetting(SHOW_UPLOAD_PREVIEW_KEY, true),
+      readBooleanSetting(NESTED_REPLIES_KEY, true),
+      readBooleanSetting(EMOJI_PICKER_KEY, true),
+      readBooleanSetting(AUTO_DAILY_CHECKIN_KEY, false),
+      readBooleanSetting(FIXED_SIDEBAR_TOOLS_KEY, true),
+      readBooleanSetting(EXPAND_REPLY_TOOLBAR_KEY, false),
+      readBooleanSetting(NODE_ICONS_KEY, true),
+      readBooleanSetting(SHOW_ADS_KEY, false),
+    ]);
+
+    applyDisplaySettingValues({
+      topicRowSpacing,
+      replyLineHeight,
+      contentCardRadius,
+      showReplyFloor,
+      showUploadPreview,
+      nestedReplies,
+      emojiPicker,
+      autoDailyCheckin,
+      fixedSidebarTools,
+      expandReplyToolbar,
+      nodeIcons,
+      showAds,
+    });
+  }
+
+  function applyDisplaySettingValues({
+    topicRowSpacing,
+    replyLineHeight,
+    contentCardRadius,
+    showReplyFloor,
+    showUploadPreview,
+    nestedReplies,
+    emojiPicker,
+    autoDailyCheckin,
+    fixedSidebarTools,
+    expandReplyToolbar,
+    nodeIcons,
+    showAds,
+  }) {
+    const topicRowPadding = {
+      compact: "8px",
+      standard: "12px",
+      relaxed: "16px",
+    }[topicRowSpacing] || "12px";
+    const lineHeightValue = String(replyLineHeight ?? "");
+    const radiusValue = String(contentCardRadius ?? "");
+    const normalizedLineHeight = ["1.4", "1.6", "1.8", "2"].includes(lineHeightValue)
+      ? lineHeightValue
+      : "1.6";
+    const normalizedRadius = ["0", "6", "10", "14", "18"].includes(radiusValue)
+      ? radiusValue
+      : "18";
+
+    docEl.style.setProperty("--v2p-topic-row-padding", topicRowPadding);
+    docEl.style.setProperty("--v2p-reply-line-height", normalizedLineHeight);
+    docEl.style.setProperty("--v2p-box-radius", normalizedRadius + "px");
+    docEl.classList.toggle("v2p-hide-reply-floor", !showReplyFloor);
+    docEl.classList.toggle("v2p-hide-upload-preview", !showUploadPreview);
+    docEl.classList.toggle("v2p-disable-nested-replies", !nestedReplies);
+    docEl.classList.toggle("v2p-hide-emoji-picker", !emojiPicker);
+    docEl.classList.toggle("v2p-unpin-topic-card", !fixedSidebarTools);
+    docEl.classList.toggle("v2p-expand-reply-toolbar", Boolean(expandReplyToolbar));
+    docEl.classList.toggle("v2p-hide-node-icons", !nodeIcons);
+    docEl.classList.toggle("v2p-show-ads", Boolean(showAds));
+
+    emojiPickerEnabled = emojiPicker !== false;
+    configureAutoDailyCheckin(Boolean(autoDailyCheckin));
+    const shouldExpandReplyToolbar = Boolean(expandReplyToolbar);
+    if (defaultReplyToolbarExpanded !== shouldExpandReplyToolbar) {
+      defaultReplyToolbarExpanded = shouldExpandReplyToolbar;
+      setTopicToolsExpanded(shouldExpandReplyToolbar);
+    }
+    if (emojiPickerEnabled) initEmojiPicker();
+    if (nestedReplies === false) flattenNestedReplies();
+    else initNestedReplies();
+  }
+
+  function bindDisplaySettingsMessages() {
+    const runtime = globalThis.browser?.runtime || globalThis.chrome?.runtime;
+    if (!runtime?.onMessage?.addListener) return;
+    runtime.onMessage.addListener((message) => {
+      if (message?.type !== DISPLAY_SETTINGS_UPDATED || !message.settings) return;
+      applyDisplaySettingValues(message.settings);
+    });
+  }
+
+  function bindDisplaySettingChanges() {
+    const storage = globalThis.browser?.storage || globalThis.chrome?.storage;
+    if (!storage?.onChanged?.addListener) return;
+    const displayKeys = new Set([
+      TOPIC_ROW_SPACING_KEY,
+      REPLY_LINE_HEIGHT_KEY,
+      CONTENT_CARD_RADIUS_KEY,
+      SHOW_REPLY_FLOOR_KEY,
+      SHOW_UPLOAD_PREVIEW_KEY,
+      NESTED_REPLIES_KEY,
+      EMOJI_PICKER_KEY,
+      AUTO_DAILY_CHECKIN_KEY,
+      FIXED_SIDEBAR_TOOLS_KEY,
+      EXPAND_REPLY_TOOLBAR_KEY,
+      NODE_ICONS_KEY,
+      SHOW_ADS_KEY,
+    ]);
+    storage.onChanged.addListener((changes, areaName) => {
+      if (areaName !== "local" || !Object.keys(changes).some((key) => displayKeys.has(key))) return;
+      void applyDisplaySettings();
+    });
+  }
+
+  async function readUploadSetting(key, fallback) {
+    try {
+      if (typeof GM_getValue === "function") {
+        return String(GM_getValue(key, fallback) ?? fallback).trim();
+      }
+      if (globalThis.browser?.storage?.local) {
+        const result = await browser.storage.local.get(key);
+        return String(result[key] ?? fallback).trim();
+      }
+      if (globalThis.chrome?.storage?.local) {
+        return await new Promise((resolve) => {
+          chrome.storage.local.get(key, (result) => resolve(String(result?.[key] ?? fallback).trim()));
+        });
+      }
+    } catch (error) {
+      console.warn("V2EX Plus could not read an upload setting:", error);
+    }
+    return fallback;
+  }
+
+  async function readBooleanSetting(key, fallback) {
+    try {
+      let value;
+      if (typeof GM_getValue === "function") {
+        value = GM_getValue(key, fallback);
+      } else if (globalThis.browser?.storage?.local) {
+        const result = await browser.storage.local.get(key);
+        value = result[key];
+      } else if (globalThis.chrome?.storage?.local) {
+        value = await new Promise((resolve) => {
+          chrome.storage.local.get(key, (result) => resolve(result?.[key]));
+        });
+      }
+      if (value === undefined || value === null) return fallback;
+      return value !== false && value !== 0 && value !== "false";
+    } catch (error) {
+      console.warn("V2EX Plus could not read a feature setting:", error);
+      return fallback;
+    }
+  }
+
+  async function readR2UploadToken() {
+    try {
+      if (typeof GM_getValue === "function") {
+        return String(GM_getValue(R2_UPLOAD_TOKEN_KEY, "") || "").trim();
+      }
+      if (globalThis.browser && browser.storage && browser.storage.local) {
+        const result = await browser.storage.local.get(R2_UPLOAD_TOKEN_KEY);
+        return String(result[R2_UPLOAD_TOKEN_KEY] || "").trim();
+      }
+      if (globalThis.chrome && chrome.storage && chrome.storage.local) {
+        return await new Promise((resolve) => {
+          chrome.storage.local.get(R2_UPLOAD_TOKEN_KEY, (result) => {
+            resolve(String((result && result[R2_UPLOAD_TOKEN_KEY]) || "").trim());
+          });
+        });
+      }
+    } catch (error) {
+      console.warn("V2EX Plus could not read extension storage:", error);
+    }
+    return "";
+  }
+
+  async function writeR2UploadToken(token) {
+    try {
+      if (typeof GM_setValue === "function") {
+        GM_setValue(R2_UPLOAD_TOKEN_KEY, token);
+        return;
+      }
+      if (globalThis.browser && browser.storage && browser.storage.local) {
+        await browser.storage.local.set({ [R2_UPLOAD_TOKEN_KEY]: token });
+        return;
+      }
+      if (globalThis.chrome && chrome.storage && chrome.storage.local) {
+        await new Promise((resolve) => chrome.storage.local.set({ [R2_UPLOAD_TOKEN_KEY]: token }, resolve));
+        return;
+      }
+    } catch (error) {
+      console.warn("V2EX Plus could not write extension storage:", error);
+    }
+  }
+
+  async function removeR2UploadToken() {
+    try {
+      if (typeof GM_deleteValue === "function") {
+        GM_deleteValue(R2_UPLOAD_TOKEN_KEY);
+      } else if (globalThis.browser && browser.storage && browser.storage.local) {
+        await browser.storage.local.remove(R2_UPLOAD_TOKEN_KEY);
+      } else if (globalThis.chrome && chrome.storage && chrome.storage.local) {
+        await new Promise((resolve) => chrome.storage.local.remove(R2_UPLOAD_TOKEN_KEY, resolve));
+      }
+    } catch (error) {
+      console.warn("V2EX Plus could not clear extension storage:", error);
+    }
+  }
+
+  function isImageFile(file) {
+    if (!file) return false;
+    if (file.type && file.type.indexOf("image/") === 0) return true;
+    return /\.(apng|avif|gif|jpe?g|png|webp)$/i.test(file.name || "");
+  }
+
+  function getImageFileFromClipboard(event) {
+    const items = event.clipboardData && event.clipboardData.items;
+    if (!items) return null;
+    const imageItem = Array.from(items).find((item) => item.type && item.type.indexOf("image/") === 0);
+    return imageItem ? imageItem.getAsFile() : null;
+  }
+
+  function getImageFileFromDataTransfer(event) {
+    const files = event.dataTransfer && event.dataTransfer.files;
+    if (!files || files.length === 0) return null;
+    return Array.from(files).find(isImageFile) || null;
+  }
+
+  function insertTextToTextarea(textarea, text) {
+    const value = textarea.value || "";
+    const start = typeof textarea.selectionStart === "number" ? textarea.selectionStart : value.length;
+    const end = typeof textarea.selectionEnd === "number" ? textarea.selectionEnd : start;
+    textarea.value = value.slice(0, start) + text + value.slice(end);
+    focusTextareaAt(textarea, start + text.length);
+    dispatchInput(textarea);
+  }
+
+  function replaceTextInTextarea(textarea, find, replace) {
+    const value = textarea.value || "";
+    const index = value.indexOf(find);
+    if (index < 0) return;
+    textarea.value = value.slice(0, index) + replace + value.slice(index + find.length);
+    focusTextareaAt(textarea, index + replace.length);
+    dispatchInput(textarea);
+  }
+
+  function focusTextareaAt(textarea, cursor) {
+    textarea.focus();
+    if (typeof textarea.setSelectionRange !== "function") return;
+    try {
+      textarea.setSelectionRange(cursor, cursor);
+    } catch (error) {
+      // Some mobile browsers reject selection changes while the field is blurred.
+    }
+  }
+
+  function dispatchInput(el) {
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+
+  function getCodeMirrorEditor() {
+    const pageEditor = window.editor;
+    if (pageEditor && typeof pageEditor.getDoc === "function") return pageEditor;
+
+    const codeMirrorEl = document.querySelector(".CodeMirror");
+    if (codeMirrorEl && codeMirrorEl.CodeMirror && typeof codeMirrorEl.CodeMirror.getDoc === "function") {
+      return codeMirrorEl.CodeMirror;
+    }
+    return null;
+  }
+
+  function postWriteEditorMessage(action, payload) {
+    window.postMessage(
+      Object.assign(
+        {
+          source: "v2p-content",
+          type: "v2p:write-editor",
+          action,
+        },
+        payload,
+      ),
+      window.location.origin,
+    );
+  }
+
+  function insertTextToWriteEditor(text) {
+    const editor = getCodeMirrorEditor();
+    if (editor) {
+      insertTextToEditor(editor, text);
+      return;
+    }
+    postWriteEditorMessage("insert", { text });
+  }
+
+  function replaceTextInWriteEditor(find, replace) {
+    const editor = getCodeMirrorEditor();
+    if (editor) {
+      replaceTextInEditor(editor, find, replace);
+      return;
+    }
+    postWriteEditorMessage("replace", { find, replace });
+  }
+
+  function insertTextToEditor(editor, text) {
+    const doc = editor.getDoc();
+    doc.replaceRange(text, doc.getCursor());
+    if (typeof editor.focus === "function") editor.focus();
+  }
+
+  function replaceTextInEditor(editor, find, replace) {
+    const doc = editor.getDoc();
+    const value = doc.getValue();
+    const replacement = replace ? formatUploadedImageLink(replace) : "";
+    doc.setValue(value.replace(find, replacement));
+    if (typeof editor.focus === "function") editor.focus();
+  }
+
+  function formatUploadedImageLink(link) {
+    const syntax = document.querySelector('input[name="syntax"]:checked');
+    return syntax && syntax.value === "markdown" ? "![](" + link + ")" : link;
+  }
+
+  function initTopicSidebarTools() {
+    if (topicToolsInitialized || !/^\/t\/\d+/.test(window.location.pathname)) return;
+
+    const rightbar = document.getElementById("Rightbar");
+    const memberActivity = document.getElementById("member-activity");
+    const infoCard = memberActivity && memberActivity.closest(".box");
+    if (!rightbar || !infoCard || !rightbar.contains(infoCard)) return;
+
+    const removeDuplicateToolRows = (keep) => {
+      Array.from(infoCard.children).forEach((child) => {
+        if (child === keep || !child.classList) return;
+        if (child.classList.contains("v2p-tools") || child.classList.contains("v2p-lite-topic-tools")) {
+          child.remove();
+        }
+      });
+    };
+    removeDuplicateToolRows(null);
+
+    const tools = document.createElement("div");
+    tools.className = "cell v2p-lite-topic-tools";
+    tools.setAttribute("aria-label", "主题工具");
+
+    const replyButton = createTopicToolButton(
+      "v2p-lite-topic-tool-reply",
+      "回复主题",
+      '<path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4Z"/><path d="m10 15-3-3 3-3"/><path d="M7 12h8"/>',
+      "回复",
+    );
+    const topButton = createTopicToolButton(
+      "v2p-lite-topic-tool-top",
+      "回到顶部",
+      '<path d="m18 9-6-6-6 6"/><path d="M12 3v14"/><path d="M5 21h14"/>',
+      "顶部",
+    );
+    const moreButton = createTopicToolButton(
+      "v2p-lite-topic-tool-more",
+      "更多功能",
+      '<circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.5" fill="currentColor" stroke="none"/>',
+      "更多",
+    );
+    moreButton.setAttribute("aria-expanded", "false");
+    tools.append(replyButton, topButton, moreButton);
+    infoCard.appendChild(tools);
+    if (typeof MutationObserver === "function") {
+      const duplicateToolObserver = new MutationObserver(() => removeDuplicateToolRows(tools));
+      duplicateToolObserver.observe(infoCard, { childList: true });
+    }
+
+    const panel = document.createElement("div");
+    panel.id = "v2p-lite-topic-tool-panel";
+    panel.className = "v2p-lite-topic-tool-panel";
+    panel.setAttribute("role", "toolbar");
+    panel.setAttribute("aria-label", "更多主题工具");
+    moreButton.setAttribute("aria-controls", panel.id);
+    let selectedBase64Snapshot = null;
+
+    const memberRefButton = createTopicMenuButton(
+      "显示或隐藏 @ 用户名",
+      "用户名",
+      '<circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/>',
+      () => {
+        const refs = Array.from(document.querySelectorAll("#Main .v2p-member-ref"));
+        if (refs.length === 0) {
+          showLiteToast("本页没有隐藏的 @ 用户名");
+          return;
+        }
+
+        topicMemberRefsVisible = !topicMemberRefsVisible;
+        refs.forEach((ref) => ref.classList.toggle("v2p-member-ref-show", topicMemberRefsVisible));
+        setTopicMenuButtonLabel(
+          memberRefButton,
+          topicMemberRefsVisible ? "隐藏 @ 用户名" : "显示 @ 用户名",
+          "用户名",
+        );
+      },
+    );
+    const decodeSelectedButton = createTopicMenuButton(
+      "解析选中的 Base64 文本",
+      "解码",
+      '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M2 15h10"/><path d="m9 12 3 3-3 3"/>',
+      () => {
+        decodeSelectedBase64Text(selectedBase64Snapshot || captureTopicTextSelection());
+        selectedBase64Snapshot = null;
+      },
+    );
+    decodeSelectedButton.addEventListener("pointerdown", () => {
+      selectedBase64Snapshot = captureTopicTextSelection();
+    });
+    const encodeButton = createTopicMenuButton(
+      "文本转 Base64",
+      "编码",
+      '<path d="M14 2H6a2 2 0 0 0-2 2v6"/><path d="M14 2v6h6"/><path d="M20 8v12a2 2 0 0 1-2 2H6"/><path d="M12 15H2"/><path d="m5 12-3 3 3 3"/>',
+      encodeTextForTopicReply,
+    );
+    panel.append(memberRefButton, decodeSelectedButton, encodeButton);
+    infoCard.appendChild(panel);
+
+    replyButton.addEventListener("click", focusTopicReplyEditor);
+    topButton.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+    moreButton.addEventListener("pointerdown", () => {
+      selectedBase64Snapshot = captureTopicTextSelection();
+    });
+    moreButton.addEventListener("click", (event) => {
+      event.stopPropagation();
+      setTopicToolsExpanded(moreButton.getAttribute("aria-expanded") !== "true");
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") setTopicToolsExpanded(false);
+    });
+
+    const naturalRect = infoCard.getBoundingClientRect();
+    const naturalStyle = window.getComputedStyle(infoCard);
+    const verticalMargins =
+      (parseFloat(naturalStyle.marginTop) || 0) + (parseFloat(naturalStyle.marginBottom) || 0);
+    const preferredTop = Math.max(12, Math.min(naturalRect.top, 120));
+    const placeholder = document.createElement("div");
+    placeholder.className = "v2p-lite-topic-tool-placeholder";
+    placeholder.setAttribute("aria-hidden", "true");
+    rightbar.insertBefore(placeholder, infoCard);
+
+    const syncPlaceholderHeight = () => {
+      placeholder.style.height = Math.ceil(infoCard.getBoundingClientRect().height + verticalMargins) + "px";
+    };
+    let positionFrame = 0;
+    const positionCard = () => {
+      positionFrame = 0;
+      if (!window.matchMedia("(min-width: 901px)").matches) return;
+
+      const placeholderRect = placeholder.getBoundingClientRect();
+      if (placeholderRect.width <= 0) return;
+
+      const cardHeight = infoCard.getBoundingClientRect().height;
+      const usableCardHeight = Math.min(cardHeight, Math.max(0, window.innerHeight - 24));
+      const maxTop = Math.max(12, window.innerHeight - usableCardHeight - 12);
+      infoCard.style.setProperty("--v2p-lite-topic-card-top", Math.round(Math.min(preferredTop, maxTop)) + "px");
+      infoCard.style.setProperty("--v2p-lite-topic-card-left", Math.round(placeholderRect.left) + "px");
+      infoCard.style.setProperty("--v2p-lite-topic-card-width", Math.round(placeholderRect.width) + "px");
+    };
+    const scheduleCardPosition = () => {
+      if (positionFrame) cancelAnimationFrame(positionFrame);
+      positionFrame = requestAnimationFrame(positionCard);
+    };
+
+    syncPlaceholderHeight();
+    positionCard();
+    infoCard.classList.add("v2p-lite-topic-tool-card");
+    setTopicToolsExpanded(docEl.classList.contains("v2p-expand-reply-toolbar"));
+    scheduleCardPosition();
+    window.addEventListener("resize", () => {
+      scheduleCardPosition();
+    });
+    if (typeof ResizeObserver === "function") {
+      const cardObserver = new ResizeObserver(() => {
+        syncPlaceholderHeight();
+        scheduleCardPosition();
+      });
+      cardObserver.observe(infoCard);
+    }
+
+    topicToolsInitialized = true;
+  }
+
+  function setTopicToolsExpanded(expanded) {
+    const card = document.querySelector("#Rightbar > .box.v2p-lite-topic-tool-card");
+    const panel = card && card.querySelector(":scope > .v2p-lite-topic-tool-panel");
+    const moreButton = card && card.querySelector(".v2p-lite-topic-tool-more");
+    if (!card || !panel || !moreButton) return false;
+
+    panel.hidden = !expanded;
+    card.classList.toggle("v2p-topic-toolbar-expanded", expanded);
+    moreButton.setAttribute("aria-expanded", String(expanded));
+    return true;
+  }
+
+  function createTopicToolButton(className, label, iconPaths, visibleLabel = label) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "v2p-lite-topic-tool " + className;
+    button.title = label;
+    button.setAttribute("aria-label", label);
+    button.innerHTML = buildSvgIcon(iconPaths) + "<span>" + escapeHtml(visibleLabel) + "</span>";
+    return button;
+  }
+
+  function createTopicMenuButton(label, visibleLabel, iconPaths, action) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "v2p-lite-topic-menu-item";
+    button.title = label;
+    button.setAttribute("aria-label", label);
+    button.innerHTML = buildSvgIcon(iconPaths) + "<span>" + escapeHtml(visibleLabel) + "</span>";
+    button.addEventListener("click", action);
+    return button;
+  }
+
+  function setTopicMenuButtonLabel(button, label, visibleLabel) {
+    button.title = label;
+    button.setAttribute("aria-label", label);
+    const text = button.querySelector("span");
+    if (text) text.textContent = visibleLabel;
+  }
+
+  function focusTopicReplyEditor() {
+    const textarea = document.querySelector("#reply_content");
+    if (textarea) {
+      try {
+        textarea.focus({ preventScroll: true });
+      } catch (error) {
+        textarea.focus();
+      }
+      textarea.scrollIntoView({ behavior: "smooth", block: "center" });
+      return true;
+    }
+
+    const editor = getCodeMirrorEditor();
+    if (!editor) return false;
+    if (typeof editor.focus === "function") editor.focus();
+    const wrapper = typeof editor.getWrapperElement === "function" ? editor.getWrapperElement() : null;
+    if (wrapper) wrapper.scrollIntoView({ behavior: "smooth", block: "center" });
+    return true;
+  }
+
+  function encodeTextForTopicReply() {
+    focusTopicReplyEditor();
+    const inputText = window.prompt("输入要转换为 Base64 的文本，转换结果将插入回复框：");
+    if (inputText === null || inputText === "") return;
+
+    try {
+      const encodedText = encodeUtf8Base64(inputText);
+      const textarea = document.querySelector("#reply_content");
+      if (textarea) {
+        insertTextToTextarea(textarea, encodedText);
+      } else {
+        const editor = getCodeMirrorEditor();
+        if (!editor) {
+          showLiteToast("未找到回复输入框");
+          return;
+        }
+        insertTextToEditor(editor, encodedText);
+      }
+      showLiteToast("Base64 已插入回复框");
+    } catch (error) {
+      console.error("转换 Base64 出错：", error);
+      showLiteToast("该文本无法转换为 Base64");
+    }
+  }
+
+  function encodeUtf8Base64(text) {
+    const bytes = new TextEncoder().encode(text);
+    let binary = "";
+    const chunkSize = 0x8000;
+    for (let index = 0; index < bytes.length; index += chunkSize) {
+      binary += String.fromCharCode(...bytes.subarray(index, index + chunkSize));
+    }
+    return window.btoa(binary);
+  }
+
+  function captureTopicTextSelection() {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return null;
+
+    const range = selection.getRangeAt(0);
+    const main = document.getElementById("Main");
+    if (!main || !main.contains(range.commonAncestorContainer)) return null;
+
+    const text = selection.toString().trim();
+    if (!text) return null;
+    return { text, range: range.cloneRange() };
+  }
+
+  function decodeSelectedBase64Text(snapshot) {
+    const selectionSnapshot = snapshot || captureTopicTextSelection();
+    if (!selectionSnapshot) {
+      showLiteToast("请先选择 Base64 文本");
+      return;
+    }
+
+    const candidate = selectionSnapshot.text.replace(/\s+/g, "");
+    const decodedText = decodeUtf8Base64(candidate);
+    if (decodedText === null) {
+      showLiteToast("选中的文本不是有效的 UTF-8 Base64");
+      return;
+    }
+
+    const range = selectionSnapshot.range;
+    if (!range.commonAncestorContainer.isConnected) {
+      showLiteToast("选中的文本已失效，请重新选择");
+      return;
+    }
+
+    range.collapse(false);
+    range.insertNode(createBase64DecodedBlock(decodedText));
+    const selection = window.getSelection();
+    if (selection) selection.removeAllRanges();
+    showLiteToast("已解析选中的 Base64 文本");
+  }
+
+  function decodeBase64TopicPage() {
+    if (topicBase64Decoded) {
+      showLiteToast("已解析完本页所有 Base64 字符串");
+      return;
+    }
+
+    const roots = Array.from(document.querySelectorAll("#Main .topic_content, #Main .reply_content"));
+    const excluded = new Set([
+      "boss",
+      "bilibili",
+      "Bilibili",
+      "Encrypto",
+      "encrypto",
+      "Window10",
+      "airpords",
+      "Windows7",
+    ]);
+    let count = 0;
+
+    roots.forEach((root) => {
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+        acceptNode(node) {
+          const parent = node.parentElement;
+          if (!parent || !(node.nodeValue || "").trim()) return NodeFilter.FILTER_REJECT;
+          return parent.closest("a, code, pre, script, style, textarea, input, .v2p-lite-decode-block")
+            ? NodeFilter.FILTER_REJECT
+            : NodeFilter.FILTER_ACCEPT;
+        },
+      });
+      const textNodes = [];
+      while (walker.nextNode()) textNodes.push(walker.currentNode);
+
+      textNodes.forEach((textNode) => {
+        const text = textNode.nodeValue || "";
+        const matches = Array.from(text.matchAll(/[A-Za-z0-9+/]{9,}={0,2}/g));
+        if (matches.length === 0) return;
+
+        const fragment = document.createDocumentFragment();
+        let cursor = 0;
+        let changed = false;
+        matches.forEach((match) => {
+          const candidate = match[0];
+          const start = match.index;
+          const end = start + candidate.length;
+          const previousChar = start > 0 ? text[start - 1] : "";
+          const nextChar = end < text.length ? text[end] : "";
+          fragment.appendChild(document.createTextNode(text.slice(cursor, end)));
+          cursor = end;
+
+          if (
+            candidate.length % 4 !== 0 ||
+            excluded.has(candidate) ||
+            /[A-Za-z0-9+/=]/.test(previousChar) ||
+            /[A-Za-z0-9+/=]/.test(nextChar)
+          ) {
+            return;
+          }
+
+          const decodedText = decodeUtf8Base64(candidate);
+          if (decodedText === null) return;
+
+          fragment.appendChild(createBase64DecodedBlock(decodedText));
+          count += 1;
+          changed = true;
+        });
+        fragment.appendChild(document.createTextNode(text.slice(cursor)));
+        if (changed) textNode.replaceWith(fragment);
+      });
+    });
+
+    topicBase64Decoded = true;
+    showLiteToast(count > 0 ? "已解析 " + count + " 个 Base64 字符串" : "本页没有可解析的 Base64 字符串");
+  }
+
+  function createBase64DecodedBlock(decodedText) {
+    const decodedBlock = document.createElement("span");
+    decodedBlock.className = "v2p-lite-decode-block";
+    decodedBlock.appendChild(document.createTextNode("("));
+
+    const decoded = document.createElement("ins");
+    decoded.className = "v2p-lite-decode";
+    decoded.title = "点击复制";
+    decoded.textContent = decodedText;
+    decoded.addEventListener("click", async () => {
+      try {
+        await copyLiteText(decodedText);
+        showLiteToast("已复制解析内容");
+      } catch (error) {
+        showLiteToast("复制失败");
+      }
+    });
+
+    decodedBlock.append(decoded, document.createTextNode(")"));
+    return decodedBlock;
+  }
+
+  function decodeUtf8Base64(text) {
+    try {
+      const binary = window.atob(text);
+      if (window.btoa(binary).replace(/=+$/, "") !== text.replace(/=+$/, "")) return null;
+
+      const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+      const decoded = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+      if (!decoded.trim() || /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(decoded)) return null;
+      return decoded;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async function copyLiteText(text) {
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+      try {
+        await navigator.clipboard.writeText(text);
+        return;
+      } catch (error) {
+        // Fall back to execCommand for Safari userscript contexts.
+      }
+    }
+
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.setAttribute("readonly", "");
+    textarea.style.position = "fixed";
+    textarea.style.opacity = "0";
+    document.body.appendChild(textarea);
+    textarea.select();
+    const copied = document.execCommand("copy");
+    textarea.remove();
+    if (!copied) throw new Error("Copy command failed");
+  }
+
+  function showLiteToast(message) {
+    let toast = document.getElementById("v2p-lite-toast");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "v2p-lite-toast";
+      toast.className = "v2p-lite-toast";
+      toast.setAttribute("role", "status");
+      toast.setAttribute("aria-live", "polite");
+      document.body.appendChild(toast);
+    }
+    toast.textContent = message;
+    if (liteToastTimer) clearTimeout(liteToastTimer);
+    liteToastTimer = setTimeout(() => {
+      toast.remove();
+      liteToastTimer = null;
+    }, 2200);
+  }
+
+  function initMemberActivityRing() {
+    const activitySource = document.getElementById("member-activity");
+    const infoCard = activitySource?.closest(".box");
+    const activityProgress = activitySource?.querySelector('[class^="member-activity-"]:not(.member-activity-bar)');
+    const avatar = infoCard?.querySelector(".cell:first-child table:first-of-type img.avatar");
+    const avatarLink = avatar?.closest("a");
+    if (!activitySource || !activityProgress || !avatar || !avatarLink) return false;
+
+    const inlineWidth = activityProgress.style.width || "";
+    let percentage = parseFloat(inlineWidth);
+    if (!inlineWidth.includes("%")) {
+      const barWidth = activityProgress.parentElement?.getBoundingClientRect().width || 0;
+      const progressWidth = activityProgress.getBoundingClientRect().width;
+      percentage = barWidth > 0 ? progressWidth / barWidth * 100 : percentage;
+    }
+    percentage = Math.max(0, Math.min(100, Number.isFinite(percentage) ? percentage : 0));
+    const progressColor = getComputedStyle(activityProgress).backgroundColor;
+
+    infoCard.classList.add("v2p-lite-member-card");
+    avatarLink.classList.add("v2p-lite-activity-avatar");
+    let ring = avatarLink.querySelector(":scope > .v2p-lite-activity-avatar-ring");
+    if (!ring) {
+      const svgNamespace = "http://www.w3.org/2000/svg";
+      ring = document.createElementNS(svgNamespace, "svg");
+      ring.classList.add("v2p-lite-activity-avatar-ring");
+      ring.setAttribute("viewBox", "0 0 48 48");
+      ring.setAttribute("aria-hidden", "true");
+
+      const track = document.createElementNS(svgNamespace, "circle");
+      track.classList.add("v2p-lite-activity-avatar-track");
+      track.setAttribute("cx", "24");
+      track.setAttribute("cy", "24");
+      track.setAttribute("r", "21");
+
+      const progress = document.createElementNS(svgNamespace, "circle");
+      progress.classList.add("v2p-lite-activity-avatar-progress");
+      progress.setAttribute("cx", "24");
+      progress.setAttribute("cy", "24");
+      progress.setAttribute("r", "21");
+      ring.append(track, progress);
+      avatarLink.insertBefore(ring, avatar);
+    }
+
+    const progressCircle = ring.querySelector(".v2p-lite-activity-avatar-progress");
+    const circumference = 2 * Math.PI * 21;
+    progressCircle.style.stroke = progressColor;
+    progressCircle.style.strokeDasharray = String(circumference);
+    progressCircle.style.strokeDashoffset = String(circumference * (1 - percentage / 100));
+    avatarLink.dataset.activity = String(Math.round(percentage));
+    activitySource.classList.add("v2p-lite-activity-source");
+    return true;
+  }
+
+  function initMemberStatsCapsule() {
+    const infoCard = document.getElementById("member-activity")?.closest(".box");
+    if (!infoCard) return false;
+
+    const stats = [
+      {
+        href: "/my/nodes",
+        label: "节点收藏",
+      },
+      {
+        href: "/my/topics",
+        label: "主题收藏",
+      },
+      {
+        href: "/my/following",
+        label: "特别关注",
+      },
+    ];
+    const links = stats.map((stat) => infoCard.querySelector('a[href="' + stat.href + '"]'));
+    if (links.some((link) => !link)) return false;
+
+    const statsTable = links[0].closest("table");
+    if (!statsTable || !links.every((link) => statsTable.contains(link))) return false;
+
+    statsTable.classList.add("v2p-lite-member-stats");
+
+    links.forEach((link, index) => {
+      const stat = stats[index];
+      const count = (link.querySelector(".bigger")?.textContent || link.textContent || "0").trim();
+      link.classList.add("v2p-lite-member-stat");
+      link.title = stat.label + " " + count;
+      link.setAttribute("aria-label", stat.label + " " + count);
+    });
+
+    return true;
+  }
+
+  function initBalanceFooter() {
+    const infoCard = document.getElementById("member-activity")?.closest(".box");
+    const balanceLink = infoCard?.querySelector('a.balance_area[href="/balance"], a[href="/balance"]');
+    if (!infoCard || !balanceLink) return false;
+
+    const row = balanceLink.closest(".cell");
+    if (row) {
+      row.classList.add("v2p-lite-member-balance-row");
+      row.querySelectorAll("a").forEach((link) => {
+        if (link !== balanceLink && link.getAttribute("href") !== "/notifications") {
+          link.classList.add("v2p-lite-balance-extra");
+        }
+      });
+    }
+    if (balanceLink.classList.contains("v2p-lite-balance-link")) return true;
+
+    const amounts = (balanceLink.textContent || "").match(/\d+/g)?.slice(0, 3) || [];
+    if (amounts.length < 3) return false;
+
+    const units = [
+      { kind: "gold", label: "金币" },
+      { kind: "silver", label: "银币" },
+      { kind: "bronze", label: "铜币" },
+    ];
+    balanceLink.classList.add("v2p-lite-balance-link");
+    balanceLink.replaceChildren();
+
+    const wallet = document.createElement("span");
+    wallet.className = "v2p-lite-balance-wallet";
+    wallet.setAttribute("aria-hidden", "true");
+    wallet.innerHTML = buildSvgIcon(
+      '<path d="M19 7V4a1 1 0 0 0-1-1H5a3 3 0 0 0 0 6h14v12H5a3 3 0 0 1-3-3V6"/><path d="M16 13h4"/>',
+    );
+    balanceLink.appendChild(wallet);
+
+    units.forEach((unit, index) => {
+      const item = document.createElement("span");
+      item.className = "v2p-lite-balance-unit";
+      item.dataset.kind = unit.kind;
+      item.title = unit.label + " " + amounts[index];
+
+      const dot = document.createElement("span");
+      dot.className = "v2p-lite-balance-dot";
+      dot.setAttribute("aria-hidden", "true");
+
+      const amount = document.createElement("span");
+      amount.textContent = amounts[index];
+      item.append(dot, amount);
+      balanceLink.appendChild(item);
+    });
+
+    const label = units.map((unit, index) => unit.label + " " + amounts[index]).join("，");
+    balanceLink.title = "账户余额：" + label;
+    balanceLink.setAttribute("aria-label", "账户余额：" + label);
+    return true;
+  }
+
+  function initMemberShortcuts() {
+    const rightbar = document.getElementById("Rightbar");
+    const infoCard = document.getElementById("member-activity")?.closest(".box");
+    if (!rightbar || !infoCard || !rightbar.contains(infoCard)) return false;
+    if (infoCard.querySelector(".v2p-lite-member-shortcuts")) return true;
+
+    const writeSource = Array.from(rightbar.querySelectorAll('a[href="/write"]')).find(
+      (link) => !infoCard.contains(link) && link.querySelector('img[src*="compose"]'),
+    );
+    const sourceBox = writeSource?.closest(".box");
+    if (!writeSource || !sourceBox) return false;
+
+    const chatSource = sourceBox.querySelector('a[href*="edge.v2ex.com/chat"]');
+    const shortcuts = [
+      {
+        source: writeSource,
+        kind: "write",
+        label: "创作新主题",
+        title: "创作新主题",
+        icon: '<path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.38 2.62a1 1 0 0 1 3 3L12 15l-4 1 1-4Z"/>',
+      },
+      {
+        source: chatSource,
+        kind: "chat",
+        label: "Chat",
+        title: "打开 Chat",
+        icon: '<path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/>',
+      },
+    ].filter((item) => item.source);
+    if (shortcuts.length === 0) return false;
+
+    const container = document.createElement("div");
+    container.className = "cell v2p-lite-member-shortcuts";
+    container.setAttribute("aria-label", "快捷入口");
+    container.classList.toggle("v2p-single-shortcut", shortcuts.length === 1);
+
+    shortcuts.forEach((item) => {
+      const link = document.createElement("a");
+      link.className = "v2p-lite-member-shortcut v2p-lite-member-shortcut-" + item.kind;
+      link.href = item.source.href;
+      link.title = item.title;
+      link.setAttribute("aria-label", item.title);
+      if (item.source.target) link.target = item.source.target;
+      if (item.source.rel) link.rel = item.source.rel;
+      link.innerHTML = buildSvgIcon(item.icon) + "<span>" + escapeHtml(item.label) + "</span>";
+      container.appendChild(link);
+    });
+
+    sourceBox.classList.add("v2p-lite-member-shortcuts-source");
+    const sourceSeparator = sourceBox.previousElementSibling;
+    if (sourceSeparator?.classList.contains("sep")) {
+      sourceSeparator.classList.add("v2p-lite-member-shortcuts-source");
+    }
+    infoCard.appendChild(container);
+    return true;
+  }
+
+  function initNotificationIndicator() {
+    const infoCard = document.getElementById("member-activity")?.closest(".box");
+    if (!infoCard) return false;
+
+    let unreadCount = 0;
+    document.querySelectorAll('a[href="/notifications"]').forEach((link) => {
+      const match = (link.textContent || "").trim().match(/^(\d+)\s*未读提醒$/);
+      if (!match) return;
+      unreadCount = Math.max(unreadCount, Number(match[1]) || 0);
+    });
+
+    const memberLink = Array.from(infoCard.querySelectorAll('a[href^="/member/"]')).find(
+      (link) => (link.textContent || "").trim(),
+    );
+    if (!memberLink) return false;
+
+    let iconLink = infoCard.querySelector(".v2p-lite-notification-icon");
+    if (!iconLink) {
+      iconLink = document.createElement("a");
+      iconLink.href = "/notifications";
+      iconLink.className = "v2p-lite-notification-icon";
+      iconLink.innerHTML = buildSvgIcon(
+        '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M10 21h4"/>',
+      );
+      memberLink.insertAdjacentElement("afterend", iconLink);
+    }
+
+    let badge = iconLink.querySelector(".v2p-lite-notification-badge");
+    if (!badge) {
+      badge = document.createElement("span");
+      badge.className = "v2p-lite-notification-badge";
+      badge.setAttribute("aria-hidden", "true");
+      iconLink.appendChild(badge);
+    }
+
+    const hasUnread = unreadCount > 0;
+    const label = hasUnread ? unreadCount + " 条未读提醒" : "没有未读提醒";
+    badge.textContent = unreadCount > 99 ? "99+" : String(unreadCount);
+    iconLink.classList.toggle("v2p-has-unread", hasUnread);
+    iconLink.title = label;
+    iconLink.setAttribute("aria-label", label);
+    return true;
+  }
+
+  function initCheckinIndicator() {
+    const infoCard = document.getElementById("member-activity")?.closest(".box");
+    if (!infoCard) return false;
+
+    const memberLink = Array.from(infoCard.querySelectorAll('a[href^="/member/"]')).find(
+      (link) => (link.textContent || "").trim(),
+    );
+    if (!memberLink) return false;
+
+    let button = infoCard.querySelector(".v2p-lite-checkin-icon");
+    if (!button) {
+      button = document.createElement("button");
+      button.type = "button";
+      button.className = "v2p-lite-checkin-icon";
+      button.innerHTML = buildSvgIcon(
+        '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/><path d="M7.5 8A2.5 2.5 0 1 1 12 6.5V8z"/><path d="M16.5 8A2.5 2.5 0 1 0 12 6.5V8z"/>',
+      );
+      button.addEventListener("click", () => {
+        void runDailyCheckin({ claim: true, notify: true, force: true });
+      });
+      const notificationIcon = infoCard.querySelector(".v2p-lite-notification-icon");
+      (notificationIcon || memberLink).insertAdjacentElement("afterend", button);
+    }
+
+    const username = getCurrentUserName();
+    if (username && alreadyCheckedInToday(username)) {
+      updateCheckinIndicator("claimed", readCachedCheckinState(username));
+    } else {
+      const cached = username ? readCachedCheckinState(username) : null;
+      updateCheckinIndicator(cached?.status || "unchecked", cached);
+    }
+    return true;
+  }
+
+  function updateCheckinIndicator(status, details = null) {
+    const button = document.querySelector(".v2p-lite-checkin-icon");
+    if (!button) return;
+
+    const labels = {
+      unchecked: "签到状态待检查",
+      checking: "正在检查签到状态",
+      available: "今日未签到，点击领取",
+      claimed: "今日已签到",
+      error: "签到状态检查失败，点击重试",
+    };
+    let label = labels[status] || labels.unchecked;
+    if (status === "claimed" && details?.days) label += "，连续 " + details.days + " 天";
+    if (status === "claimed" && details?.coins) label += "，本次 " + details.coins + " 铜币";
+    button.dataset.state = status;
+    button.disabled = status === "checking";
+    button.title = label;
+    button.setAttribute("aria-label", label);
+  }
+
+  function configureAutoDailyCheckin(enabled) {
+    autoDailyCheckinEnabled = enabled;
+    if (dailyCheckinTimer !== null) {
+      clearTimeout(dailyCheckinTimer);
+      dailyCheckinTimer = null;
+    }
+    const username = getCurrentUserName();
+    const cached = username ? readCachedCheckinState(username) : null;
+    if (!enabled && cached && isFreshCheckinState(cached)) {
+      updateCheckinIndicator(cached.status, cached);
+      return;
+    }
+    scheduleDailyCheckin(Boolean(enabled));
+  }
+
+  function scheduleDailyCheckin(claim, retry = 0) {
+    if (dailyCheckinRunning) return;
+    if (getCurrentUserName()) {
+      void runDailyCheckin({ claim, notify: claim });
+      return;
+    }
+    if (retry >= 9) return;
+    dailyCheckinTimer = setTimeout(() => {
+      dailyCheckinTimer = null;
+      scheduleDailyCheckin(claim, retry + 1);
+    }, 300);
+  }
+
+  function getCurrentUserName() {
+    const link = document.querySelector('#Top .tools a[href^="/member/"]');
+    return (link?.textContent || "").trim();
+  }
+
+  function getLocalDateKey() {
+    const now = new Date();
+    const pad = (value) => String(value).padStart(2, "0");
+    return now.getFullYear() + "-" + pad(now.getMonth() + 1) + "-" + pad(now.getDate());
+  }
+
+  function alreadyCheckedInToday(username) {
+    try {
+      return localStorage.getItem(CHECKIN_DATE_KEY) === getLocalDateKey()
+        && localStorage.getItem(CHECKIN_USER_KEY) === username;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function readCachedCheckinState(username) {
+    try {
+      const state = JSON.parse(localStorage.getItem(CHECKIN_STATE_KEY) || "null");
+      if (state?.username !== username || state?.date !== getLocalDateKey()) return null;
+      return state;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function isFreshCheckinState(state) {
+    if (!state) return false;
+    if (state.status === "claimed") return true;
+    return state.status === "available"
+      && Number.isFinite(Number(state.checkedAt))
+      && Date.now() - Number(state.checkedAt) < CHECKIN_STATE_MAX_AGE;
+  }
+
+  function cacheCheckinState(username, status, details = {}) {
+    const state = {
+      username,
+      date: getLocalDateKey(),
+      status,
+      checkedAt: Date.now(),
+      ...details,
+    };
+    try {
+      localStorage.setItem(CHECKIN_STATE_KEY, JSON.stringify(state));
+    } catch (error) {
+      // The visible state still works when local storage is unavailable.
+    }
+    updateCheckinIndicator(status, state);
+    return state;
+  }
+
+  function markCheckedInToday(username, details = {}) {
+    try {
+      localStorage.setItem(CHECKIN_DATE_KEY, getLocalDateKey());
+      localStorage.setItem(CHECKIN_USER_KEY, username);
+    } catch (error) {
+      // The current page still avoids duplicate requests through the in-memory flag.
+    }
+    return cacheCheckinState(username, "claimed", details);
+  }
+
+  function acquireDailyCheckinLock() {
+    const token = Date.now() + ":" + Math.random().toString(36).slice(2);
+    try {
+      const current = JSON.parse(localStorage.getItem(CHECKIN_LOCK_KEY) || "null");
+      if (current?.time && Date.now() - Number(current.time) < 60000) return null;
+      localStorage.setItem(CHECKIN_LOCK_KEY, JSON.stringify({ token, time: Date.now() }));
+    } catch (error) {
+      return token;
+    }
+    return token;
+  }
+
+  function releaseDailyCheckinLock(token) {
+    try {
+      const current = JSON.parse(localStorage.getItem(CHECKIN_LOCK_KEY) || "null");
+      if (current?.token === token) localStorage.removeItem(CHECKIN_LOCK_KEY);
+    } catch (error) {
+      // A stale lock expires automatically after one minute.
+    }
+  }
+
+  function extractDailyRedeemUrl(html) {
+    const parsed = new DOMParser().parseFromString(html, "text/html");
+    const claimButton = parsed.querySelector('input[value^="领取"]');
+    const onclick = claimButton?.getAttribute("onclick") || "";
+    const onclickMatch = onclick.match(/'(\/mission\/daily\/redeem\?once=\d+)'/);
+    if (onclickMatch) return onclickMatch[1];
+    return html.match(/\/mission\/daily\/redeem\?once=\d+/)?.[0] || null;
+  }
+
+  function parseDailyCheckinPage(html) {
+    const parsed = new DOMParser().parseFromString(html, "text/html");
+    const text = (parsed.body?.textContent || "").replace(/\s+/g, "");
+    const claimed = text.includes("每日登录奖励已领取")
+      || text.includes("今日登录奖励已领取")
+      || Boolean(parsed.querySelector('input[value*="已领取"], button[value*="已领取"]'));
+    return {
+      signedIn: html.includes("/signout"),
+      claimed,
+      redeemUrl: claimed ? null : extractDailyRedeemUrl(html),
+      days: html.match(/已连续登[^0-9]*?(\d+)\s*天/)?.[1] || null,
+    };
+  }
+
+  async function runDailyCheckin({ claim = false, notify = false, force = false } = {}) {
+    if (dailyCheckinRunning) return;
+    const username = getCurrentUserName();
+    if (!username) {
+      updateCheckinIndicator("error");
+      if (force) showLiteToast("请先登录 V2EX");
+      return;
+    }
+    if (alreadyCheckedInToday(username) && !force) {
+      const cached = readCachedCheckinState(username);
+      updateCheckinIndicator("claimed", cached);
+      return;
+    }
+    const cached = readCachedCheckinState(username);
+    if (!claim && !force && isFreshCheckinState(cached)) {
+      updateCheckinIndicator(cached.status, cached);
+      return;
+    }
+
+    const lockToken = claim ? acquireDailyCheckinLock() : null;
+    if (claim && !lockToken) return;
+
+    dailyCheckinRunning = true;
+    updateCheckinIndicator("checking");
+    try {
+      const dailyResponse = await fetch("/mission/daily", { credentials: "include" });
+      if (!dailyResponse.ok) throw new Error("Daily page returned HTTP " + dailyResponse.status);
+      const dailyHtml = await dailyResponse.text();
+      const dailyState = parseDailyCheckinPage(dailyHtml);
+      if (!dailyState.signedIn) throw new Error("Daily page did not contain a signed-in session");
+      if (dailyState.claimed) {
+        markCheckedInToday(username, { days: dailyState.days });
+        if (force) showLiteToast("今日登录奖励已领取");
+        return;
+      }
+
+      if (!dailyState.redeemUrl) throw new Error("Daily redeem URL was not found");
+      if (!claim) {
+        cacheCheckinState(username, "available");
+        return;
+      }
+      if (!force && !autoDailyCheckinEnabled) {
+        cacheCheckinState(username, "available");
+        return;
+      }
+      const redeemResponse = await fetch(dailyState.redeemUrl, { credentials: "include" });
+      if (!redeemResponse.ok) throw new Error("Daily redeem returned HTTP " + redeemResponse.status);
+      const redeemHtml = await redeemResponse.text();
+
+      const verificationResponse = await fetch("/mission/daily", { credentials: "include" });
+      if (!verificationResponse.ok) {
+        throw new Error("Daily verification returned HTTP " + verificationResponse.status);
+      }
+      const verificationHtml = await verificationResponse.text();
+      const verificationState = parseDailyCheckinPage(verificationHtml);
+      if (!verificationState.signedIn || !verificationState.claimed) {
+        throw new Error("Daily reward was not confirmed after redeem");
+      }
+
+      const days = redeemHtml.match(/已连续登[^0-9]*?(\d+)\s*天/)?.[1]
+        || verificationState.days;
+      let message = days ? "连续签到 " + days + " 天" : "签到成功，今日奖励已领取";
+      let coins = null;
+      try {
+        const balanceResponse = await fetch("/balance", { credentials: "include" });
+        const balanceHtml = balanceResponse.ok ? await balanceResponse.text() : "";
+        coins = balanceHtml.match(/每日登录奖励\s*(\d+)\s*铜币/)?.[1] || null;
+        if (coins) message += "，本次 " + coins + " 铜币";
+      } catch (error) {
+        // The reward was already claimed; balance details are optional.
+      }
+      markCheckedInToday(username, { days, coins });
+      if (notify) showLiteToast(message);
+    } catch (error) {
+      updateCheckinIndicator("error");
+      if (force) showLiteToast("签到失败，请稍后重试");
+      console.warn("V2EX Plus automatic check-in failed:", error);
+    } finally {
+      dailyCheckinRunning = false;
+      if (lockToken) releaseDailyCheckinLock(lockToken);
+    }
+  }
+
+  function initNestedReplies() {
+    if (nestedReplyApplied || !/^\/t\/\d+/.test(window.location.pathname)) return;
+
+    const cells = getCommentCells();
+    if (cells.length === 0) return;
+    if (nestedReplyOrder.length === 0) {
+      nestedReplyOrder = cells.slice();
+      nestedReplyRoot = cells[0].parentElement;
+      nestedReplyAnchor = cells[cells.length - 1].nextSibling;
+    }
+    document.querySelectorAll("#Main .v2p-member-ref").forEach((ref) => {
+      ref.classList.remove("v2p-member-ref-show");
+    });
+
+    const commentDataList = cells.map((cell, index) => getCommentData(cell, index));
+    const commentIndexByMemberFloor = new Map();
+    const lastCommentIndexByMember = new Map();
+
+    commentDataList.forEach((comment) => {
+      if (comment && comment.memberName && comment.floor) {
+        const key = comment.memberName + "\u0000" + comment.floor;
+        if (!commentIndexByMemberFloor.has(key)) {
+          commentIndexByMemberFloor.set(key, comment.index);
+        }
+      }
+      if (comment && comment.refMemberNames && comment.refMemberNames.length === 1) {
+        hideSingleMemberRef(comment.contentEl, comment.refMemberNames[0]);
+      }
+    });
+
+    cells.forEach((cell, index) => {
+      const currentComment = commentDataList[index];
+      if (!currentComment) return;
+
+      const refMemberNames = currentComment.refMemberNames || [];
+      const moreThanOneRefMember = refMemberNames.length > 1;
+      const refNames = moreThanOneRefMember ? refMemberNames.slice().reverse() : refMemberNames;
+      const refFloors = currentComment.refFloors || [];
+      const firstRefFloor = moreThanOneRefMember ? refFloors[refFloors.length - 1] : refFloors[0];
+
+      for (const refName of refNames) {
+        const targetIndex = lastCommentIndexByMember.get(refName);
+        if (targetIndex === undefined) continue;
+
+        let refCommentIndex = targetIndex;
+        const targetComment = commentDataList[targetIndex];
+        if (firstRefFloor && targetComment && firstRefFloor !== targetComment.floor) {
+          const exactIndex = commentIndexByMemberFloor.get(refName + "\u0000" + firstRefFloor);
+          if (exactIndex !== undefined && exactIndex < targetIndex) {
+            refCommentIndex = exactIndex;
+          }
+        }
+
+        cell.classList.add("v2p-indent");
+        cells[refCommentIndex].appendChild(cell);
+        break;
+      }
+
+      if (currentComment.memberName) {
+        lastCommentIndexByMember.set(currentComment.memberName, index);
+      }
+    });
+
+    updateReplyStructureClasses(cells);
+    nestedReplyApplied = true;
+  }
+
+  function flattenNestedReplies() {
+    if (!/^\/t\/\d+/.test(window.location.pathname)) return;
+
+    const cells = (nestedReplyOrder.length > 0 ? nestedReplyOrder : getCommentCells())
+      .filter((cell) => cell && cell.isConnected);
+    if (cells.length === 0) return;
+
+    const root = nestedReplyRoot && nestedReplyRoot.isConnected
+      ? nestedReplyRoot
+      : cells.find((cell) => cell.parentElement)?.parentElement;
+    if (!root) return;
+
+    cells.forEach((cell) => {
+      if (nestedReplyAnchor && nestedReplyAnchor.parentNode === root) {
+        root.insertBefore(cell, nestedReplyAnchor);
+      } else {
+        root.appendChild(cell);
+      }
+      cell.classList.remove("v2p-indent", "v2p-reply-leaf", "v2p-reply-last");
+    });
+    document.querySelectorAll("#Main .v2p-member-ref").forEach((ref) => {
+      ref.classList.add("v2p-member-ref-show");
+    });
+    nestedReplyApplied = false;
+  }
+
+  function updateReplyStructureClasses(cells) {
+    cells.forEach((cell) => {
+      const hasNestedReply = !!cell.querySelector('.cell[id^="r"]');
+      const nextSibling = cell.nextElementSibling;
+      const hasNextReply = !!(nextSibling && nextSibling.matches('.cell[id^="r"]'));
+      cell.classList.toggle("v2p-reply-leaf", !hasNestedReply);
+      cell.classList.toggle("v2p-reply-last", !hasNextReply);
+    });
+  }
+
+  function getCommentCells() {
+    return Array.from(document.querySelectorAll('#Main .cell[id^="r"]')).filter((cell) => {
+      const table = getDirectTable(cell);
+      return table && getContentCell(table) && getReplyContentEl(table);
+    });
+  }
+
+  function getCommentData(cell, index) {
+    const table = getDirectTable(cell);
+    const contentCell = table && getContentCell(table);
+    if (!contentCell) return null;
+
+    const member = contentCell.querySelector("strong > a");
+    const contentEl = getReplyContentEl(table);
+    if (!member || !contentEl) return null;
+
+    const content = contentEl.textContent || "";
+    const memberNameMatches = Array.from(content.matchAll(/@([a-zA-Z0-9]+)/g));
+    const floorNumberMatches = Array.from(content.matchAll(/#(\d+)/g));
+
+    return {
+      id: cell.id,
+      index,
+      memberName: (member.textContent || "").trim(),
+      contentEl,
+      floor: ((contentCell.querySelector("span.no") || {}).textContent || "").trim(),
+      refMemberNames: memberNameMatches.map((match) => match[1]),
+      refFloors: floorNumberMatches.map((match) => match[1]),
+    };
+  }
+
+  function getDirectTable(cell) {
+    return Array.from(cell.children).find((child) => child.tagName === "TABLE") || null;
+  }
+
+  function getContentCell(table) {
+    const row = (table.tBodies[0] && table.tBodies[0].rows[0]) || table.rows[0];
+    return row && row.cells ? row.cells[2] : null;
+  }
+
+  function getReplyContentEl(table) {
+    const contentCell = getContentCell(table);
+    if (!contentCell) return null;
+    return Array.from(contentCell.children).find((child) => child.classList && child.classList.contains("reply_content")) || null;
+  }
+
+  function hideSingleMemberRef(contentEl, memberName) {
+    const link = Array.from(contentEl.querySelectorAll('a[href*="/member/"]')).find(
+      (item) => (item.textContent || "").trim() === memberName,
+    );
+    if (!link || !link.previousSibling || link.previousSibling.nodeType !== Node.TEXT_NODE) return;
+
+    const textNode = link.previousSibling;
+    const text = textNode.textContent || "";
+    if (!text.endsWith("@")) return;
+
+    textNode.textContent = text.slice(0, -1);
+    const span = document.createElement("span");
+    span.className = "v2p-member-ref";
+    span.appendChild(document.createTextNode("@"));
+    span.appendChild(link.cloneNode(true));
+    link.replaceWith(span);
+  }
+
+  function syncCodeHighlight(mode) {
+    const link = document.querySelector('link[href*="tomorrow-night.css"], link[href*="tomorrow.css"]');
+    if (!link) return;
+
+    const href = link.getAttribute("href") || "";
+    if (mode === "dark" && href.includes("tomorrow.css") && !href.includes("tomorrow-night.css")) {
+      link.setAttribute("href", href.replace("tomorrow.css", "tomorrow-night.css"));
+    } else if (mode === "light" && href.includes("tomorrow-night.css")) {
+      link.setAttribute("href", href.replace("tomorrow-night.css", "tomorrow.css"));
+    }
+  }
+
+  function updateThemeColor(mode) {
+    let meta = document.getElementById(THEME_META_ID);
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.id = THEME_META_ID;
+      meta.name = "theme-color";
+      (document.head || docEl).appendChild(meta);
+    }
+    if (meta.content !== THEME_META_COLORS[mode]) meta.content = THEME_META_COLORS[mode];
+  }
+
+  function ensureToggle() {
+    const topTools = document.querySelector("#Top .tools");
+    let toggle = document.getElementById(TOGGLE_ID);
+
+    if (!toggle) {
+      toggle = document.createElement("a");
+      toggle.id = TOGGLE_ID;
+      toggle.href = "javascript:void(0)";
+      toggle.className = "top";
+      toggle.setAttribute("role", "button");
+      toggle.setAttribute("data-v2p-lite-toggle", "theme");
+    }
+
+    if (topTools) {
+      if (toggle.className !== "top") toggle.className = "top";
+      if (toggle.parentNode !== topTools) topTools.appendChild(toggle);
+    } else if (document.body && !toggle.parentNode) {
+      toggle.className = "v2p-lite-floating";
+      document.body.appendChild(toggle);
+    }
+
+    hideNativeThemeToggle();
+    updateToggle();
+  }
+
+  function updateToggle() {
+    const toggle = document.getElementById(TOGGLE_ID);
+    if (!toggle) return;
+
+    const label = LABELS[currentMode] || LABELS.auto;
+    const effectiveLabel = LABELS[effectiveMode] || LABELS.light;
+    const title = currentMode === "auto" ? "自动：当前" + effectiveLabel : "当前" + label;
+    const pressed = effectiveMode === "dark" ? "true" : "false";
+
+    if (toggle.dataset.mode !== currentMode || !toggle.querySelector("svg")) {
+      toggle.innerHTML = ICONS[currentMode] || ICONS.auto;
+    }
+    if (toggle.title !== title) toggle.title = title;
+    if (toggle.getAttribute("aria-label") !== "主题：" + title) {
+      toggle.setAttribute("aria-label", "主题：" + title);
+    }
+    if (toggle.getAttribute("aria-pressed") !== pressed) toggle.setAttribute("aria-pressed", pressed);
+    if (toggle.dataset.mode !== currentMode) toggle.dataset.mode = currentMode;
+    if (toggle.dataset.effectiveMode !== effectiveMode) toggle.dataset.effectiveMode = effectiveMode;
+  }
+
+  function cycleMode() {
+    const index = MODES.indexOf(currentMode);
+    const next = MODES[(index + 1 + MODES.length) % MODES.length];
+    writeMode(next);
+    applyTheme();
+    void syncNativeNight(currentMode);
+  }
+
+  function bindEvents() {
+    document.addEventListener(
+      "click",
+      (event) => {
+        const target = event.target;
+        if (!target || !target.closest) return;
+
+        const toggle = target.closest("#" + TOGGLE_ID);
+        if (!toggle) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+        cycleMode();
+      },
+      true,
+    );
+
+    try {
+      const media = window.matchMedia("(prefers-color-scheme: dark)");
+      const onChange = () => {
+        if (currentMode === "auto") {
+          applyTheme();
+          void syncNativeNight(currentMode);
+        }
+      };
+      if (typeof media.addEventListener === "function") {
+        media.addEventListener("change", onChange);
+      } else if (typeof media.addListener === "function") {
+        media.addListener(onChange);
+      }
+    } catch (error) {
+      // Ignore matchMedia listener failures.
+    }
+  }
+
+  function onReady(fn) {
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", fn, { once: true });
+    } else {
+      fn();
+    }
+  }
+
+  function startBootObserver() {
+    if (!window.MutationObserver || bootObserver) return;
+
+    bootObserver = new MutationObserver(scheduleBootSync);
+
+    bootObserver.observe(docEl, {
+      childList: true,
+      subtree: true,
+    });
+
+    scheduleBootSync();
+    setTimeout(stopBootObserver, 3000);
+  }
+
+  function stopBootObserver() {
+    if (!bootObserver) return;
+    bootObserver.disconnect();
+    bootObserver = null;
+  }
+})();

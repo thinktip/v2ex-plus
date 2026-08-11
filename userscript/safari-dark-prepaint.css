@@ -1,0 +1,28 @@
+/*
+ * Safari companion stylesheet for V2EX Plus.
+ *
+ * Use it from Safari Settings > Advanced > Style Sheet when Safari still shows
+ * a white first frame before Tampermonkey starts. This file is intentionally
+ * tiny and only affects v2ex.com while the system is in dark mode.
+ */
+
+@media (prefers-color-scheme: dark) {
+    @-webkit-document domain("v2ex.com") {
+        html,
+        body {
+            background-color: #1c2128 !important;
+            color-scheme: dark !important;
+        }
+
+        html:not(.v2p-loaded),
+        html:not(.v2p-loaded) body {
+            background-color: #1c2128 !important;
+            color-scheme: dark !important;
+        }
+
+        #Top,
+        #Wrapper {
+            background-color: #1c2128 !important;
+        }
+    }
+}

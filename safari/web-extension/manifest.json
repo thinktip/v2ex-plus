@@ -1,0 +1,63 @@
+{
+  "manifest_version": 3,
+  "name": "V2EX Plus",
+  "version": "1.13.33",
+  "description": "Safari edition of V2EX Plus.",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  "optional_host_permissions": [
+    "https://*/*"
+  ],
+  "host_permissions": [
+    "https://v2ex.com/*",
+    "https://*.v2ex.com/*",
+    "https://upload-cloud.2smile.top/*",
+    "https://api.imgur.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "V2EX Plus 设置",
+    "default_icon": {
+      "16": "icon16.png",
+      "32": "icon32.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://v2ex.com/*",
+        "https://*.v2ex.com/*"
+      ],
+      "js": [
+        "page-bridge.js"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "https://v2ex.com/*",
+        "https://*.v2ex.com/*"
+      ],
+      "css": [
+        "lite.css"
+      ],
+      "js": [
+        "preflight.js",
+        "lite.js"
+      ],
+      "run_at": "document_start"
+    }
+  ],
+  "icons": {
+    "16": "icon16.png",
+    "32": "icon32.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}
