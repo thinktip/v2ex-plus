@@ -1,4 +1,4 @@
-/* Generated from userscript/v2ex-plus.user.js 1.13.33. Do not edit directly. */
+/* Generated from userscript/v2ex-plus.user.js 1.13.40. Do not edit directly. */
 
 html.v2p-lite-prepaint,
 html.v2p-lite-prepaint body {
@@ -39,6 +39,9 @@ html.v2p-lite-prepaint #LogoMobile {
     --v2p-box-radius: 18px;
     --v2p-topic-row-padding: 12px;
     --v2p-reply-line-height: 1.6;
+    --v2p-reading-line-height: 1.68;
+    --v2p-reading-measure: 75ch;
+    --v2p-focus-ring: #059669;
 }
 
 html.v2p-theme-dark-default body #search-container {
@@ -70,6 +73,7 @@ background-color: #22272e !important;
     --v2p-color-accent-400: #34d399;
     --v2p-color-accent-500: #10b981;
     --v2p-color-accent-600: #059669;
+    --v2p-color-accent-700: #047857;
     --v2p-color-orange-50: #fff7ed;
     --v2p-color-orange-100: #ffedd5;
     --v2p-color-orange-400: #fb923c;
@@ -162,6 +166,7 @@ html.v2p-theme-light-default body {
     --v2p-color-accent-400: #34d399;
     --v2p-color-accent-500: #10b981;
     --v2p-color-accent-600: #059669;
+    --v2p-color-accent-700: #047857;
     --v2p-color-orange-50: #fff7ed;
     --v2p-color-orange-100: #ffedd5;
     --v2p-color-orange-400: #fb923c;
@@ -278,6 +283,22 @@ cursor: pointer;
 body a:hover {
 text-decoration: underline 1px;
     text-underline-offset: var(--v2p-underline-offset);
+}
+
+body :where(a[href], button, [tabindex]):not(input):not(select):not(textarea):focus-visible {
+outline: 2px solid var(--v2p-focus-ring) !important;
+    outline-offset: 2px !important;
+}
+
+body :where(input, select, textarea):focus-visible {
+outline: none !important;
+}
+
+body .v2p-lite-emoji-item:focus-visible,
+body .v2p-lite-topic-tool:focus-visible,
+body .v2p-lite-topic-menu-item:focus-visible {
+outline: 2px solid var(--v2p-focus-ring) !important;
+    outline-offset: 2px !important;
 }
 
 body pre {
@@ -1249,7 +1270,7 @@ body .page_current:is(:link, :visited) {
 pointer-events: none;
     font-weight: bold;
     color: #fff !important;
-    background-color: var(--v2p-color-accent-500, #333) !important;
+    background-color: var(--v2p-color-accent-700, #333) !important;
     box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
@@ -1818,7 +1839,7 @@ visibility: hidden;
 height: 26px;
     padding: 0 6px;
     line-height: 26px;
-    color: var(--v2p-color-button-foreground);
+    color: var(--v2p-color-main-600);
     white-space: nowrap;
     border-radius: 4px;
 }
@@ -1944,12 +1965,12 @@ box-shadow: 0 2px 2px var(--v2p-color-main-200);
 }
 
 #Main .cell .topic-link {
-color: var(--v2p-color-main-600);
+color: var(--v2p-color-foreground);
     text-decoration: none;
 }
 
 #Main .cell .topic-link:visited {
-color: var(--v2p-color-main-600);
+color: var(--v2p-color-font-tertiary);
 }
 
 #Main .cell .topic_info {
@@ -1958,7 +1979,11 @@ pointer-events: none;
     position: relative;
     display: flex;
     flex-wrap: wrap;
+    gap: 2px 4px;
     align-items: center;
+    margin-top: 4px;
+    font-size: 12px;
+    line-height: 18px;
 }
 
 #Main .cell .topic_info::after {
@@ -2011,8 +2036,9 @@ user-select: none;
 }
 
 #Main .cell .item_title .topic-link {
-font-size: 15px;
-    font-weight: 500;
+font-size: 16px;
+    font-weight: normal !important;
+    line-height: 1.45;
 }
 
 #Main .cell.item:has(.item_title > .topic-link) {
@@ -2339,15 +2365,23 @@ color: var(--v2p-color-main-600);
 }
 
 #Main .topic_content {
-font-size: 15px;
-    line-height: 1.6;
+max-width: none;
+    font-size: 16px;
+    line-height: var(--v2p-reading-line-height);
     color: currentColor;
 }
 
 #Main .reply_content {
-font-size: 15px;
-    line-height: var(--v2p-reply-line-height);
+max-width: var(--v2p-reading-measure);
+    font-size: 16px;
+    line-height: var(--v2p-reading-line-height);
     color: currentColor;
+}
+
+body #Main .box:has(.topic_content) .header > h1 {
+font-size: 23px;
+    font-weight: 700;
+    line-height: 1.35;
 }
 
 #Main .topic_content a[href^="/member"],
@@ -2702,7 +2736,7 @@ background-color: rgba(0, 0, 0, 0);
 }
 
 html.v2p-theme-dark-default #Main .cell .item_title .topic-link {
-font-weight: normal;
+font-weight: normal !important;
 }
 
 html.v2p-theme-dark-default #search-container::before {
@@ -2785,6 +2819,92 @@ display: inline;
 }
 
 @media (max-width: 768px) {
+  html,
+  body {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  body #Top .content,
+  body #Wrapper > .content,
+  body #Bottom .content {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    box-sizing: border-box;
+    padding-right: 12px !important;
+    padding-left: 12px !important;
+  }
+
+  body #Wrapper > .content {
+    display: flex !important;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  body #Main,
+  body #Rightbar {
+    float: none !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+  }
+
+  body #Main {
+    order: 1;
+  }
+
+  body #Rightbar {
+    order: 2;
+  }
+
+  body #Top .site-nav {
+    min-width: 0;
+  }
+
+  body #Top .tools {
+    min-width: 0;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+  }
+
+  body #Top .tools::-webkit-scrollbar {
+    display: none;
+  }
+
+  body #Top .tools .top {
+    flex: 0 0 auto;
+  }
+
+  body #Top .tools .top,
+  #Main #Tabs .tab,
+  #Main #Tabs .tab_current,
+  body :is(.page_normal, .page_current) {
+    min-height: 44px !important;
+  }
+
+  body :is(.page_normal, .page_current) {
+    min-width: 44px !important;
+    height: 44px !important;
+  }
+
+  #v2p-lite-theme-toggle {
+    flex-basis: 44px !important;
+    width: 44px !important;
+    height: 44px !important;
+    padding: 13px !important;
+  }
+
+  #Main .cell .item_title .topic-link {
+    font-size: 16px;
+  }
+
+  body #Main .box:has(.topic_content) .header > h1 {
+    font-size: 21px;
+  }
+
   #Main .cell[id^="r"] {
     padding-right: 5px !important;
     padding-left: 5px !important;
@@ -2792,8 +2912,8 @@ display: inline;
 
   #Main .reply_content {
     overflow-wrap: break-word;
-    font-size: 15px !important;
-    line-height: var(--v2p-reply-line-height) !important;
+    font-size: 16px !important;
+    line-height: var(--v2p-reading-line-height) !important;
   }
 
   #Main .cell[id^="r"] > table ~ .cell[id^="r"] {
@@ -3617,7 +3737,7 @@ background-color: rgba(0, 0, 0, 0);
 }
 
 html:not(.v2p-theme-light-default):not(.v2p-theme-dark-default) #Main .cell .item_title .topic-link {
-font-weight: normal;
+font-weight: normal !important;
 }
 
 html:not(.v2p-theme-light-default):not(.v2p-theme-dark-default) #search-container::before {
@@ -3735,6 +3855,7 @@ html:not(.v2p-theme-light-default):not(.v2p-theme-dark-default) body {
     --v2p-color-accent-400: #34d399;
     --v2p-color-accent-500: #10b981;
     --v2p-color-accent-600: #059669;
+    --v2p-color-accent-700: #047857;
     --v2p-color-orange-50: #fff7ed;
     --v2p-color-orange-100: #ffedd5;
     --v2p-color-orange-400: #fb923c;
@@ -3912,7 +4033,7 @@ background-color: rgba(0, 0, 0, 0);
 }
 
 html:not(.v2p-theme-light-default):not(.v2p-theme-dark-default):has(#Top img[src*="toggle-light"]) #Main .cell .item_title .topic-link {
-font-weight: normal;
+font-weight: normal !important;
 }
 
 html:not(.v2p-theme-light-default):not(.v2p-theme-dark-default):has(#Top img[src*="toggle-light"]) #search-container::before {

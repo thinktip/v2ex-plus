@@ -1,4 +1,4 @@
-// Generated from userscript/v2ex-plus.user.js 1.13.33. Do not edit directly.
+// Generated from userscript/v2ex-plus.user.js 1.13.40. Do not edit directly.
 (function boot() {
   "use strict";
 
@@ -56,7 +56,6 @@
   const SHOW_UPLOAD_PREVIEW_KEY = "v2p_show_upload_preview";
   const NESTED_REPLIES_KEY = "v2p_nested_replies";
   const EMOJI_PICKER_KEY = "v2p_emoji_picker";
-  const AUTO_DAILY_CHECKIN_KEY = "v2p_auto_daily_checkin";
   const FIXED_SIDEBAR_TOOLS_KEY = "v2p_fixed_sidebar_tools";
   const EXPAND_REPLY_TOOLBAR_KEY = "v2p_expand_reply_toolbar";
   const NODE_ICONS_KEY = "v2p_node_icons";
@@ -67,7 +66,6 @@
   const CHECKIN_USER_KEY = "v2p_checkin_user";
   const CHECKIN_LOCK_KEY = "v2p_checkin_lock";
   const CHECKIN_STATE_KEY = "v2p_checkin_state";
-  const CHECKIN_STATE_MAX_AGE = 5 * 60 * 1000;
   const LONG_REPLY_COLLAPSED_HEIGHT = 250;
   const LONG_REPLY_THRESHOLD = 550;
   const UPLOAD_TIP = "选择、粘贴、拖放上传图片。";
@@ -191,6 +189,58 @@
   if (docEl.dataset[RUNTIME_MARKER] === "1") return;
   docEl.dataset[RUNTIME_MARKER] = "1";
 
+  // Userscript runs in the page world (@grant none); extensions load their MAIN bridge separately.
+  if (!isExtensionRuntime()) {
+    (function () {
+      "use strict";
+
+      document.documentElement.dataset.v2pWriteEditorBridge = "1";
+
+      function getWriteEditor() {
+        try {
+          if (typeof editor !== "undefined") {
+            return editor;
+          }
+        } catch {}
+        return window.editor;
+      }
+
+      window.addEventListener("message", (event) => {
+        if (event.source !== window || event.origin !== window.location.origin) {
+          return;
+        }
+
+        const data = event.data;
+        if (data?.source !== "v2p-content" || data.type !== "v2p:write-editor") {
+          return;
+        }
+
+        const writeEditor = getWriteEditor();
+        if (!writeEditor?.getDoc || !writeEditor?.getValue || !writeEditor?.setValue) {
+          return;
+        }
+
+        if (data.action === "insert" && typeof data.text === "string") {
+          writeEditor.getDoc().replaceRange(data.text, writeEditor.getCursor());
+          return;
+        }
+
+        if (
+          data.action === "replace" &&
+          typeof data.find === "string" &&
+          typeof data.replace === "string"
+        ) {
+          writeEditor.setValue(
+            writeEditor.getValue().replace(data.find, data.replace),
+          );
+          const doc = writeEditor.getDoc();
+          const lastLine = doc.lastLine();
+          doc.setCursor({ line: lastLine, ch: doc.getLine(lastLine).length });
+        }
+      });
+    })();
+  }
+
   let currentMode = readMode();
   let effectiveMode = resolveMode(currentMode);
 
@@ -211,7 +261,6 @@
   let editorImageUploadStopTimer = null;
   let topicToolsInitialized = false;
   let defaultReplyToolbarExpanded = null;
-  let autoDailyCheckinEnabled = false;
   let dailyCheckinRunning = false;
   let dailyCheckinTimer = null;
   let topicMemberRefsVisible = false;
@@ -225,6 +274,7 @@
   docEl.classList.add("v2p-topnav-pending");
   setTimeout(() => docEl.classList.remove("v2p-topnav-pending"), 1500);
   setTimeout(() => docEl.classList.remove("v2p-tabs-pending"), 1500);
+  ensureViewportMeta();
   void applyDisplaySettings();
   bindDisplaySettingChanges();
   bindDisplaySettingsMessages();
@@ -232,7 +282,10 @@
     applyTheme();
     bindEvents();
     startBootObserver();
-    onReady(initializePage);
+    onReady(() => {
+      scheduleDailyCheckin();
+      initializePage();
+    });
   } catch (error) {
     // Fail open: whatever breaks during boot, never leave the page in prepaint state.
     docEl.classList.remove("v2p-lite-prepaint", "v2p-tabs-pending", "v2p-topnav-pending");
@@ -252,7 +305,7 @@
     initReplyFooterIcons();
     initNotificationIndicator();
     initCheckinIndicator();
-    configureAutoDailyCheckin(autoDailyCheckinEnabled);
+    scheduleDailyCheckin();
     void syncNativeNight(currentMode);
   });
 
@@ -2275,7 +2328,9 @@
     if (!clientId) {
       throw createImageUploadError(
         "Imgur Client ID was not provided",
-        "尚未配置 Imgur Client ID，请点击插件图标打开设置。",
+        isExtensionRuntime()
+          ? "尚未配置 Imgur Client ID，请点击插件图标打开设置。"
+          : "油猴版使用默认设置，未配置图床凭据。请使用 Chrome 扩展配置上传，或手动粘贴图片链接。",
       );
     }
 
@@ -2401,7 +2456,6 @@
       showUploadPreview,
       nestedReplies,
       emojiPicker,
-      autoDailyCheckin,
       fixedSidebarTools,
       expandReplyToolbar,
       nodeIcons,
@@ -2414,7 +2468,6 @@
       readBooleanSetting(SHOW_UPLOAD_PREVIEW_KEY, true),
       readBooleanSetting(NESTED_REPLIES_KEY, true),
       readBooleanSetting(EMOJI_PICKER_KEY, true),
-      readBooleanSetting(AUTO_DAILY_CHECKIN_KEY, false),
       readBooleanSetting(FIXED_SIDEBAR_TOOLS_KEY, true),
       readBooleanSetting(EXPAND_REPLY_TOOLBAR_KEY, false),
       readBooleanSetting(NODE_ICONS_KEY, true),
@@ -2429,7 +2482,6 @@
       showUploadPreview,
       nestedReplies,
       emojiPicker,
-      autoDailyCheckin,
       fixedSidebarTools,
       expandReplyToolbar,
       nodeIcons,
@@ -2445,7 +2497,6 @@
     showUploadPreview,
     nestedReplies,
     emojiPicker,
-    autoDailyCheckin,
     fixedSidebarTools,
     expandReplyToolbar,
     nodeIcons,
@@ -2478,7 +2529,6 @@
     docEl.classList.toggle("v2p-show-ads", Boolean(showAds));
 
     emojiPickerEnabled = emojiPicker !== false;
-    configureAutoDailyCheckin(Boolean(autoDailyCheckin));
     const shouldExpandReplyToolbar = Boolean(expandReplyToolbar);
     if (defaultReplyToolbarExpanded !== shouldExpandReplyToolbar) {
       defaultReplyToolbarExpanded = shouldExpandReplyToolbar;
@@ -2509,7 +2559,6 @@
       SHOW_UPLOAD_PREVIEW_KEY,
       NESTED_REPLIES_KEY,
       EMOJI_PICKER_KEY,
-      AUTO_DAILY_CHECKIN_KEY,
       FIXED_SIDEBAR_TOOLS_KEY,
       EXPAND_REPLY_TOOLBAR_KEY,
       NODE_ICONS_KEY,
@@ -2522,6 +2571,7 @@
   }
 
   async function readUploadSetting(key, fallback) {
+    if (!isExtensionRuntime()) return fallback;
     try {
       if (typeof GM_getValue === "function") {
         return String(GM_getValue(key, fallback) ?? fallback).trim();
@@ -2542,6 +2592,7 @@
   }
 
   async function readBooleanSetting(key, fallback) {
+    if (!isExtensionRuntime()) return fallback;
     try {
       let value;
       if (typeof GM_getValue === "function") {
@@ -3276,7 +3327,7 @@
     if (row) {
       row.classList.add("v2p-lite-member-balance-row");
       row.querySelectorAll("a").forEach((link) => {
-        if (link !== balanceLink && link.getAttribute("href") !== "/notifications") {
+        if (link !== balanceLink) {
           link.classList.add("v2p-lite-balance-extra");
         }
       });
@@ -3443,7 +3494,7 @@
         '<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/><path d="M7.5 8A2.5 2.5 0 1 1 12 6.5V8z"/><path d="M16.5 8A2.5 2.5 0 1 0 12 6.5V8z"/>',
       );
       button.addEventListener("click", () => {
-        void runDailyCheckin({ claim: true, notify: true, force: true });
+        void runDailyCheckin({ notify: true, force: true });
       });
       const notificationIcon = infoCard.querySelector(".v2p-lite-notification-icon");
       (notificationIcon || memberLink).insertAdjacentElement("afterend", button);
@@ -3479,37 +3530,25 @@
     button.setAttribute("aria-label", label);
   }
 
-  function configureAutoDailyCheckin(enabled) {
-    autoDailyCheckinEnabled = enabled;
-    if (dailyCheckinTimer !== null) {
-      clearTimeout(dailyCheckinTimer);
-      dailyCheckinTimer = null;
-    }
-    const username = getCurrentUserName();
-    const cached = username ? readCachedCheckinState(username) : null;
-    if (!enabled && cached && isFreshCheckinState(cached)) {
-      updateCheckinIndicator(cached.status, cached);
-      return;
-    }
-    scheduleDailyCheckin(Boolean(enabled));
-  }
-
-  function scheduleDailyCheckin(claim, retry = 0) {
+  function scheduleDailyCheckin(retry = 0) {
     if (dailyCheckinRunning) return;
     if (getCurrentUserName()) {
-      void runDailyCheckin({ claim, notify: claim });
+      void runDailyCheckin({ notify: true });
       return;
     }
     if (retry >= 9) return;
     dailyCheckinTimer = setTimeout(() => {
       dailyCheckinTimer = null;
-      scheduleDailyCheckin(claim, retry + 1);
+      scheduleDailyCheckin(retry + 1);
     }, 300);
   }
 
   function getCurrentUserName() {
-    const link = document.querySelector('#Top .tools a[href^="/member/"]');
-    return (link?.textContent || "").trim();
+    const link = document.querySelector(
+      '#Top a[href^="/member/"], #menu-body a[href^="/member/"], #Rightbar a[href^="/member/"]',
+    );
+    const hrefName = link?.getAttribute("href")?.match(/^\/member\/([^/?#]+)/)?.[1];
+    return decodeURIComponent(hrefName || (link?.textContent || "").trim());
   }
 
   function getLocalDateKey() {
@@ -3535,14 +3574,6 @@
     } catch (error) {
       return null;
     }
-  }
-
-  function isFreshCheckinState(state) {
-    if (!state) return false;
-    if (state.status === "claimed") return true;
-    return state.status === "available"
-      && Number.isFinite(Number(state.checkedAt))
-      && Date.now() - Number(state.checkedAt) < CHECKIN_STATE_MAX_AGE;
   }
 
   function cacheCheckinState(username, status, details = {}) {
@@ -3607,6 +3638,8 @@
     const text = (parsed.body?.textContent || "").replace(/\s+/g, "");
     const claimed = text.includes("每日登录奖励已领取")
       || text.includes("今日登录奖励已领取")
+      || text.includes("已成功领取每日登录奖励")
+      || text.includes("已领取每日登录奖励")
       || Boolean(parsed.querySelector('input[value*="已领取"], button[value*="已领取"]'));
     return {
       signedIn: html.includes("/signout"),
@@ -3616,7 +3649,7 @@
     };
   }
 
-  async function runDailyCheckin({ claim = false, notify = false, force = false } = {}) {
+  async function runDailyCheckin({ notify = false, force = false } = {}) {
     if (dailyCheckinRunning) return;
     const username = getCurrentUserName();
     if (!username) {
@@ -3629,14 +3662,8 @@
       updateCheckinIndicator("claimed", cached);
       return;
     }
-    const cached = readCachedCheckinState(username);
-    if (!claim && !force && isFreshCheckinState(cached)) {
-      updateCheckinIndicator(cached.status, cached);
-      return;
-    }
-
-    const lockToken = claim ? acquireDailyCheckinLock() : null;
-    if (claim && !lockToken) return;
+    const lockToken = acquireDailyCheckinLock();
+    if (!lockToken) return;
 
     dailyCheckinRunning = true;
     updateCheckinIndicator("checking");
@@ -3645,7 +3672,9 @@
       if (!dailyResponse.ok) throw new Error("Daily page returned HTTP " + dailyResponse.status);
       const dailyHtml = await dailyResponse.text();
       const dailyState = parseDailyCheckinPage(dailyHtml);
-      if (!dailyState.signedIn) throw new Error("Daily page did not contain a signed-in session");
+      if (!dailyState.signedIn && !dailyState.claimed && !dailyState.redeemUrl) {
+        throw new Error("Daily page did not contain a signed-in session");
+      }
       if (dailyState.claimed) {
         markCheckedInToday(username, { days: dailyState.days });
         if (force) showLiteToast("今日登录奖励已领取");
@@ -3653,14 +3682,6 @@
       }
 
       if (!dailyState.redeemUrl) throw new Error("Daily redeem URL was not found");
-      if (!claim) {
-        cacheCheckinState(username, "available");
-        return;
-      }
-      if (!force && !autoDailyCheckinEnabled) {
-        cacheCheckinState(username, "available");
-        return;
-      }
       const redeemResponse = await fetch(dailyState.redeemUrl, { credentials: "include" });
       if (!redeemResponse.ok) throw new Error("Daily redeem returned HTTP " + redeemResponse.status);
       const redeemHtml = await redeemResponse.text();
@@ -3671,7 +3692,7 @@
       }
       const verificationHtml = await verificationResponse.text();
       const verificationState = parseDailyCheckinPage(verificationHtml);
-      if (!verificationState.signedIn || !verificationState.claimed) {
+      if (!verificationState.claimed) {
         throw new Error("Daily reward was not confirmed after redeem");
       }
 
@@ -3691,7 +3712,7 @@
       if (notify) showLiteToast(message);
     } catch (error) {
       updateCheckinIndicator("error");
-      if (force) showLiteToast("签到失败，请稍后重试");
+      if (notify || force) showLiteToast("签到失败，请稍后重试");
       console.warn("V2EX Plus automatic check-in failed:", error);
     } finally {
       dailyCheckinRunning = false;
@@ -3887,6 +3908,17 @@
       (document.head || docEl).appendChild(meta);
     }
     if (meta.content !== THEME_META_COLORS[mode]) meta.content = THEME_META_COLORS[mode];
+  }
+
+  function ensureViewportMeta() {
+    let meta = document.querySelector('meta[name="viewport"]');
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.name = "viewport";
+      (document.head || docEl).appendChild(meta);
+    }
+    const content = "width=device-width, initial-scale=1";
+    if (meta.content !== content) meta.content = content;
   }
 
   function ensureToggle() {

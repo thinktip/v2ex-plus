@@ -1,102 +1,116 @@
 # V2EX Plus
 
-V2EX Plus 是一个轻量的 V2EX 浏览体验增强项目。仓库只维护同一套 Lite 功能的三个分发版本：油猴脚本、Chrome 扩展和 Safari Web Extension。
+为 V2EX 提供主题、布局、导航和阅读增强。当前版本 **1.13.40**，提供 **单文件油猴脚本**、**Chrome 扩展**和 **Safari Web Extension**。
+
+[安装油猴版](https://raw.githubusercontent.com/thinktip/v2ex-plus/main/userscript/v2ex-plus.user.js) · [下载 Chrome 扩展](https://github.com/thinktip/v2ex-plus/releases/latest) · [Safari 安装说明](#安装-safari-版) · [查看 Chrome 源码](chrome/)
+
+## 从旧版迁移
+
+以前需要同时安装 `v2ex.polish.style.js` 和 `v2ex.polish.plus.js`（或对应的 `.user.js` 文件）。现在只安装 **`v2ex-plus.user.js` 一个文件**，样式和功能已经合并。
+
+1. 在油猴管理面板停用或删除旧的 **V2EX Plus - style**、**V2EX Plus - plus**，以及旧 Lite 脚本。
+2. 点击上方“安装油猴版”，确认安装后刷新 V2EX。
+3. 同一浏览器只启用油猴版或 Chrome 扩展版中的一种，避免重复处理页面。
+
+旧双脚本位于之前的 V2ex-Polish-Plus 仓库，本仓库只维护新版单文件脚本。旧双脚本不会自动合并升级，需要手动完成上述迁移；新版包含自动更新地址。旧版独立设置不会导入新版。
 
 ## 功能
 
-- 浅色、深色和跟随系统的主题切换，并尽量减少首屏闪烁
-- 导航排序与显示控制、节点图标、页面密度和圆角设置
-- 长回复折叠、回复预览、楼层显示、嵌套回复和表情选择
-- 图片粘贴、拖放、压缩、预览与远端删除
-- 自动签到、回复定位、侧边栏工具和 Base64 辅助工具
-- 默认隐藏广告，可在设置中恢复显示
+- 浅色、深色、跟随系统主题，优化页面布局与阅读宽度。
+- 导航排序、节点图标、通知入口和侧边栏工具。
+- 长回复折叠、回复预览、回复定位、楼层及嵌套回复。
+- 表情选择、Base64 辅助工具。
+- 登录后每日首次打开页面自动检查并领取每日奖励。
+- 默认隐藏广告。
+- Chrome 版可配置图片选择、粘贴、拖放上传，以及压缩、预览和远端删除。
 
-## 目录结构
+## 安装油猴版
 
-```text
-.
-├── userscript/              # 油猴脚本，也是唯一功能源码
-│   ├── v2ex-plus.user.js
-│   └── safari-dark-prepaint.css
-├── chrome/                  # Chrome Manifest V3 扩展
-│   └── build.sh
-├── safari/                  # Safari Web Extension 与 macOS 宿主工程
-│   ├── web-extension/
-│   ├── xcode/
-│   └── build-local.sh
-└── scripts/
-    └── sync.mjs             # 从油猴源码生成 Chrome/Safari 运行资源
-```
+1. 安装 [Tampermonkey](https://www.tampermonkey.net/)。
+2. Chrome 用户在扩展详情中启用“允许用户脚本”，或按 [Tampermonkey 官方说明](https://www.tampermonkey.net/faq.php?locale=zh&q=Q209)启用开发者模式。
+3. 点击[安装单文件油猴脚本](https://raw.githubusercontent.com/thinktip/v2ex-plus/main/userscript/v2ex-plus.user.js)，在 Tampermonkey 页面确认安装。
+4. 打开或刷新 [V2EX](https://www.v2ex.com/)。若链接只显示源码，可在油猴管理面板新建脚本，将完整内容粘贴进去并保存。
 
-`userscript/v2ex-plus.user.js` 是功能实现的唯一来源。`chrome/lite.js`、`chrome/lite.css`、`safari/web-extension/` 及 Xcode 工程中的扩展资源由同步脚本生成，不要直接修改。
+油猴版**没有扩展设置面板，相关设置固定使用当前 Chrome 版的默认参数**。页面内的主题切换和导航操作仍可使用，主题初始为跟随系统。
 
-## 安装
+| 设置 | 默认值 |
+| --- | --- |
+| 列表间距 / 回复行高 / 卡片圆角 | 标准 / 1.6 / 18px |
+| 长回复折叠 / 回复预览 / 自动定位回复 | 开启 |
+| 楼层 / 嵌套回复 / 节点图标 / 表情 | 开启 |
+| 固定侧栏工具 / 上传预览 | 开启 |
+| 默认展开回复工具栏 / 显示广告 | 关闭 |
+| 图片压缩 / 远端删除 | 关闭 |
+| 压缩质量（开启压缩时） | 82% |
+| 图床 | Imgur，Client ID 默认为空 |
 
-### 油猴脚本
+**油猴版未附带图床凭据，默认不能直接上传图片。** 可手动粘贴图片链接；需要上传功能时，请使用 Chrome 扩展并填写自己的图床配置。脚本不会读取旧油猴版保存的图床凭据。
 
-先安装 Tampermonkey 或其他兼容的用户脚本管理器，然后打开：
+用户脚本的注入时间由浏览器和脚本管理器决定，无法保证深色模式首帧完全无闪烁。
 
-[安装 V2EX Plus 用户脚本](https://raw.githubusercontent.com/thinktip/v2ex-plus/main/userscript/v2ex-plus.user.js)
+## 安装 Chrome 扩展
 
-Safari 使用油猴脚本时，浏览器可能在脚本执行前先绘制浅色页面。需要严格压制深色模式首帧闪白时，可在 Safari 设置的高级选项中选择 `userscript/safari-dark-prepaint.css` 作为样式表，或改用 Safari 扩展版。
+1. 在 [Releases](https://github.com/thinktip/v2ex-plus/releases/latest) 下载 `V2EX-Plus-Chrome-1.13.40.zip`，解压到一个固定目录。
+2. 打开 `chrome://extensions/`，开启右上角“开发者模式”。
+3. 点击“加载已解压的扩展程序”，选择解压后包含 `manifest.json` 的目录。
+4. 刷新 V2EX。点击浏览器工具栏的 V2EX Plus 图标即可修改设置。
 
-### Chrome 扩展
+也可下载本仓库 ZIP，解压后选择其中的 `chrome/` 文件夹。此分发方式是本地加载扩展，并非 Chrome 应用商店安装；更新时用新版文件替换原目录，再到扩展管理页点击重新加载。
 
-1. 下载或克隆本仓库。
-2. 打开 `chrome://extensions/` 并启用开发者模式。
-3. 选择“加载已解压的扩展程序”，指向 `chrome/`。
+### 图片上传
 
-打包发布文件：
+在扩展设置中选择 Imgur 或 Cloudflare R2：Imgur 需要填写自己的 Client ID；R2 需要填写与本扩展上传协议兼容的 HTTPS 服务地址和访问令牌。源码保留当前 Chrome 版默认的 R2 服务地址，但不包含访问令牌，也不代表提供公共上传额度。自定义域名可能触发额外站点权限请求。
 
-```sh
-./chrome/build.sh
-```
+## 安装 Safari 版
 
-压缩包会生成在 `chrome/build/`，该目录不会提交到 Git。
+[Releases](https://github.com/thinktip/v2ex-plus/releases/latest) 提供 `V2EX-Plus-Safari-Source-1.13.40.zip`，包含 Safari 扩展资源、Xcode 工程及构建所需的共同源码。**这是源码包，不是双击即可安装的已签名 App。**
 
-### Safari 扩展
+1. 在 Mac 安装完整 Xcode，解压 Safari 源码包（也可克隆本仓库）。
+2. 用 Xcode 打开 `safari/xcode/V2EX Plus/V2EX Plus.xcodeproj`。
+3. 在 App 和 Extension 两个目标的 Signing & Capabilities 中选择你自己的 Team，启用自动签名。
+4. 选择 `V2EX Plus` scheme 和本机 Mac，运行 App。
+5. 在 Safari 设置 → 扩展中启用 V2EX Plus，并允许访问 V2EX。
 
-使用 Xcode 打开 `safari/xcode/V2EX Plus/V2EX Plus.xcodeproj`，为 App 和 Extension 目标选择自己的 Personal Team 后运行 macOS App 目标。
+Safari 原生扩展带设置弹窗，使用方法与 Chrome 版类似。个人开发签名受账号和有效期限制，对外分发 App 需要适当的签名与公证；本项目不公开上传个人开发签名包、证书或描述文件。
 
-也可以生成仅供本机开发使用的 ad-hoc 签名版本：
+也可把自己的 Team ID 写入本机 `safari/.development-team`（已被 Git 忽略），在源码包根目录运行：
 
 ```sh
 ./safari/build-local.sh
 ```
 
-未使用 Apple Developer 身份签名的 Safari 扩展只适合本机测试。正常分发仍需要 Apple 签名和公证。
+该脚本生成本机开发签名归档，默认目标架构为 Apple Silicon（arm64）。本次公开发布验证 Xcode 编译和扩展资源同步，不包含个人签名安装验证。
 
-油猴脚本、Chrome 扩展和 Safari 扩展会初始化相同的页面组件，同一浏览器中请只启用一个版本。
+## 开发与打包
 
-## 开发
-
-修改 `userscript/v2ex-plus.user.js` 或 `chrome/` 中的弹窗、预加载脚本和图标后，运行：
+`userscript/v2ex-plus.user.js` 是共同功能源码。修改后运行同步脚本生成 Chrome、Safari Web Extension 和 Xcode 资源，不要直接修改生成文件。
 
 ```sh
+node --check userscript/v2ex-plus.user.js
 node scripts/sync.mjs
-```
-
-该命令会：
-
-1. 从油猴脚本提取主题 CSS 和运行逻辑。
-2. 更新 Chrome 与 Safari 的 Manifest 版本。
-3. 同步 Safari Web Extension 和 Xcode 工程资源。
-4. 更新 Xcode 工程的 `MARKETING_VERSION`。
-
-提交前建议至少执行：
-
-```sh
-node scripts/sync.mjs
+node --test tests/*.test.mjs
 ./chrome/build.sh
 ```
 
-## 隐私与安全
+需要 Node.js 和 `zip`。Chrome ZIP 位于 `chrome/build/`。Safari 本机构建另外需要完整 Xcode 和自己的签名团队。油猴版在无扩展运行环境时使用默认设置，并内置页面编辑器桥接；Chrome/Safari 保留原生设置面板及独立 MAIN-world 桥接。
 
-- 仓库不包含上传令牌、Imgur Client ID、Apple Team ID、证书或本机用户配置。
-- 图床凭据仅保存在浏览器本地存储中，不会写入仓库。
-- 不要提交 `.env`、证书、描述文件、Xcode `xcuserdata` 或构建产物。
-- 自建上传服务时，应使用自己的 HTTPS 地址和访问令牌，并定期轮换凭据。
+```text
+userscript/          单文件油猴脚本与共同功能源码
+chrome/              Chrome 扩展、设置面板和打包脚本
+safari/web-extension/ Safari 扩展资源
+safari/xcode/        macOS 宿主 App 与扩展工程
+scripts/sync.mjs     三个版本的资源同步脚本
+tests/               行为与分发回归检查
+```
+
+## 隐私与权限
+
+- 本次分发不包含浏览器个人配置、上传令牌、私钥、证书或 Safari 本机签名信息。
+- Chrome 图床配置保存在扩展本地存储中；主题、导航及签到状态使用浏览器本地存储。
+- 签到请求使用你在 V2EX 的登录状态；图片上传仅在主动操作时发送到所选图床；表情图片从 Imgur 加载。
+- Chrome 申请 V2EX、默认图床访问权限，以及设置存储和当前标签页操作权限；自定义图床使用可选站点权限。油猴版只匹配 V2EX HTTPS 页面，无外部脚本依赖。
+- 请勿将 `.env`、浏览器存储导出、Token、证书或本机配置提交到仓库。
 
 ## 致谢
 
-项目基于 [V2EX Polish](https://github.com/coolpace/V2EX_Polish) 的设计与实现思路持续精简和扩展。
+基于 [coolpace / V2EX Polish](https://github.com/coolpace/V2EX_Polish) 的设计与实现思路持续调整。

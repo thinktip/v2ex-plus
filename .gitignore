@@ -9,6 +9,7 @@
 *.pem
 *.p12
 *.mobileprovision
+safari/.development-team
 
 # Generated build products
 chrome/build/
@@ -24,3 +25,26 @@ xcuserdata/
 node_modules/
 .idea/
 .vscode/
+
+# Impeccable ephemeral output and per-developer state.
+.impeccable/config.local.json
+.impeccable/hook.cache.json
+.impeccable/hook.pending.json
+.impeccable/*.png
+.impeccable/live/server.json
+.impeccable/live/sessions/
+.impeccable/live/previews/
+.impeccable/live/annotations/
+.impeccable/live/cache/
+.impeccable/live/manual-edit-apply-transaction.json
+.impeccable/live/manual-edit-events.jsonl
+.impeccable/live/manual-edit-evidence/
+.impeccable/live/pending-manual-edits.json
+.impeccable/live/deferred-svelte-component-accepts.json
+.impeccable/live/*.png
+
+# Local agent configuration
+.agents/
+.codex/
+.impeccable/
+*.key

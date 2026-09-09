@@ -76,7 +76,7 @@
 		D2ADC1A8300F5EE700D13ACC /* manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = manifest.json; path = Resources/manifest.json; sourceTree = "<group>"; };
 		D2ADC1A9300F5EE700D13ACC /* lite.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = lite.js; path = Resources/lite.js; sourceTree = "<group>"; };
 		D2ADC1AA300F5EE700D13ACC /* icon32.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icon32.png; path = Resources/icon32.png; sourceTree = "<group>"; };
-		D2ADC1B4300F5EE700D13ACC /* page-bridge.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = page-bridge.js; path = Resources/page-bridge.js; sourceTree = "<group>"; };
+		D2ADC1B4300F5EE700D13ACC /* page-bridge.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = "page-bridge.js"; path = "Resources/page-bridge.js"; sourceTree = "<group>"; };
 		D2ADC1B5300F5EE700D13ACC /* popup.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = popup.html; path = Resources/popup.html; sourceTree = "<group>"; };
 		D2ADC1B6300F5EE700D13ACC /* popup.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; name = popup.css; path = Resources/popup.css; sourceTree = "<group>"; };
 		D2ADC1B7300F5EE700D13ACC /* popup.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; name = popup.js; path = Resources/popup.js; sourceTree = "<group>"; };
@@ -444,6 +444,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
@@ -457,7 +458,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 1.13.33;
+				MARKETING_VERSION = 1.13.40;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -478,6 +479,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
@@ -491,7 +493,7 @@
 					"@executable_path/../../../../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				MARKETING_VERSION = 1.13.33;
+				MARKETING_VERSION = 1.13.40;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -515,6 +517,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
@@ -530,7 +533,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.13.33;
+				MARKETING_VERSION = 1.13.40;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,
@@ -557,6 +560,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
@@ -572,7 +576,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.13.33;
+				MARKETING_VERSION = 1.13.40;
 				OTHER_LDFLAGS = (
 					"-framework",
 					SafariServices,

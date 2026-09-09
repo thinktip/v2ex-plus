@@ -18,7 +18,6 @@ const SETTINGS = {
   showUploadPreview: "v2p_show_upload_preview",
   nestedReplies: "v2p_nested_replies",
   emojiPicker: "v2p_emoji_picker",
-  autoDailyCheckin: "v2p_auto_daily_checkin",
   fixedSidebarTools: "v2p_fixed_sidebar_tools",
   expandReplyToolbar: "v2p_expand_reply_toolbar",
   nodeIcons: "v2p_node_icons",
@@ -52,7 +51,6 @@ const showReplyFloor = document.querySelector("#show-reply-floor");
 const showUploadPreview = document.querySelector("#show-upload-preview");
 const nestedReplies = document.querySelector("#nested-replies");
 const emojiPicker = document.querySelector("#emoji-picker");
-const autoDailyCheckin = document.querySelector("#auto-daily-checkin");
 const fixedSidebarTools = document.querySelector("#fixed-sidebar-tools");
 const expandReplyToolbar = document.querySelector("#expand-reply-toolbar");
 const nodeIcons = document.querySelector("#node-icons");
@@ -97,7 +95,7 @@ deleteRemoteImage.addEventListener("change", () => void queueAutoSave());
 [...topicRowSpacingInputs, replyLineHeight, contentCardRadius, showReplyFloor, showUploadPreview].forEach((input) => {
   input.addEventListener("change", () => void queueAutoSave());
 });
-[nestedReplies, emojiPicker, autoDailyCheckin, fixedSidebarTools, expandReplyToolbar, nodeIcons, showAds].forEach((input) => {
+[nestedReplies, emojiPicker, fixedSidebarTools, expandReplyToolbar, nodeIcons, showAds].forEach((input) => {
   input.addEventListener("change", () => void queueAutoSave());
 });
 resetNodeOrder.addEventListener("click", () => void restoreDefaultNodeOrder());
@@ -161,7 +159,6 @@ async function loadSettings() {
     showUploadPreview.checked = values[SETTINGS.showUploadPreview] !== false;
     nestedReplies.checked = values[SETTINGS.nestedReplies] !== false;
     emojiPicker.checked = values[SETTINGS.emojiPicker] !== false;
-    autoDailyCheckin.checked = values[SETTINGS.autoDailyCheckin] === true;
     fixedSidebarTools.checked = values[SETTINGS.fixedSidebarTools] !== false;
     expandReplyToolbar.checked = values[SETTINGS.expandReplyToolbar] === true;
     nodeIcons.checked = values[SETTINGS.nodeIcons] !== false;
@@ -242,7 +239,6 @@ async function saveSettings({ requestPermission = false } = {}) {
     [SETTINGS.showUploadPreview]: showUploadPreview.checked,
     [SETTINGS.nestedReplies]: nestedReplies.checked,
     [SETTINGS.emojiPicker]: emojiPicker.checked,
-    [SETTINGS.autoDailyCheckin]: autoDailyCheckin.checked,
     [SETTINGS.fixedSidebarTools]: fixedSidebarTools.checked,
     [SETTINGS.expandReplyToolbar]: expandReplyToolbar.checked,
     [SETTINGS.nodeIcons]: nodeIcons.checked,
@@ -272,7 +268,6 @@ async function notifyActiveTabOfDisplaySettings(values) {
     showUploadPreview: values[SETTINGS.showUploadPreview],
     nestedReplies: values[SETTINGS.nestedReplies],
     emojiPicker: values[SETTINGS.emojiPicker],
-    autoDailyCheckin: values[SETTINGS.autoDailyCheckin],
     fixedSidebarTools: values[SETTINGS.fixedSidebarTools],
     expandReplyToolbar: values[SETTINGS.expandReplyToolbar],
     nodeIcons: values[SETTINGS.nodeIcons],

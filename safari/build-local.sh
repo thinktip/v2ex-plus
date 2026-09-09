@@ -11,6 +11,16 @@ TEMP_APP="$TEMP_BUILD_DIRECTORY/V2EX Plus.app"
 OUTPUT_ARCHIVE="$BUILD_DIRECTORY/V2EX-Plus.zip"
 CONFIGURATION="${CONFIGURATION:-Release}"
 ARCHITECTURES="${ARCHITECTURES:-arm64}"
+TEAM_FILE="$SCRIPT_DIRECTORY/.development-team"
+
+if [ -z "${DEVELOPMENT_TEAM:-}" ] && [ -f "$TEAM_FILE" ]; then
+  DEVELOPMENT_TEAM=$(tr -d '[:space:]' < "$TEAM_FILE")
+fi
+
+if [ -z "${DEVELOPMENT_TEAM:-}" ]; then
+  echo "Set DEVELOPMENT_TEAM or create safari/.development-team before building." >&2
+  exit 1
+fi
 
 cleanup() {
   pluginkit -r "$TEMP_APP/Contents/PlugIns/V2EX Plus Extension.appex" >/dev/null 2>&1 || true
@@ -44,9 +54,9 @@ xcodebuild \
   CONFIGURATION_BUILD_DIR="$TEMP_BUILD_DIRECTORY" \
   ARCHS="$ARCHITECTURES" \
   ONLY_ACTIVE_ARCH=NO \
-  CODE_SIGN_STYLE=Manual \
-  CODE_SIGN_IDENTITY=- \
-  DEVELOPMENT_TEAM= \
+  CODE_SIGN_STYLE=Automatic \
+  DEVELOPMENT_TEAM="$DEVELOPMENT_TEAM" \
+  -allowProvisioningUpdates \
   clean \
   build
 
