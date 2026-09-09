@@ -1,4 +1,4 @@
-// Generated from userscript/v2ex-plus.user.js 1.13.41. Do not edit directly.
+// Generated from userscript/v2ex-plus.user.js 1.13.42. Do not edit directly.
 (function boot() {
   "use strict";
 
@@ -12,6 +12,8 @@
   const NATIVE_TOGGLE_SELECTOR = 'a[href*="/settings/night/toggle"]';
   const STRUCTURE_MARKER_SELECTOR = [
     "#Singleton",
+    "#site-header",
+    "#Wrapper > .content",
     '#Main form[action="/write"]',
     "#Main #syntax-selector",
     "#Main #reply-box > .cell form",
@@ -316,6 +318,7 @@
   function initializePage() {
     if (pageInitialized) return;
     pageInitialized = true;
+    initMobileLayout();
     markPageStructure(document);
     stopBootObserver();
     applyTheme();
@@ -565,9 +568,10 @@
       bootSyncScheduled = false;
       if (!bootObserver) return;
 
+      initMobileLayout();
       applyThemeClasses(effectiveMode);
       markPageStructure(document);
-      const topTools = document.querySelector("#Top .tools");
+      const topTools = document.querySelector("#Top .tools, #site-header");
       if (topTools) ensureToggle();
       const tabsReady = attemptEarlyNodeNavigation();
       if (
@@ -644,8 +648,30 @@
     return matches;
   }
 
+  function initMobileLayout() {
+    const header = document.getElementById("site-header");
+    if (!header) return false;
+    docEl.classList.add("v2p-mobile");
+    // The server's mobile template has no #Main. Keep its original .content
+    // element and children intact, and give shared reply features a stable root.
+    if (!document.getElementById("Main")) {
+      const main = document.querySelector("#Wrapper > .content");
+      if (main && !main.id) main.id = "Main";
+    }
+    const menu = header.querySelector("#menu-entry");
+    if (menu && menu.querySelector("img.menu-guest") && !menu.querySelector(".v2p-mobile-menu-icon")) {
+      menu.insertAdjacentHTML("beforeend", '<svg class="v2p-mobile-menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>');
+    }
+    if (menu && !menu.hasAttribute("aria-label")) menu.setAttribute("aria-label", "打开导航菜单");
+    return true;
+  }
+
   function markPageStructure(root) {
     findStructureMatches(root, STRUCTURE_MARKER_SELECTOR).forEach((element) => {
+      if (element.id === "site-header" || element.matches("#Wrapper > .content")) {
+        initMobileLayout();
+        return;
+      }
       if (element.id === "Singleton") {
         const wrapper = element.closest("#Wrapper");
         if (wrapper) wrapper.classList.add("v2p-has-singleton");
@@ -1100,7 +1126,7 @@
       logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>',
     };
 
-    const links = Array.from(document.querySelectorAll("#Top .tools > a.top"));
+    const links = Array.from(document.querySelectorAll("#Top .tools > a.top, #menu-body .cell > a.top"));
     let changed = false;
 
     links.forEach((link) => {
@@ -3962,7 +3988,7 @@
   }
 
   function ensureToggle() {
-    const topTools = document.querySelector("#Top .tools");
+    const topTools = document.querySelector("#Top .tools, #site-header");
     let toggle = document.getElementById(TOGGLE_ID);
 
     if (!toggle) {
@@ -3976,7 +4002,8 @@
 
     if (topTools) {
       if (toggle.className !== "top") toggle.className = "top";
-      if (toggle.parentNode !== topTools) topTools.appendChild(toggle);
+      const mobileMenu = topTools.id === "site-header" ? topTools.querySelector("#site-header-menu") : null;
+      if (toggle.parentNode !== topTools) topTools.insertBefore(toggle, mobileMenu);
     } else if (document.body && !toggle.parentNode) {
       toggle.className = "v2p-lite-floating";
       document.body.appendChild(toggle);

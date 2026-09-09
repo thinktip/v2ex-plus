@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Plus
 // @namespace    https://v2ex.com/
-// @version      1.13.41
+// @version      1.13.42
 // @description  Lightweight V2EX layout, theme, navigation, reading, reply, and image tools.
 // @match        https://v2ex.com/*
 // @match        https://*.v2ex.com/*
@@ -25,6 +25,8 @@
   const NATIVE_TOGGLE_SELECTOR = 'a[href*="/settings/night/toggle"]';
   const STRUCTURE_MARKER_SELECTOR = [
     "#Singleton",
+    "#site-header",
+    "#Wrapper > .content",
     '#Main form[action="/write"]',
     "#Main #syntax-selector",
     "#Main #reply-box > .cell form",
@@ -3202,6 +3204,124 @@ display: inline;
 
 }
 
+/* V2EX serves a separate mobile template (#site-header and no native #Main).
+   Scope this to that template, including landscape/tablet widths. */
+html.v2p-mobile {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+html.v2p-mobile #site-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) 44px 44px;
+  align-items: center;
+  gap: 4px;
+  box-sizing: border-box;
+  width: 100%;
+  height: auto;
+  min-height: 56px;
+  padding: calc(6px + env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) 6px max(12px, env(safe-area-inset-left, 0px));
+  color: var(--v2p-color-font-primary);
+  background: var(--v2p-color-bg-content);
+  border-bottom: 1px solid var(--box-border-color);
+}
+html.v2p-mobile #site-header #site-header-logo { display: flex; align-items: center; width: 90px; height: 40px; margin: 0; }
+html.v2p-mobile #site-header #LogoMobile { width: 86px !important; height: 32px !important; background-size: contain !important; background-position: center; }
+html.v2p-mobile.v2p-theme-dark-default #LogoMobile { filter: invert(1) brightness(0.9) contrast(0.9); }
+html.v2p-mobile #site-header #search-container {
+  position: relative;
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+  height: 36px;
+  margin: 0;
+  padding: 0 6px 0 28px;
+  background: var(--v2p-color-bg-block);
+  border-radius: 12px;
+}
+html.v2p-mobile #site-header #search {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  font-size: 16px;
+  background-color: transparent;
+}
+html.v2p-mobile #site-header #v2p-lite-theme-toggle {
+  width: 44px !important;
+  height: 44px !important;
+  padding: 13px !important;
+}
+html.v2p-mobile #site-header #site-header-menu { position: relative; width: 44px; height: 44px; padding: 0; margin: 0; }
+html.v2p-mobile #site-header #site-header-menu #menu-entry {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 8px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+}
+html.v2p-mobile #menu-entry img.menu-guest { display: none; }
+html.v2p-mobile #menu-entry .avatar { width: 28px !important; height: 28px !important; max-height: 28px !important; }
+html.v2p-mobile #site-header #site-header-menu #menu-body {
+  position: absolute;
+  left: auto;
+  right: 0;
+  top: 48px;
+  width: min(260px, calc(100vw - 24px));
+  box-sizing: border-box;
+  z-index: 1000;
+  padding: 6px;
+  border: 1px solid var(--box-border-color);
+  border-radius: 14px;
+  background: var(--v2p-color-bg-content);
+  box-shadow: var(--v2p-widget-shadow);
+}
+html.v2p-mobile #menu-body .cell { padding: 0; border: none; }
+html.v2p-mobile #menu-body .cell > a.top:not([hidden]) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 12px;
+  color: var(--v2p-color-font-secondary);
+  border-radius: 10px;
+}
+html.v2p-mobile #menu-body .v2p-lite-topnav-icon svg { width: 16px; height: 16px; flex: 0 0 16px; }
+html.v2p-mobile #Wrapper > #Main.content {
+  display: block !important;
+  float: none;
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0;
+  box-sizing: border-box;
+  margin: 0 !important;
+  padding: 0 12px !important;
+}
+html.v2p-mobile #Main .cell[id^="r"] > table { width: 100%; table-layout: fixed; }
+html.v2p-mobile #Main .cell[id^="r"] > table > tbody > tr > td:first-child {
+  width: 28px !important;
+  min-width: 28px;
+  vertical-align: top;
+}
+html.v2p-mobile #Main .cell[id^="r"] > table > tbody > tr > td:nth-child(2) { width: 10px !important; }
+html.v2p-mobile #Main .cell[id^="r"] > table > tbody > tr > td:nth-child(3) { width: auto; min-width: 0; }
+html.v2p-mobile #Main .cell[id^="r"] > table > tbody > tr > td:first-child .avatar {
+  display: block;
+  width: 28px !important;
+  height: 28px !important;
+  max-width: 28px !important;
+  max-height: 28px !important;
+  margin: 0;
+}
+html.v2p-mobile #Main .reply_content { overflow-wrap: anywhere; }
+html.v2p-mobile #Main .cell[id^="r"] .cell[id^="r"] { margin-left: 4px; }
+html.v2p-mobile #Main .cell[id^="r"] .cell[id^="r"] .cell[id^="r"] { margin-left: 0; }
+html.v2p-mobile #Main .header > .fr { margin-left: 12px; }
+
 html.v2p-hide-reply-floor #Main .cell[id^="r"] .no {
 display: none !important;
 }
@@ -3959,6 +4079,7 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
   function initializePage() {
     if (pageInitialized) return;
     pageInitialized = true;
+    initMobileLayout();
     markPageStructure(document);
     stopBootObserver();
     applyTheme();
@@ -4208,9 +4329,10 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
       bootSyncScheduled = false;
       if (!bootObserver) return;
 
+      initMobileLayout();
       applyThemeClasses(effectiveMode);
       markPageStructure(document);
-      const topTools = document.querySelector("#Top .tools");
+      const topTools = document.querySelector("#Top .tools, #site-header");
       if (topTools) ensureToggle();
       const tabsReady = attemptEarlyNodeNavigation();
       if (
@@ -4287,8 +4409,30 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
     return matches;
   }
 
+  function initMobileLayout() {
+    const header = document.getElementById("site-header");
+    if (!header) return false;
+    docEl.classList.add("v2p-mobile");
+    // The server's mobile template has no #Main. Keep its original .content
+    // element and children intact, and give shared reply features a stable root.
+    if (!document.getElementById("Main")) {
+      const main = document.querySelector("#Wrapper > .content");
+      if (main && !main.id) main.id = "Main";
+    }
+    const menu = header.querySelector("#menu-entry");
+    if (menu && menu.querySelector("img.menu-guest") && !menu.querySelector(".v2p-mobile-menu-icon")) {
+      menu.insertAdjacentHTML("beforeend", '<svg class="v2p-mobile-menu-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>');
+    }
+    if (menu && !menu.hasAttribute("aria-label")) menu.setAttribute("aria-label", "打开导航菜单");
+    return true;
+  }
+
   function markPageStructure(root) {
     findStructureMatches(root, STRUCTURE_MARKER_SELECTOR).forEach((element) => {
+      if (element.id === "site-header" || element.matches("#Wrapper > .content")) {
+        initMobileLayout();
+        return;
+      }
       if (element.id === "Singleton") {
         const wrapper = element.closest("#Wrapper");
         if (wrapper) wrapper.classList.add("v2p-has-singleton");
@@ -4743,7 +4887,7 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
       logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>',
     };
 
-    const links = Array.from(document.querySelectorAll("#Top .tools > a.top"));
+    const links = Array.from(document.querySelectorAll("#Top .tools > a.top, #menu-body .cell > a.top"));
     let changed = false;
 
     links.forEach((link) => {
@@ -7605,7 +7749,7 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
   }
 
   function ensureToggle() {
-    const topTools = document.querySelector("#Top .tools");
+    const topTools = document.querySelector("#Top .tools, #site-header");
     let toggle = document.getElementById(TOGGLE_ID);
 
     if (!toggle) {
@@ -7619,7 +7763,8 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
 
     if (topTools) {
       if (toggle.className !== "top") toggle.className = "top";
-      if (toggle.parentNode !== topTools) topTools.appendChild(toggle);
+      const mobileMenu = topTools.id === "site-header" ? topTools.querySelector("#site-header-menu") : null;
+      if (toggle.parentNode !== topTools) topTools.insertBefore(toggle, mobileMenu);
     } else if (document.body && !toggle.parentNode) {
       toggle.className = "v2p-lite-floating";
       document.body.appendChild(toggle);

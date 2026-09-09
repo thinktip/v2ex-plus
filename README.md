@@ -1,8 +1,14 @@
 # V2EX Plus
 
-为 V2EX 提供主题、布局、导航和阅读增强。当前版本 **1.13.41**，提供 **单文件油猴脚本**、**Chrome 扩展**和 **Safari Web Extension**。
+为 V2EX 提供主题、布局、导航和阅读增强。当前版本 **1.13.42**，提供 **单文件油猴脚本**、**Chrome 扩展**和 **Safari Web Extension**。
 
 [安装油猴版](https://raw.githubusercontent.com/thinktip/v2ex-plus/main/userscript/v2ex-plus.user.js) · [下载 Chrome 扩展](https://github.com/thinktip/v2ex-plus/releases/latest) · [Safari 安装说明](#安装-safari-版) · [查看 Chrome 源码](chrome/)
+
+## 1.13.42 更新
+
+- 补齐 V2EX 移动模板适配：顶部 Logo、搜索、主题切换和原生导航菜单共用移动布局。
+- 修复移动端回复头像超出表格列宽、遮挡文字的问题，恢复长回复折叠与嵌套回复的共同内容根节点。
+- 适配窄屏、横屏与深色主题；移动端以网站实际模板识别，不仅依赖屏幕宽度。
 
 ## 1.13.41 更新
 
@@ -39,6 +45,8 @@
 2. Chrome 用户在扩展详情中启用“允许用户脚本”，或按 [Tampermonkey 官方说明](https://www.tampermonkey.net/faq.php?locale=zh&q=Q209)启用开发者模式。
 3. 点击[安装单文件油猴脚本](https://raw.githubusercontent.com/thinktip/v2ex-plus/main/userscript/v2ex-plus.user.js)，在 Tampermonkey 页面确认安装。
 4. 打开或刷新 [V2EX](https://www.v2ex.com/)。若链接只显示源码，可在油猴管理面板新建脚本，将完整内容粘贴进去并保存。
+
+iOS Safari 用户需在所用脚本管理器中启用本脚本，并允许访问 V2EX。更新后重新载入页面；若仍显示旧布局，请确认旧双脚本与其他 V2EX 美化扩展已停用。移动端采用紧凑顶部与原生下拉菜单，沿用桌面端主题配色。
 
 油猴版**没有扩展设置面板，相关设置固定使用当前 Chrome 版的默认参数**。页面内的主题切换和导航操作仍可使用，主题初始为跟随系统。
 
