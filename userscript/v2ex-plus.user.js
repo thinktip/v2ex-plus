@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Plus
 // @namespace    https://v2ex.com/
-// @version      1.13.47
+// @version      1.13.48
 // @description  Lightweight V2EX layout, theme, navigation, reading, reply, and image tools.
 // @match        https://v2ex.com/*
 // @match        https://*.v2ex.com/*
@@ -3385,6 +3385,11 @@ html.v2p-mobile #reply-box > .cell :is(div,span,a):has(> img.avatar):not(:has(fo
 html.v2p-mobile #reply-box > .cell :is(div,span):has(> a > img.avatar):not(:has(form,textarea,button,input)),
 html.v2p-mobile #reply-box > .cell img.avatar,
 html.v2p-mobile #reply-box > .cell a[href^="/member/"]:not(form a) { display: none !important; }
+
+/* Let the reply count use only its intrinsic width instead of native 70px. */
+html.v2p-mobile #Main .cell.item tr > td:last-child { width: 1% !important; white-space: nowrap; padding-left: 8px; }
+html.v2p-mobile #Main > .box,
+html.v2p-mobile #Main #reply-box.reply-box-sticky { padding-left: 13px !important; padding-right: 13px !important; }
 
 html.v2p-hide-reply-floor #Main .cell[id^="r"] .no {
 display: none !important;

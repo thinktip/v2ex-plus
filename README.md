@@ -1,8 +1,13 @@
 # V2EX Plus
 
-为 V2EX 提供主题、布局、导航和阅读增强。当前版本 **1.13.47**，提供 **单文件油猴脚本**、**Chrome 扩展**和 **Safari Web Extension**。
+为 V2EX 提供主题、布局、导航和阅读增强。当前版本 **1.13.48**，提供 **单文件油猴脚本**、**Chrome 扩展**和 **Safari Web Extension**。
 
 [安装油猴版](https://raw.githubusercontent.com/thinktip/v2ex-plus/main/userscript/v2ex-plus.user.js) · [下载 Chrome 扩展](https://github.com/thinktip/v2ex-plus/releases/latest) · [Safari 安装说明](#安装-safari-版) · [查看 Chrome 源码](chrome/)
+
+## 1.13.48 更新
+
+- 移动主题列表回复数量列按实际数字宽度占位，取消原生70px预留，与标题间距8px。
+- 移动卡片左右内边距各增加5px至13px。
 
 ## 1.13.47 更新
 
