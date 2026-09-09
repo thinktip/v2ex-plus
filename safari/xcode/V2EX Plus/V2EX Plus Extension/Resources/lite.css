@@ -1,4 +1,4 @@
-/* Generated from userscript/v2ex-plus.user.js 1.13.43. Do not edit directly. */
+/* Generated from userscript/v2ex-plus.user.js 1.13.44. Do not edit directly. */
 
 html.v2p-lite-prepaint,
 html.v2p-lite-prepaint body {
@@ -3078,6 +3078,36 @@ html.v2p-mobile #Main #Tabs > a { flex: 0 0 auto; }
 html.v2p-mobile #Main #Tabs::-webkit-scrollbar { display: none; }
 html.v2p-mobile #Main .box:has(#Tabs) > :first-child { border-top-left-radius: inherit; border-top-right-radius: inherit; }
 
+
+/* Mobile density: override native menu padding and desktop reading spacing. */
+html.v2p-mobile #site-header { background: transparent !important; border: 0 !important; box-shadow: none !important; }
+html.v2p-mobile #site-header #site-header-menu #menu-body { width: min(220px, calc(100vw - 24px)); padding: 4px; max-height: calc(100dvh - 76px); overflow-y: auto; }
+html.v2p-mobile #site-header #site-header-menu #menu-body .cell { padding: 0; margin: 0; border: 0; }
+html.v2p-mobile #site-header #site-header-menu #menu-body .cell + .cell { border-top: 1px solid var(--box-border-color); }
+html.v2p-mobile #site-header #site-header-menu #menu-body a.top:not([hidden]) {
+  box-sizing: border-box; min-height: 34px; height: auto; line-height: 20px;
+  padding: 7px 10px; margin: 0; gap: 8px; border-radius: 6px;
+}
+html.v2p-mobile #Wrapper > #Main.content { padding: 0 8px !important; }
+html.v2p-mobile #Main > .box { padding: 0 8px !important; }
+html.v2p-mobile #Main #Tabs { padding: 5px 0 !important; gap: 3px; }
+html.v2p-mobile #Main #Tabs :is(.tab,.tab_current) { min-height: 32px !important; padding: 4px 8px !important; margin: 0; font-size: 12px; line-height: 20px; }
+html.v2p-mobile #Main .cell.item:has(.item_title > .topic-link) { padding: 8px 0 !important; }
+html.v2p-mobile #Main .cell.item tr > td:first-child { width: 30px !important; }
+html.v2p-mobile #Main .cell.item tr > td:nth-child(2) { width: 8px !important; }
+html.v2p-mobile #Main .cell.item .avatar { width: 30px !important; height: 30px !important; max-height: 30px !important; }
+html.v2p-mobile #Main .cell.item .item_title { margin: 3px 0 !important; }
+html.v2p-mobile #Main .cell.item :is(.item_title,.topic-link) { line-height: 1.4 !important; }
+html.v2p-mobile #Main .cell.item :is(.topic_info,.small) { line-height: 1.4; margin-top: 3px; }
+html.v2p-mobile #Main :is(a.node,.item_node) { font-size: 10px !important; line-height: 16px; padding: 0 5px !important; }
+html.v2p-mobile #Main :is(.topic_content,.reply_content) { line-height: 1.5 !important; }
+html.v2p-mobile #Main .topic_content p { margin: 0 0 10px; }
+html.v2p-mobile #Main #reply-box.reply-box-sticky { margin: 0; padding: 0 8px; bottom: 8px; }
+/* Only the composer identity is redundant; keep authors in actual replies. */
+html.v2p-mobile #Main #reply-box > .cell > a[href^="/member/"],
+html.v2p-mobile #Main #reply-box > .cell > .avatar,
+html.v2p-mobile #Main #reply-box > .cell > :is(.flex-one-row,.gray):has(a[href^="/member/"]):not(:has(form,textarea,button)),
+html.v2p-mobile #Main #reply-box > .cell.flex-one-row:has(a[href^="/member/"]):not(:has(form,textarea,button)) { display: none !important; }
 
 html.v2p-hide-reply-floor #Main .cell[id^="r"] .no {
 display: none !important;

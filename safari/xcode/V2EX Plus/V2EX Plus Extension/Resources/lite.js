@@ -1,4 +1,4 @@
-// Generated from userscript/v2ex-plus.user.js 1.13.43. Do not edit directly.
+// Generated from userscript/v2ex-plus.user.js 1.13.44. Do not edit directly.
 (function boot() {
   "use strict";
 
@@ -1123,6 +1123,10 @@
       notes: '<path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/>',
       planet: '<circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><line x1="2" x2="22" y1="12" y2="12"/>',
       settings: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+      image: '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8" cy="8" r="1"/><path d="m21 15-5-5L5 21"/>',
+      chat: '<path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5Z"/>',
+      language: '<path d="m5 8 6 6m-7 0 6-6 2-5H2m5-2v2m7 18 5-11 5 11m-8-4h6"/>',
+      book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 3H20v19H6.5A2.5 2.5 0 0 1 4 19.5v-14A2.5 2.5 0 0 1 6.5 3Z"/>',
       login: '<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M3 12h12m-4-4 4 4-4 4"/>',
       signup: '<circle cx="9" cy="7" r="4"/><path d="M2 21v-2a7 7 0 0 1 14 0v2m3-13v6m-3-3h6"/>',
       bell: '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9m-8 13h4"/>',
@@ -1151,7 +1155,13 @@
       else if (href.startsWith("/signup")) iconName = "signup";
       else if (href.startsWith("/notifications")) iconName = "bell";
       else if (href.startsWith("/my/")) iconName = "bookmark";
+      else if (href.startsWith("/images") || /图片库/.test(text)) iconName = "image";
+      else if (/^Chat$/.test(text) || href.startsWith("/chat")) iconName = "chat";
+      else if (/Dictionary/.test(text)) iconName = "book";
+      else if (/时间轴/.test(text) || href.startsWith("/timeline")) iconName = "chat";
+      else if (/语言选择/.test(text) || href.startsWith("/select/language")) iconName = "language";
       if (!iconName) return;
+      if (link.closest("#menu-body")) link.querySelectorAll("img.tool-icon").forEach((icon) => icon.remove());
       link.dataset.v2pLiteTopnavIcon = iconName;
       link.classList.add("v2p-lite-topnav-icon");
       link.insertAdjacentHTML("afterbegin", buildSvgIcon(iconPaths[iconName]));
