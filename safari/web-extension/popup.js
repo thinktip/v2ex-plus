@@ -213,9 +213,9 @@ async function saveSettings({ requestPermission = false } = {}) {
     validationMessage = "Client ID 格式无效";
   }
 
-  if (endpointCanBeSaved && imageHost === "r2" && requestPermission) {
+  if (endpointCanBeSaved && imageHost === "r2") {
     try {
-      await ensureEndpointPermission(endpoint);
+      await ensureEndpointPermission(endpoint, requestPermission);
     } catch (error) {
       endpointCanBeSaved = false;
       validationMessage = "无法获得上传地址权限";
@@ -224,8 +224,6 @@ async function saveSettings({ requestPermission = false } = {}) {
   }
 
   const values = {
-    [SETTINGS.imageHost]: imageHost,
-    [SETTINGS.r2Token]: token,
     [SETTINGS.deleteRemoteImage]: deleteRemoteImage.checked,
     [SETTINGS.compressImages]: compressImages.checked,
     [SETTINGS.compressionQuality]: Number(compressionQuality.value),
@@ -244,12 +242,18 @@ async function saveSettings({ requestPermission = false } = {}) {
     [SETTINGS.nodeIcons]: nodeIcons.checked,
     [SETTINGS.showAds]: showAds.checked,
   };
-  if (endpointCanBeSaved) values[SETTINGS.r2Endpoint] = endpoint;
-  if (clientIdCanBeSaved) values[SETTINGS.imgurClientId] = clientId;
+  const imageConfigValid = imageHost === "r2" ? endpointCanBeSaved : clientIdCanBeSaved;
+  if (imageConfigValid) {
+    values[SETTINGS.imageHost] = imageHost;
+    if (imageHost === "r2") {
+      values[SETTINGS.r2Endpoint] = endpoint;
+      values[SETTINGS.r2Token] = token;
+    } else values[SETTINGS.imgurClientId] = clientId;
+  }
+  if (!imageConfigValid && !validationMessage) validationMessage = "图床配置未保存，请检查地址和凭据";
 
   try {
     await storageSet(values);
-    await notifyActiveTabOfDisplaySettings(values);
     showStatus(validationMessage || "已自动保存", Boolean(validationMessage));
     return !validationMessage;
   } catch (error) {
@@ -257,76 +261,6 @@ async function saveSettings({ requestPermission = false } = {}) {
     console.error(error);
     return false;
   }
-}
-
-async function notifyActiveTabOfDisplaySettings(values) {
-  const settings = {
-    topicRowSpacing: values[SETTINGS.topicRowSpacing],
-    replyLineHeight: values[SETTINGS.replyLineHeight],
-    contentCardRadius: values[SETTINGS.contentCardRadius],
-    showReplyFloor: values[SETTINGS.showReplyFloor],
-    showUploadPreview: values[SETTINGS.showUploadPreview],
-    nestedReplies: values[SETTINGS.nestedReplies],
-    emojiPicker: values[SETTINGS.emojiPicker],
-    fixedSidebarTools: values[SETTINGS.fixedSidebarTools],
-    expandReplyToolbar: values[SETTINGS.expandReplyToolbar],
-    nodeIcons: values[SETTINGS.nodeIcons],
-    showAds: values[SETTINGS.showAds],
-  };
-  try {
-    const tabs = await tabsQuery({ active: true, currentWindow: true });
-    const tabId = tabs[0]?.id;
-    if (typeof tabId === "number") {
-      let directUpdateFailed = null;
-      try {
-        await scriptingExecuteScript({
-          target: { tabId },
-          func: applyDisplaySettingsInPage,
-          args: [settings],
-        });
-      } catch (error) {
-        directUpdateFailed = error;
-      }
-      try {
-        await tabsSendMessage(tabId, { type: DISPLAY_SETTINGS_UPDATED, settings });
-      } catch (error) {
-        if (directUpdateFailed) throw directUpdateFailed;
-      }
-    }
-  } catch (error) {
-    // The active tab may not be a V2EX page; saving remains successful.
-    console.debug("V2EX Plus could not update the active tab:", error);
-  }
-}
-
-function applyDisplaySettingsInPage(settings) {
-  const root = document.documentElement;
-  if (!root) return;
-  const topicRowPadding = {
-    compact: "8px",
-    standard: "12px",
-    relaxed: "16px",
-  }[settings.topicRowSpacing] || "12px";
-  const lineHeight = String(settings.replyLineHeight ?? "");
-  const radius = String(settings.contentCardRadius ?? "");
-
-  root.style.setProperty("--v2p-topic-row-padding", topicRowPadding);
-  root.style.setProperty(
-    "--v2p-reply-line-height",
-    ["1.4", "1.6", "1.8", "2"].includes(lineHeight) ? lineHeight : "1.6",
-  );
-  root.style.setProperty(
-    "--v2p-box-radius",
-    (["0", "6", "10", "14", "18"].includes(radius) ? radius : "18") + "px",
-  );
-  root.classList.toggle("v2p-hide-reply-floor", !settings.showReplyFloor);
-  root.classList.toggle("v2p-hide-upload-preview", !settings.showUploadPreview);
-  root.classList.toggle("v2p-disable-nested-replies", !settings.nestedReplies);
-  root.classList.toggle("v2p-hide-emoji-picker", !settings.emojiPicker);
-  root.classList.toggle("v2p-unpin-topic-card", !settings.fixedSidebarTools);
-  root.classList.toggle("v2p-expand-reply-toolbar", Boolean(settings.expandReplyToolbar));
-  root.classList.toggle("v2p-hide-node-icons", !settings.nodeIcons);
-  root.classList.toggle("v2p-show-ads", Boolean(settings.showAds));
 }
 
 async function restoreDefaultNodeOrder() {
@@ -385,12 +319,13 @@ function normalizeContentCardRadius(value) {
   return ["0", "6", "10", "14", "18"].includes(normalized) ? normalized : "18";
 }
 
-async function ensureEndpointPermission(endpoint) {
+async function ensureEndpointPermission(endpoint, requestPermission = false) {
   const url = new URL(endpoint);
   if (url.origin === new URL(DEFAULT_R2_ENDPOINT).origin) return;
 
   const permission = { origins: [`${url.origin}/*`] };
   if (await permissionsContains(permission)) return;
+  if (!requestPermission) throw new Error("The upload endpoint has not been authorized.");
   const granted = await permissionsRequest(permission);
   if (!granted) throw new Error("The upload endpoint permission was not granted.");
 }

@@ -1,0 +1,138 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+import test from 'node:test';
+const source = fs.readFileSync(new URL('../userscript/v2ex-plus.user.js', import.meta.url), 'utf8');
+const popup = fs.readFileSync(new URL('../chrome/popup.js', import.meta.url), 'utf8');
+function section(text, start, end) {
+  const a = text.indexOf(start), b = text.indexOf(end, a);
+  assert.ok(a >= 0 && b > a, start);
+  return text.slice(a, b);
+}
+function deferred() { let resolve; const promise = new Promise(r => { resolve = r; }); return { promise, resolve }; }
+function previewHarness() {
+  const requests = [];
+  const context = vm.createContext({
+    AbortController, transformEmojiTokens: x => x, FormData: class { append() {} },
+    requestWithTimeout: (url, options) => { const request = { ...deferred(), options }; requests.push(request); return request.promise; },
+    renderImageLinksInPreview() {}, replaceEmojiImagesWithHD() {}, console,
+  });
+  vm.runInContext(section(source, '  async function renderReplyPreview(', '  function renderImageLinksInPreview('), context);
+  let id = 0;
+  const state = { lastText: null, nextRequestId: () => ++id, currentRequestId: () => id };
+  const preview = { innerHTML: '', dataset: {} };
+  return { requests, state, preview, run: value => context.renderReplyPreview({ value }, preview, state) };
+}
+test('clearing a preview cancels its request and ignores a late response', async () => {
+  const h = previewHarness(); const old = h.run('A');
+  await h.run('');
+  assert.equal(h.requests[0].options.signal.aborted, true);
+  h.requests[0].resolve({ ok: true, text: async () => '<p>A</p>' }); await old;
+  assert.match(h.preview.innerHTML, /没有可预览/);
+});
+test('A -> empty -> A fetches and displays A again', async () => {
+  const h = previewHarness(); const first = h.run('A');
+  h.requests[0].resolve({ ok: true, text: async () => '<p>A</p>' }); await first;
+  await h.run(''); const again = h.run('A');
+  assert.equal(h.requests.length, 2);
+  h.requests[1].resolve({ ok: true, text: async () => '<p>A</p>' }); await again;
+  assert.equal(h.preview.innerHTML, '<p>A</p>');
+});
+test('newest preview wins when requests complete out of order', async () => {
+  const h = previewHarness(); const a = h.run('A'), b = h.run('B');
+  h.requests[1].resolve({ ok: true, text: async () => '<p>B</p>' }); await b;
+  h.requests[0].resolve({ ok: true, text: async () => '<p>A</p>' }); await a;
+  assert.equal(h.preview.innerHTML, '<p>B</p>');
+});
+test('reply lookup recognizes folded content without taking a nested reply', () => {
+  const ctx = vm.createContext({});
+  vm.runInContext(section(source, '  function getContentCell(', '  function hideSingleMemberRef('), ctx);
+  const content = { classList: { contains: name => name === 'reply_content' } };
+  const td = { children: [content] }, table = { tBodies: [{ rows: [{ cells: [{}, {}, td] }] }] };
+  assert.equal(ctx.getReplyContentEl(table), content);
+  td.children = [{ classList: { contains: name => name === 'v2p-lite-long-reply' }, children: [content] }];
+  assert.equal(ctx.getReplyContentEl(table), content);
+  td.children = [{ classList: { contains: () => false }, children: [content] }];
+  assert.equal(ctx.getReplyContentEl(table), null);
+});
+test('direct editor and extension bridge both insert raw image URLs', () => {
+  const url = 'https://example.test/image.png'; let text = 'pending'; let handler;
+  const doc = { getValue: () => text, setValue: value => { text = value; }, lastLine: () => 0, setCursor() {}, getLine: () => text };
+  const editor = { getDoc: () => doc, getValue: () => text, setValue: value => { text = value; } };
+  const ctx = vm.createContext({});
+  vm.runInContext(section(source, '  function replaceTextInEditor(', '  function initTopicSidebarTools('), ctx);
+  ctx.replaceTextInEditor(editor, 'pending', url); assert.equal(text, url);
+  text = 'pending';
+  const window = { editor, location: { origin: 'https://www.v2ex.com' }, addEventListener: (type, fn) => { handler = fn; } };
+  vm.runInNewContext(fs.readFileSync(new URL('../chrome/page-bridge.js', import.meta.url), 'utf8'), { window, document: { documentElement: { dataset: {} } } });
+  handler({ source: window, origin: window.location.origin, data: { source: 'v2p-content', type: 'v2p:write-editor', action: 'replace', find: 'pending', replace: url } });
+  assert.equal(text, url);
+});
+function saveHarness(allowed) {
+  let saved;
+  const code = section(popup, 'async function saveSettings(', 'async function restoreDefaultNodeOrder(');
+  const context = { console: { error() {} }, SETTINGS: new Proxy({}, { get: (_, name) => name }), selectedProvider: () => 'r2',
+    isHttpsUrl: () => true, ensureEndpointPermission: async () => { if (!allowed) throw Error('denied'); },
+    document: { querySelector: () => ({ hidden: false }) }, selectedTopicRowSpacing: () => 'standard', normalizeReplyLineHeight: x => x,
+    normalizeContentCardRadius: x => x, storageSet: async values => { saved = values; }, showStatus() {} };
+  for (const match of code.matchAll(/\b(\w+)\.(?:value|checked|removeAttribute|setAttribute)/g)) context[match[1]] = { value: '18', checked: true, removeAttribute() {}, setAttribute() {} };
+  context.r2Endpoint.value = 'https://new.example/upload'; context.r2Token.value = 'TEST_TOKEN'; context.imgurClientId.value = '';
+  vm.createContext(context); vm.runInContext(code, context);
+  return { run: options => context.saveSettings(options), saved: () => saved };
+}
+test('denied R2 endpoint never saves a new token or provider, including later autosaves', async () => {
+  const h = saveHarness(false);
+  for (const requestPermission of [true, false]) {
+    assert.equal(await h.run({ requestPermission }), false);
+    for (const key of ['r2Endpoint', 'r2Token', 'imageHost']) assert.equal(key in h.saved(), false);
+    assert.equal(h.saved().topicRowSpacing, 'standard');
+  }
+});
+test('authorized R2 endpoint and token are committed in the same write', async () => {
+  const h = saveHarness(true); assert.equal(await h.run({ requestPermission: true }), true);
+  assert.equal(h.saved().r2Endpoint, 'https://new.example/upload');
+  assert.equal(h.saved().r2Token, 'TEST_TOKEN'); assert.equal(h.saved().imageHost, 'r2');
+});
+function settingsHarness(get) {
+  const context = vm.createContext({ isExtensionRuntime: () => true, chrome: { runtime: {}, storage: { local: { get } } }, console });
+  vm.runInContext('let settingsSnapshot = null, settingsLoad = null, settingsRevision = 0;\n' + section(source, '  async function loadSettingsSnapshot(', '  async function readR2UploadToken('), context);
+  return context;
+}
+test('parallel and subsequent settings reads share one bulk storage request', async () => {
+  let reads = 0;
+  const ctx = settingsHarness((keys, cb) => { reads++; assert.equal(keys, null); queueMicrotask(() => cb({ floor: false, spacing: 'compact' })); });
+  const result = await Promise.all(Array.from({ length: 22 }, () => ctx.readUploadSetting('spacing', 'standard')));
+  assert.ok(result.every(x => x === 'compact')); assert.equal(reads, 1);
+  assert.equal(await ctx.readBooleanSetting('floor', true), false); assert.equal(reads, 1);
+});
+test('an invalidated in-flight settings read cannot restore stale values', async () => {
+  const callbacks = []; const ctx = settingsHarness((keys, cb) => callbacks.push(cb));
+  const old = ctx.readUploadSetting('spacing', 'standard');
+  vm.runInContext('settingsRevision++; settingsLoad = null;', ctx);
+  const fresh = ctx.readUploadSetting('spacing', 'standard');
+  callbacks[1]({ spacing: 'relaxed' }); await fresh;
+  callbacks[0]({ spacing: 'compact' });
+  assert.equal(await old, 'relaxed');
+});
+function requestHarness(fetch) {
+  const ctx = vm.createContext({ fetch, AbortController, DOMException, setTimeout, clearTimeout });
+  vm.runInContext(section(source, '  async function requestWithTimeout(', '  async function getV2exOnce('), ctx);
+  return ctx.requestWithTimeout;
+}
+test('deadline covers a stalled response body and aborts it', async () => {
+  let aborted = false;
+  const request = requestHarness(async (url, { signal }) => ({ ok: true, status: 200,
+    text: () => new Promise((resolve, reject) => signal.addEventListener('abort', () => { aborted = true; reject(signal.reason); })) }));
+  await assert.rejects(request('/test', {}, 10), error => error.name === 'TimeoutError'); assert.equal(aborted, true);
+});
+test('caller cancellation propagates to the request', async () => {
+  const request = requestHarness((url, { signal }) => new Promise((resolve, reject) => signal.addEventListener('abort', () => reject(signal.reason))));
+  const controller = new AbortController(); const pending = request('/test', { signal: controller.signal }); controller.abort();
+  await assert.rejects(pending, error => error.name === 'AbortError');
+});
+test('completed response clears its deadline and preserves JSON parsing', async () => {
+  let signal;
+  const request = requestHarness(async (url, options) => { signal = options.signal; return { ok: true, status: 200, text: async () => '{"success":true}' }; });
+  const response = await request('/test', {}, 10); assert.equal((await response.json()).success, true);
+  await new Promise(resolve => setTimeout(resolve, 20)); assert.equal(signal.aborted, false);
+});

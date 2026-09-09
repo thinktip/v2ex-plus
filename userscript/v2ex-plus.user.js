@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Plus
 // @namespace    https://v2ex.com/
-// @version      1.13.40
+// @version      1.13.41
 // @description  Lightweight V2EX layout, theme, navigation, reading, reply, and image tools.
 // @match        https://v2ex.com/*
 // @match        https://*.v2ex.com/*
@@ -3890,6 +3890,11 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
 }
 `;
 
+  let settingsSnapshot = null;
+  let settingsLoad = null;
+  let settingsRevision = 0;
+  let appliedDisplaySettings = {};
+
   let bootObserver = null;
   let bootSyncScheduled = false;
   let pageInitialized = false;
@@ -3920,7 +3925,6 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
   injectStyle(STYLE_ID, THEME_STYLE);
   void applyDisplaySettings();
   bindDisplaySettingChanges();
-  bindDisplaySettingsMessages();
   try {
     applyTheme();
     bindEvents();
@@ -4061,6 +4065,23 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
     return null;
   }
 
+  async function requestWithTimeout(url, options = {}, timeoutMs = 15000) {
+    const controller = new AbortController();
+    const abort = () => controller.abort(options.signal.reason);
+    if (options.signal?.aborted) abort();
+    else options.signal?.addEventListener("abort", abort, { once: true });
+    const timer = setTimeout(() => controller.abort(new DOMException("请求超时，请稍后重试", "TimeoutError")), timeoutMs);
+    try {
+      const response = await fetch(url, { ...options, signal: controller.signal });
+      const body = await response.text();
+      return { ok: response.ok, status: response.status,
+        text: async () => body, json: async () => JSON.parse(body) };
+    } finally {
+      clearTimeout(timer);
+      options.signal?.removeEventListener("abort", abort);
+    }
+  }
+
   async function getV2exOnce() {
     if (!nativeToggleOnceUsed) {
       const nativeToggle = document.querySelector(NATIVE_TOGGLE_SELECTOR);
@@ -4078,7 +4099,7 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
       }
     }
 
-    const response = await fetch("/poll_once", {
+    const response = await requestWithTimeout("/poll_once", {
       method: "GET",
       credentials: "include",
       cache: "no-store",
@@ -4119,7 +4140,7 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
         if (current === null || current === target) return;
 
         const once = await getV2exOnce();
-        const response = await fetch("/settings/night/toggle?once=" + encodeURIComponent(once), {
+        const response = await requestWithTimeout("/settings/night/toggle?once=" + encodeURIComponent(once), {
           method: "GET",
           credentials: "include",
           cache: "no-store",
@@ -5113,6 +5134,7 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
     const preview = document.createElement("div");
     let lastPreviewText = null;
     let previewRequestId = 0;
+    let previewController = null;
 
     tabs.className = "v2p-lite-reply-tabs";
     tabs.setAttribute("role", "tablist");
@@ -5126,6 +5148,8 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
     wrapper.insertAdjacentElement("afterend", preview);
 
     const showEdit = () => {
+      previewRequestId += 1;
+      previewController?.abort();
       editTab.classList.add("is-active");
       previewTab.classList.remove("is-active");
       editTab.setAttribute("aria-selected", "true");
@@ -5141,6 +5165,8 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
       wrapper.hidden = true;
       preview.hidden = false;
       void renderReplyPreview(textarea, preview, {
+        get controller() { return previewController; },
+        set controller(value) { previewController = value; },
         get lastText() {
           return lastPreviewText;
         },
@@ -5174,22 +5200,29 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
 
   async function renderReplyPreview(textarea, preview, state) {
     const text = transformEmojiTokens(textarea.value).trim();
+    const requestId = state.nextRequestId();
+    state.controller?.abort();
+    state.controller = null;
     if (!text) {
+      state.lastText = null;
+      preview.dataset.v2pLiteLoaded = "0";
       preview.innerHTML = '<span class="v2p-lite-reply-preview-state">没有可预览的内容</span>';
       return;
     }
     if (text === state.lastText && preview.dataset.v2pLiteLoaded === "1") return;
 
-    const requestId = state.nextRequestId();
+    const controller = new AbortController();
+    state.controller = controller;
     preview.dataset.v2pLiteLoaded = "0";
     preview.innerHTML = '<span class="v2p-lite-reply-preview-state">正在加载预览...</span>';
     try {
       const formData = new FormData();
       formData.append("text", text);
-      const response = await fetch("/preview/default", {
+      const response = await requestWithTimeout("/preview/default", {
         method: "POST",
         body: formData,
         credentials: "include",
+        signal: controller.signal,
       });
       if (!response.ok) throw new Error("Reply preview failed with HTTP " + response.status);
 
@@ -5894,15 +5927,16 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
   }
 
   async function uploadImage(file) {
-    const imageHost = await readUploadSetting(IMAGE_HOST_KEY, "imgur");
+    const settings = await loadSettingsSnapshot();
+    const imageHost = settings[IMAGE_HOST_KEY] || "imgur";
     if (imageHost === "r2") {
-      return { ...(await uploadImageToR2(file)), provider: "Cloudflare R2", imageHost: "r2" };
+      return { ...(await uploadImageToR2(file, settings)), provider: "Cloudflare R2", imageHost: "r2" };
     }
-    return { ...(await uploadImageToImgur(file)), provider: "Imgur", imageHost: "imgur" };
+    return { ...(await uploadImageToImgur(file, settings)), provider: "Imgur", imageHost: "imgur" };
   }
 
-  async function uploadImageToR2(file) {
-    let token = await readR2UploadToken();
+  async function uploadImageToR2(file, settings) {
+    let token = String(settings[R2_UPLOAD_TOKEN_KEY] || "").trim();
     if (!token) {
       token = isExtensionRuntime()
         ? ""
@@ -5918,17 +5952,17 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
       await writeR2UploadToken(token);
     }
 
-    const endpoint = await readUploadSetting(R2_UPLOAD_ENDPOINT_KEY, DEFAULT_R2_UPLOAD_ENDPOINT);
+    const endpoint = String(settings[R2_UPLOAD_ENDPOINT_KEY] || DEFAULT_R2_UPLOAD_ENDPOINT).trim();
 
     const formData = new FormData();
     formData.append("image", file);
     let response;
     try {
-      response = await fetch(endpoint, {
+      response = await requestWithTimeout(endpoint, {
         method: "POST",
         headers: { Authorization: "Bearer " + token },
         body: formData,
-      });
+      }, 60000);
     } catch (error) {
       throw createImageUploadError(
         "R2 upload network error: " + (error && error.message ? error.message : error),
@@ -5966,8 +6000,8 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
     throw createImageUploadError("R2 upload failed: " + apiMessage, userMessage);
   }
 
-  async function uploadImageToImgur(file) {
-    const clientId = await readUploadSetting(IMGUR_CLIENT_ID_KEY, "");
+  async function uploadImageToImgur(file, settings) {
+    const clientId = String(settings[IMGUR_CLIENT_ID_KEY] || "").trim();
     if (!clientId) {
       throw createImageUploadError(
         "Imgur Client ID was not provided",
@@ -5981,11 +6015,11 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
     formData.append("image", file);
     let response;
     try {
-      response = await fetch("https://api.imgur.com/3/upload", {
+      response = await requestWithTimeout("https://api.imgur.com/3/upload", {
         method: "POST",
         headers: { Authorization: "Client-ID " + clientId },
         body: formData,
-      });
+      }, 60000);
     } catch (error) {
       throw createImageUploadError(
         "Imgur upload network error: " + (error && error.message ? error.message : error),
@@ -6036,7 +6070,7 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
     deleteUrl.searchParams.set("key", uploadResult.key);
     let response;
     try {
-      response = await fetch(deleteUrl, {
+      response = await requestWithTimeout(deleteUrl, {
         method: "DELETE",
         headers: { Authorization: "Bearer " + token },
       });
@@ -6063,7 +6097,7 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
     const clientId = await readUploadSetting(IMGUR_CLIENT_ID_KEY, "");
     let response;
     try {
-      response = await fetch("https://api.imgur.com/3/image/" + encodeURIComponent(uploadResult.deleteHash), {
+      response = await requestWithTimeout("https://api.imgur.com/3/image/" + encodeURIComponent(uploadResult.deleteHash), {
         method: "DELETE",
         headers: { Authorization: "Client-ID " + clientId },
       });
@@ -6091,6 +6125,7 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
   }
 
   async function applyDisplaySettings() {
+    const revision = settingsRevision;
     const [
       topicRowSpacing,
       replyLineHeight,
@@ -6117,6 +6152,7 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
       readBooleanSetting(SHOW_ADS_KEY, false),
     ]);
 
+    if (revision !== settingsRevision) return applyDisplaySettings();
     applyDisplaySettingValues({
       topicRowSpacing,
       replyLineHeight,
@@ -6177,18 +6213,14 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
       defaultReplyToolbarExpanded = shouldExpandReplyToolbar;
       setTopicToolsExpanded(shouldExpandReplyToolbar);
     }
-    if (emojiPickerEnabled) initEmojiPicker();
-    if (nestedReplies === false) flattenNestedReplies();
-    else initNestedReplies();
-  }
-
-  function bindDisplaySettingsMessages() {
-    const runtime = globalThis.browser?.runtime || globalThis.chrome?.runtime;
-    if (!runtime?.onMessage?.addListener) return;
-    runtime.onMessage.addListener((message) => {
-      if (message?.type !== DISPLAY_SETTINGS_UPDATED || !message.settings) return;
-      applyDisplaySettingValues(message.settings);
-    });
+    if (pageInitialized) {
+      if (emojiPickerEnabled) initEmojiPicker();
+      if (appliedDisplaySettings.nestedReplies !== nestedReplies || (nestedReplies !== false && !nestedReplyApplied)) {
+        if (nestedReplies === false) flattenNestedReplies();
+        else initNestedReplies();
+      }
+      appliedDisplaySettings = { nestedReplies };
+    }
   }
 
   function bindDisplaySettingChanges() {
@@ -6208,52 +6240,57 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
       SHOW_ADS_KEY,
     ]);
     storage.onChanged.addListener((changes, areaName) => {
-      if (areaName !== "local" || !Object.keys(changes).some((key) => displayKeys.has(key))) return;
-      void applyDisplaySettings();
+      if (areaName !== "local") return;
+      settingsRevision += 1;
+      settingsLoad = null;
+      if (settingsSnapshot) {
+        settingsSnapshot = { ...settingsSnapshot };
+        for (const [key, change] of Object.entries(changes)) {
+          if (change.newValue === undefined) delete settingsSnapshot[key];
+          else settingsSnapshot[key] = change.newValue;
+        }
+      }
+      if (Object.keys(changes).some((key) => displayKeys.has(key))) void applyDisplaySettings();
     });
+  }
+
+  async function loadSettingsSnapshot() {
+    if (!isExtensionRuntime()) return {};
+    if (settingsSnapshot) return settingsSnapshot;
+    if (settingsLoad) return settingsLoad;
+    const revision = settingsRevision;
+    const load = (async () => {
+      let values;
+      if (globalThis.browser?.storage?.local) values = await browser.storage.local.get(null);
+      else values = await new Promise((resolve, reject) => {
+        chrome.storage.local.get(null, (result) => {
+          const error = chrome.runtime.lastError;
+          if (error) reject(new Error(error.message));
+          else resolve(result || {});
+        });
+      });
+      if (revision !== settingsRevision) return loadSettingsSnapshot();
+      settingsSnapshot = values;
+      return values;
+    })();
+    settingsLoad = load;
+    try { return await load; }
+    finally { if (settingsLoad === load) settingsLoad = null; }
   }
 
   async function readUploadSetting(key, fallback) {
     if (!isExtensionRuntime()) return fallback;
-    try {
-      if (typeof GM_getValue === "function") {
-        return String(GM_getValue(key, fallback) ?? fallback).trim();
-      }
-      if (globalThis.browser?.storage?.local) {
-        const result = await browser.storage.local.get(key);
-        return String(result[key] ?? fallback).trim();
-      }
-      if (globalThis.chrome?.storage?.local) {
-        return await new Promise((resolve) => {
-          chrome.storage.local.get(key, (result) => resolve(String(result?.[key] ?? fallback).trim()));
-        });
-      }
-    } catch (error) {
-      console.warn("V2EX Plus could not read an upload setting:", error);
-    }
-    return fallback;
+    try { return String((await loadSettingsSnapshot())[key] ?? fallback).trim(); }
+    catch (error) { console.warn("V2EX Plus could not read settings:", error); return fallback; }
   }
 
   async function readBooleanSetting(key, fallback) {
     if (!isExtensionRuntime()) return fallback;
     try {
-      let value;
-      if (typeof GM_getValue === "function") {
-        value = GM_getValue(key, fallback);
-      } else if (globalThis.browser?.storage?.local) {
-        const result = await browser.storage.local.get(key);
-        value = result[key];
-      } else if (globalThis.chrome?.storage?.local) {
-        value = await new Promise((resolve) => {
-          chrome.storage.local.get(key, (result) => resolve(result?.[key]));
-        });
-      }
+      const value = (await loadSettingsSnapshot())[key];
       if (value === undefined || value === null) return fallback;
       return value !== false && value !== 0 && value !== "false";
-    } catch (error) {
-      console.warn("V2EX Plus could not read a feature setting:", error);
-      return fallback;
-    }
+    } catch (error) { console.warn("V2EX Plus could not read settings:", error); return fallback; }
   }
 
   async function readR2UploadToken() {
@@ -6414,14 +6451,9 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
   function replaceTextInEditor(editor, find, replace) {
     const doc = editor.getDoc();
     const value = doc.getValue();
-    const replacement = replace ? formatUploadedImageLink(replace) : "";
+    const replacement = replace || "";
     doc.setValue(value.replace(find, replacement));
     if (typeof editor.focus === "function") editor.focus();
-  }
-
-  function formatUploadedImageLink(link) {
-    const syntax = document.querySelector('input[name="syntax"]:checked');
-    return syntax && syntax.value === "markdown" ? "![](" + link + ")" : link;
   }
 
   function initTopicSidebarTools() {
@@ -7311,7 +7343,7 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
     dailyCheckinRunning = true;
     updateCheckinIndicator("checking");
     try {
-      const dailyResponse = await fetch("/mission/daily", { credentials: "include" });
+      const dailyResponse = await requestWithTimeout("/mission/daily", { credentials: "include" });
       if (!dailyResponse.ok) throw new Error("Daily page returned HTTP " + dailyResponse.status);
       const dailyHtml = await dailyResponse.text();
       const dailyState = parseDailyCheckinPage(dailyHtml);
@@ -7325,11 +7357,11 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
       }
 
       if (!dailyState.redeemUrl) throw new Error("Daily redeem URL was not found");
-      const redeemResponse = await fetch(dailyState.redeemUrl, { credentials: "include" });
+      const redeemResponse = await requestWithTimeout(dailyState.redeemUrl, { credentials: "include" });
       if (!redeemResponse.ok) throw new Error("Daily redeem returned HTTP " + redeemResponse.status);
       const redeemHtml = await redeemResponse.text();
 
-      const verificationResponse = await fetch("/mission/daily", { credentials: "include" });
+      const verificationResponse = await requestWithTimeout("/mission/daily", { credentials: "include" });
       if (!verificationResponse.ok) {
         throw new Error("Daily verification returned HTTP " + verificationResponse.status);
       }
@@ -7343,15 +7375,16 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
         || verificationState.days;
       let message = days ? "连续签到 " + days + " 天" : "签到成功，今日奖励已领取";
       let coins = null;
+      markCheckedInToday(username, { days, coins });
       try {
-        const balanceResponse = await fetch("/balance", { credentials: "include" });
+        const balanceResponse = await requestWithTimeout("/balance", { credentials: "include" }, 5000);
         const balanceHtml = balanceResponse.ok ? await balanceResponse.text() : "";
         coins = balanceHtml.match(/每日登录奖励\s*(\d+)\s*铜币/)?.[1] || null;
         if (coins) message += "，本次 " + coins + " 铜币";
       } catch (error) {
         // The reward was already claimed; balance details are optional.
       }
-      markCheckedInToday(username, { days, coins });
+      if (coins) cacheCheckinState(username, "claimed", { days, coins });
       if (notify) showLiteToast(message);
     } catch (error) {
       updateCheckinIndicator("error");
@@ -7509,7 +7542,14 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
   function getReplyContentEl(table) {
     const contentCell = getContentCell(table);
     if (!contentCell) return null;
-    return Array.from(contentCell.children).find((child) => child.classList && child.classList.contains("reply_content")) || null;
+    for (const child of contentCell.children) {
+      if (child.classList?.contains("reply_content")) return child;
+      if (child.classList?.contains("v2p-lite-long-reply")) {
+        const content = Array.from(child.children).find((element) => element.classList?.contains("reply_content"));
+        if (content) return content;
+      }
+    }
+    return null;
   }
 
   function hideSingleMemberRef(contentEl, memberName) {

@@ -14,7 +14,7 @@ function extractRunDailyCheckin() {
   return source.slice(start, end).trim();
 }
 
-function createHarness({ alreadyCheckedIn = false, dailyState = "available", dailyResponseOk = true } = {}) {
+function createHarness({ alreadyCheckedIn = false, dailyState = "available", dailyResponseOk = true, balanceWait = null } = {}) {
   const requests = [];
   const marks = [];
   const cachedStates = [];
@@ -43,8 +43,9 @@ function createHarness({ alreadyCheckedIn = false, dailyState = "available", dai
     markCheckedInToday: (...args) => marks.push(args),
     showLiteToast: (message) => toasts.push(message),
     parseDailyCheckinPage: (html) => states[html],
-    fetch: async (url) => {
+    requestWithTimeout: async (url) => {
       requests.push(url);
+      if (url === "/balance" && balanceWait) return balanceWait;
       if (url === "/mission/daily" && !dailyResponseOk) {
         return { ok: false, status: 503, text: async () => "" };
       }
@@ -63,7 +64,7 @@ function createHarness({ alreadyCheckedIn = false, dailyState = "available", dai
         getCurrentUserName, alreadyCheckedInToday, readCachedCheckinState,
         acquireDailyCheckinLock, releaseDailyCheckinLock,
         updateCheckinIndicator, cacheCheckinState, markCheckedInToday,
-        showLiteToast, parseDailyCheckinPage, fetch, console
+        showLiteToast, parseDailyCheckinPage, requestWithTimeout, console
       } = deps;
       let dailyCheckinRunning = false;
       ${extractRunDailyCheckin()}
@@ -154,5 +155,19 @@ test("an automatic check-in failure is visible instead of silent", async () => {
   await harness.run({ notify: true });
 
   assert.deepEqual(harness.toasts, ["签到失败，请稍后重试"]);
+  assert.deepEqual(harness.releasedLocks, ["lock-1"]);
+});
+
+
+test("confirmed daily reward is recorded while optional balance request is still pending", async () => {
+  let finishBalance;
+  const balanceWait = new Promise(resolve => { finishBalance = resolve; });
+  const harness = createHarness({ balanceWait });
+  const pending = harness.run();
+  for (let i = 0; i < 20 && !harness.requests.includes("/balance"); i++) await Promise.resolve();
+  assert.ok(harness.requests.includes("/balance"));
+  assert.deepEqual(harness.marks, [["alice", { days: "8", coins: null }]]);
+  finishBalance({ ok: false, status: 503, text: async () => "" });
+  await pending;
   assert.deepEqual(harness.releasedLocks, ["lock-1"]);
 });

@@ -1,8 +1,17 @@
 # V2EX Plus
 
-为 V2EX 提供主题、布局、导航和阅读增强。当前版本 **1.13.40**，提供 **单文件油猴脚本**、**Chrome 扩展**和 **Safari Web Extension**。
+为 V2EX 提供主题、布局、导航和阅读增强。当前版本 **1.13.41**，提供 **单文件油猴脚本**、**Chrome 扩展**和 **Safari Web Extension**。
 
 [安装油猴版](https://raw.githubusercontent.com/thinktip/v2ex-plus/main/userscript/v2ex-plus.user.js) · [下载 Chrome 扩展](https://github.com/thinktip/v2ex-plus/releases/latest) · [Safari 安装说明](#安装-safari-版) · [查看 Chrome 源码](chrome/)
+
+## 1.13.41 更新
+
+- 图床地址、令牌和服务类型一起校验保存；授权失败不会混用旧地址和新令牌。
+- 修复回复预览清空、重复内容及请求乱序问题，离开预览时取消旧请求。
+- 修复长回复折叠后切换嵌套回复时的内容识别问题。
+- 图片统一插入原始 URL，由 V2EX 自身解析，不自动包装 Markdown。
+- 原生扩展批量读取并缓存设置，通过存储变化通知更新页面。
+- 普通请求最多等待 15 秒，图片上传 60 秒，可选余额查询 5 秒；超时不会自动重试上传或领取奖励。签到经服务器确认后立即记录成功。
 
 ## 从旧版迁移
 
@@ -50,7 +59,7 @@
 
 ## 安装 Chrome 扩展
 
-1. 在 [Releases](https://github.com/thinktip/v2ex-plus/releases/latest) 下载 `V2EX-Plus-Chrome-1.13.40.zip`，解压到一个固定目录。
+1. 在 [Releases](https://github.com/thinktip/v2ex-plus/releases/latest) 下载 `V2EX-Plus-Chrome-1.13.41.zip`，解压到一个固定目录。
 2. 打开 `chrome://extensions/`，开启右上角“开发者模式”。
 3. 点击“加载已解压的扩展程序”，选择解压后包含 `manifest.json` 的目录。
 4. 刷新 V2EX。点击浏览器工具栏的 V2EX Plus 图标即可修改设置。
@@ -63,7 +72,7 @@
 
 ## 安装 Safari 版
 
-[Releases](https://github.com/thinktip/v2ex-plus/releases/latest) 提供 `V2EX-Plus-Safari-Source-1.13.40.zip`，包含 Safari 扩展资源、Xcode 工程及构建所需的共同源码。**这是源码包，不是双击即可安装的已签名 App。**
+[Releases](https://github.com/thinktip/v2ex-plus/releases/latest) 提供 `V2EX-Plus-Safari-Source-1.13.41.zip`，包含 Safari 扩展资源、Xcode 工程及构建所需的共同源码。**这是源码包，不是双击即可安装的已签名 App。**
 
 1. 在 Mac 安装完整 Xcode，解压 Safari 源码包（也可克隆本仓库）。
 2. 用 Xcode 打开 `safari/xcode/V2EX Plus/V2EX Plus.xcodeproj`。
