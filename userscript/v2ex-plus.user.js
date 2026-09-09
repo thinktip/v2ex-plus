@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Plus
 // @namespace    https://v2ex.com/
-// @version      1.13.44
+// @version      1.13.45
 // @description  Lightweight V2EX layout, theme, navigation, reading, reply, and image tools.
 // @match        https://v2ex.com/*
 // @match        https://*.v2ex.com/*
@@ -3372,6 +3372,10 @@ html.v2p-mobile #Main #reply-box > .cell > .avatar,
 html.v2p-mobile #Main #reply-box > .cell > :is(.flex-one-row,.gray):has(a[href^="/member/"]):not(:has(form,textarea,button)),
 html.v2p-mobile #Main #reply-box > .cell.flex-one-row:has(a[href^="/member/"]):not(:has(form,textarea,button)) { display: none !important; }
 
+html.v2p-mobile #menu-body .v2p-lite-activity-source { display: none !important; }
+html.v2p-mobile #menu-entry.v2p-lite-activity-avatar { position: relative; }
+html.v2p-mobile #menu-entry .v2p-lite-activity-avatar-ring { width: 36px; height: 36px; }
+
 html.v2p-hide-reply-floor #Main .cell[id^="r"] .no {
 display: none !important;
 }
@@ -4941,6 +4945,8 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
       login: '<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M3 12h12m-4-4 4 4-4 4"/>',
       signup: '<circle cx="9" cy="7" r="4"/><path d="M2 21v-2a7 7 0 0 1 14 0v2m3-13v6m-3-3h6"/>',
       bell: '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9m-8 13h4"/>',
+      nodes: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+      timeline: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
       bookmark: '<path d="M6 3h12v18l-6-4-6 4z"/>',
       logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>',
     };
@@ -4965,11 +4971,12 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
       else if (href.startsWith("/signin")) iconName = "login";
       else if (href.startsWith("/signup")) iconName = "signup";
       else if (href.startsWith("/notifications")) iconName = "bell";
+      else if (href.startsWith("/my/nodes")) iconName = "nodes";
       else if (href.startsWith("/my/")) iconName = "bookmark";
       else if (href.startsWith("/images") || /图片库/.test(text)) iconName = "image";
       else if (/^Chat$/.test(text) || href.startsWith("/chat")) iconName = "chat";
       else if (/Dictionary/.test(text)) iconName = "book";
-      else if (/时间轴/.test(text) || href.startsWith("/timeline")) iconName = "chat";
+      else if (/时间轴/.test(text) || href.startsWith("/timeline")) iconName = "timeline";
       else if (/语言选择/.test(text) || href.startsWith("/select/language")) iconName = "language";
       if (!iconName) return;
       if (link.closest("#menu-body")) link.querySelectorAll("img.tool-icon").forEach((icon) => icon.remove());
@@ -7116,11 +7123,16 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
   }
 
   function initMemberActivityRing() {
-    const activitySource = document.getElementById("member-activity");
+    const mobile = docEl.classList.contains("v2p-mobile");
+    const activitySource = mobile
+      ? document.querySelector("#menu-body .member-activity-mobile-wrapper, #menu-body #member-activity, #menu-body .member-activity-bar")
+      : document.getElementById("member-activity");
     const infoCard = activitySource?.closest(".box");
     const activityProgress = activitySource?.querySelector('[class^="member-activity-"]:not(.member-activity-bar)');
-    const avatar = infoCard?.querySelector(".cell:first-child table:first-of-type img.avatar");
-    const avatarLink = avatar?.closest("a");
+    const avatar = mobile
+      ? document.querySelector("#menu-entry img.avatar")
+      : infoCard?.querySelector(".cell:first-child table:first-of-type img.avatar");
+    const avatarLink = mobile ? avatar?.parentElement : avatar?.closest("a");
     if (!activitySource || !activityProgress || !avatar || !avatarLink) return false;
 
     const inlineWidth = activityProgress.style.width || "";
@@ -7133,7 +7145,7 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
     percentage = Math.max(0, Math.min(100, Number.isFinite(percentage) ? percentage : 0));
     const progressColor = getComputedStyle(activityProgress).backgroundColor;
 
-    infoCard.classList.add("v2p-lite-member-card");
+    infoCard?.classList.add("v2p-lite-member-card");
     avatarLink.classList.add("v2p-lite-activity-avatar");
     let ring = avatarLink.querySelector(":scope > .v2p-lite-activity-avatar-ring");
     if (!ring) {
@@ -7164,6 +7176,7 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
     progressCircle.style.strokeDasharray = String(circumference);
     progressCircle.style.strokeDashoffset = String(circumference * (1 - percentage / 100));
     avatarLink.dataset.activity = String(Math.round(percentage));
+    if (mobile) avatarLink.setAttribute("aria-label", "打开导航菜单，每日活跃度 " + Math.round(percentage) + "%");
     activitySource.classList.add("v2p-lite-activity-source");
     return true;
   }

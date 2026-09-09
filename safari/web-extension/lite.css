@@ -1,4 +1,4 @@
-/* Generated from userscript/v2ex-plus.user.js 1.13.44. Do not edit directly. */
+/* Generated from userscript/v2ex-plus.user.js 1.13.45. Do not edit directly. */
 
 html.v2p-lite-prepaint,
 html.v2p-lite-prepaint body {
@@ -3108,6 +3108,10 @@ html.v2p-mobile #Main #reply-box > .cell > a[href^="/member/"],
 html.v2p-mobile #Main #reply-box > .cell > .avatar,
 html.v2p-mobile #Main #reply-box > .cell > :is(.flex-one-row,.gray):has(a[href^="/member/"]):not(:has(form,textarea,button)),
 html.v2p-mobile #Main #reply-box > .cell.flex-one-row:has(a[href^="/member/"]):not(:has(form,textarea,button)) { display: none !important; }
+
+html.v2p-mobile #menu-body .v2p-lite-activity-source { display: none !important; }
+html.v2p-mobile #menu-entry.v2p-lite-activity-avatar { position: relative; }
+html.v2p-mobile #menu-entry .v2p-lite-activity-avatar-ring { width: 36px; height: 36px; }
 
 html.v2p-hide-reply-floor #Main .cell[id^="r"] .no {
 display: none !important;

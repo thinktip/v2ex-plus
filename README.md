@@ -1,8 +1,13 @@
 # V2EX Plus
 
-为 V2EX 提供主题、布局、导航和阅读增强。当前版本 **1.13.44**，提供 **单文件油猴脚本**、**Chrome 扩展**和 **Safari Web Extension**。
+为 V2EX 提供主题、布局、导航和阅读增强。当前版本 **1.13.45**，提供 **单文件油猴脚本**、**Chrome 扩展**和 **Safari Web Extension**。
 
 [安装油猴版](https://raw.githubusercontent.com/thinktip/v2ex-plus/main/userscript/v2ex-plus.user.js) · [下载 Chrome 扩展](https://github.com/thinktip/v2ex-plus/releases/latest) · [Safari 安装说明](#安装-safari-版) · [查看 Chrome 源码](chrome/)
+
+## 1.13.45 更新
+
+- 节点收藏使用四宫格图标，时间轴使用时钟图标，避免菜单图标重复。
+- 移动每日活跃度改为顶部头像外围圆环，复用桌面进度和颜色，移除菜单横向进度条。
 
 ## 1.13.44 更新
 
