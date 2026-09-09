@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Plus
 // @namespace    https://v2ex.com/
-// @version      1.13.45
+// @version      1.13.46
 // @description  Lightweight V2EX layout, theme, navigation, reading, reply, and image tools.
 // @match        https://v2ex.com/*
 // @match        https://*.v2ex.com/*
@@ -3375,6 +3375,16 @@ html.v2p-mobile #Main #reply-box > .cell.flex-one-row:has(a[href^="/member/"]):n
 html.v2p-mobile #menu-body .v2p-lite-activity-source { display: none !important; }
 html.v2p-mobile #menu-entry.v2p-lite-activity-avatar { position: relative; }
 html.v2p-mobile #menu-entry .v2p-lite-activity-avatar-ring { width: 36px; height: 36px; }
+
+/* Keep breathing room between mobile cards without loosening list rows. */
+html.v2p-mobile #Main > .box { padding-top: 10px !important; padding-bottom: 10px !important; margin-top: 6px; margin-bottom: 16px !important; }
+html.v2p-mobile #Main #reply-box.reply-box-sticky { padding-top: 12px !important; padding-bottom: 12px !important; margin-top: 16px; margin-bottom: 16px; }
+/* Native composer identity can be nested in an unclassified div/span.
+   Hide only identity branches; retain docking controls, form and preview. */
+html.v2p-mobile #reply-box > .cell :is(div,span,a):has(> img.avatar):not(:has(form,textarea,button,input)),
+html.v2p-mobile #reply-box > .cell :is(div,span):has(> a > img.avatar):not(:has(form,textarea,button,input)),
+html.v2p-mobile #reply-box > .cell img.avatar,
+html.v2p-mobile #reply-box > .cell a[href^="/member/"]:not(form a) { display: none !important; }
 
 html.v2p-hide-reply-floor #Main .cell[id^="r"] .no {
 display: none !important;
