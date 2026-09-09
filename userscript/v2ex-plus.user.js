@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Plus
 // @namespace    https://v2ex.com/
-// @version      1.13.48
+// @version      1.13.49
 // @description  Lightweight V2EX layout, theme, navigation, reading, reply, and image tools.
 // @match        https://v2ex.com/*
 // @match        https://*.v2ex.com/*
@@ -3391,6 +3391,13 @@ html.v2p-mobile #Main .cell.item tr > td:last-child { width: 1% !important; whit
 html.v2p-mobile #Main > .box,
 html.v2p-mobile #Main #reply-box.reply-box-sticky { padding-left: 13px !important; padding-right: 13px !important; }
 
+html.v2p-mobile #Main .cell.item .v2p-mobile-topic-text { vertical-align: top; }
+html.v2p-mobile #Main .cell.item .v2p-mobile-topic-text .item_title { margin: 0 0 8px !important; }
+html.v2p-mobile #Main .cell.item .v2p-mobile-topic-meta { display: block; margin: 0; line-height: 1.6; }
+html.v2p-mobile #Main .cell.item .v2p-mobile-topic-meta a[href^="/member/"] { font-weight: 400; }
+html.v2p-mobile #Main .cell.item tr > td:last-child { vertical-align: top; }
+html.v2p-mobile #Main .cell[id^="r"] { padding-top: 12px !important; padding-bottom: 12px !important; }
+
 html.v2p-hide-reply-floor #Main .cell[id^="r"] .no {
 display: none !important;
 }
@@ -4155,6 +4162,7 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
     ensureToggle();
     initTopNavigationIcons();
     void syncNativeNight(currentMode);
+    initMobileTopicRows();
     initNodeNavigation();
     initReplyActionIcons();
     initImageUpload();
@@ -4494,6 +4502,31 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
     }
     if (menu && !menu.hasAttribute("aria-label")) menu.setAttribute("aria-label", "打开导航菜单");
     return true;
+  }
+
+  function initMobileTopicRows() {
+    if (!docEl.classList.contains("v2p-mobile")) return;
+    document.querySelectorAll("#Main .cell.item .item_title").forEach((title) => {
+      const cell = title.parentElement;
+      if (!cell || cell.classList.contains("v2p-mobile-topic-text")) return;
+      const metadata = Array.from(cell.children).filter((child) => child.matches(".small, .topic_info"));
+      const identity = metadata.find((child) => child.querySelector('a[href^="/member/"]'));
+      const timestamp = metadata.find((child) => child !== identity);
+      if (!identity || !timestamp) return;
+      const time = timestamp.textContent.split(/[•·]/)[0].trim();
+      const author = identity.querySelector('a[href^="/member/"]');
+      const node = identity.querySelector("a.node, .item_node");
+      const line = document.createElement("span");
+      line.className = "small fade v2p-mobile-topic-meta";
+      [node, author, time && document.createTextNode(time)].filter(Boolean).forEach((part, index) => {
+        if (index) line.append(document.createTextNode(" · "));
+        line.append(part);
+      });
+      metadata.forEach((child) => child.remove());
+      Array.from(cell.children).filter((child) => child.matches(".sep5")).forEach((child) => child.remove());
+      title.after(line);
+      cell.classList.add("v2p-mobile-topic-text");
+    });
   }
 
   function markPageStructure(root) {

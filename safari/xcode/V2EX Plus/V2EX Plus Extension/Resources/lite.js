@@ -1,4 +1,4 @@
-// Generated from userscript/v2ex-plus.user.js 1.13.48. Do not edit directly.
+// Generated from userscript/v2ex-plus.user.js 1.13.49. Do not edit directly.
 (function boot() {
   "use strict";
 
@@ -325,6 +325,7 @@
     ensureToggle();
     initTopNavigationIcons();
     void syncNativeNight(currentMode);
+    initMobileTopicRows();
     initNodeNavigation();
     initReplyActionIcons();
     initImageUpload();
@@ -664,6 +665,31 @@
     }
     if (menu && !menu.hasAttribute("aria-label")) menu.setAttribute("aria-label", "打开导航菜单");
     return true;
+  }
+
+  function initMobileTopicRows() {
+    if (!docEl.classList.contains("v2p-mobile")) return;
+    document.querySelectorAll("#Main .cell.item .item_title").forEach((title) => {
+      const cell = title.parentElement;
+      if (!cell || cell.classList.contains("v2p-mobile-topic-text")) return;
+      const metadata = Array.from(cell.children).filter((child) => child.matches(".small, .topic_info"));
+      const identity = metadata.find((child) => child.querySelector('a[href^="/member/"]'));
+      const timestamp = metadata.find((child) => child !== identity);
+      if (!identity || !timestamp) return;
+      const time = timestamp.textContent.split(/[•·]/)[0].trim();
+      const author = identity.querySelector('a[href^="/member/"]');
+      const node = identity.querySelector("a.node, .item_node");
+      const line = document.createElement("span");
+      line.className = "small fade v2p-mobile-topic-meta";
+      [node, author, time && document.createTextNode(time)].filter(Boolean).forEach((part, index) => {
+        if (index) line.append(document.createTextNode(" · "));
+        line.append(part);
+      });
+      metadata.forEach((child) => child.remove());
+      Array.from(cell.children).filter((child) => child.matches(".sep5")).forEach((child) => child.remove());
+      title.after(line);
+      cell.classList.add("v2p-mobile-topic-text");
+    });
   }
 
   function markPageStructure(root) {

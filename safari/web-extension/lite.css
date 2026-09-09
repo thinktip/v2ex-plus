@@ -1,4 +1,4 @@
-/* Generated from userscript/v2ex-plus.user.js 1.13.48. Do not edit directly. */
+/* Generated from userscript/v2ex-plus.user.js 1.13.49. Do not edit directly. */
 
 html.v2p-lite-prepaint,
 html.v2p-lite-prepaint body {
@@ -3127,6 +3127,13 @@ html.v2p-mobile #reply-box > .cell a[href^="/member/"]:not(form a) { display: no
 html.v2p-mobile #Main .cell.item tr > td:last-child { width: 1% !important; white-space: nowrap; padding-left: 8px; }
 html.v2p-mobile #Main > .box,
 html.v2p-mobile #Main #reply-box.reply-box-sticky { padding-left: 13px !important; padding-right: 13px !important; }
+
+html.v2p-mobile #Main .cell.item .v2p-mobile-topic-text { vertical-align: top; }
+html.v2p-mobile #Main .cell.item .v2p-mobile-topic-text .item_title { margin: 0 0 8px !important; }
+html.v2p-mobile #Main .cell.item .v2p-mobile-topic-meta { display: block; margin: 0; line-height: 1.6; }
+html.v2p-mobile #Main .cell.item .v2p-mobile-topic-meta a[href^="/member/"] { font-weight: 400; }
+html.v2p-mobile #Main .cell.item tr > td:last-child { vertical-align: top; }
+html.v2p-mobile #Main .cell[id^="r"] { padding-top: 12px !important; padding-bottom: 12px !important; }
 
 html.v2p-hide-reply-floor #Main .cell[id^="r"] .no {
 display: none !important;
