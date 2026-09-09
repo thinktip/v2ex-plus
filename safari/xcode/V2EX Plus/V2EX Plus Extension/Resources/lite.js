@@ -1,4 +1,4 @@
-// Generated from userscript/v2ex-plus.user.js 1.13.50. Do not edit directly.
+// Generated from userscript/v2ex-plus.user.js 1.13.51. Do not edit directly.
 (function boot() {
   "use strict";
 
@@ -308,6 +308,7 @@
     initMemberStatsCapsule();
     initBalanceFooter();
     initMemberShortcuts();
+    initTopicDetailIcons();
     initReplyFooterIcons();
     initNotificationIndicator();
     initCheckinIndicator();
@@ -334,6 +335,7 @@
     initMemberStatsCapsule();
     initBalanceFooter();
     initMemberShortcuts();
+    initTopicDetailIcons();
     initReplyFooterIcons();
     initTopicSidebarTools();
     initNotificationIndicator();
@@ -918,6 +920,44 @@
       paths +
       "</svg>"
     );
+  }
+
+  function initTopicDetailIcons() {
+    if (!docEl.classList.contains("v2p-mobile")) return;
+    const icons = {
+      bookmark: '<path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>',
+      tweet: '<path d="M22 5.9a8.4 8.4 0 0 1-2.4.7 4.2 4.2 0 0 0-7.2 3.8A11.8 11.8 0 0 1 3 5s-4 9 5 13a13 13 0 0 1-7 2c9 5 20 0 20-11.5a4.2 4.2 0 0 0 0-.6A8.4 8.4 0 0 0 22 5.9z"/>',
+      share: '<path d="M12 16V3m-5 5 5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/>',
+      ignore: '<path d="m3 3 18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 5.2A10.7 10.7 0 0 1 12 5c7 0 10 7 10 7a15 15 0 0 1-3 4M6.6 6.6C3.5 8.5 2 12 2 12s3 7 10 7a11 11 0 0 0 5.4-1.4"/>',
+      heart: '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/>',
+      tags: '<path d="m20 13-7 7a2 2 0 0 1-3 0l-8-8V2h10l8 8a2 2 0 0 1 0 3z"/><circle cx="7" cy="7" r="1"/>',
+      chat: '<path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5Z"/>',
+    };
+    document.querySelectorAll("#Main a.tb").forEach((link) => {
+      if (link.classList.contains("v2p-topic-icon-action")) return;
+      const label = link.textContent.trim();
+      const key = /收藏|favorite|bookmark/i.test(label) ? "bookmark"
+        : /tweet/i.test(label) ? "tweet" : /share|分享/i.test(label) ? "share"
+        : /忽略|ignore/i.test(label) ? "ignore" : /感谢|thank/i.test(label) ? "heart" : null;
+      if (!key) return;
+      link.title = label;
+      link.setAttribute("aria-label", label);
+      link.classList.add("v2p-topic-icon-action");
+      link.innerHTML = buildSvgIcon(icons[key]);
+    });
+    document.querySelectorAll("#Main .fa-tags").forEach((icon) => {
+      if (icon.classList.contains("v2p-topic-tag-icon")) return;
+      icon.classList.remove("fa", "fa-tags");
+      icon.classList.add("v2p-topic-tag-icon");
+      icon.innerHTML = buildSvgIcon(icons.tags);
+    });
+    document.querySelectorAll("#Main a, #Main button").forEach((link) => {
+      if (!/^(?:💬\s*)?开启对话$/.test(link.textContent.trim()) || link.classList.contains("v2p-topic-chat-link")) return;
+      link.classList.add("v2p-topic-chat-link");
+      link.replaceChildren();
+      link.insertAdjacentHTML("afterbegin", buildSvgIcon(icons.chat));
+      link.append(document.createTextNode("开启对话"));
+    });
   }
 
   function initReplyFooterIcons() {
@@ -1840,7 +1880,14 @@
     const panelId = "v2p-lite-emoji-panel";
     panel.id = panelId;
     trigger.setAttribute("aria-controls", panelId);
-    submitter.insertAdjacentElement("afterend", trigger);
+    if (docEl.classList.contains("v2p-mobile")) {
+      const actions = document.createElement("div");
+      actions.className = "v2p-mobile-compose-actions";
+      submitter.before(actions);
+      actions.append(submitter, trigger);
+    } else {
+      submitter.insertAdjacentElement("afterend", trigger);
+    }
     document.body.appendChild(panel);
 
     const closePanel = () => {

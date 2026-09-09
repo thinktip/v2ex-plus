@@ -1,4 +1,4 @@
-/* Generated from userscript/v2ex-plus.user.js 1.13.50. Do not edit directly. */
+/* Generated from userscript/v2ex-plus.user.js 1.13.51. Do not edit directly. */
 
 html.v2p-lite-prepaint,
 html.v2p-lite-prepaint body {
@@ -3166,6 +3166,18 @@ html.v2p-mobile #Main .cell.item .v2p-mobile-topic-meta { display: block; margin
 html.v2p-mobile #Main .cell.item .v2p-mobile-topic-meta a[href^="/member/"] { font-weight: 400; }
 html.v2p-mobile #Main .cell.item tr > td:last-child { vertical-align: top; }
 html.v2p-mobile #Main .cell[id^="r"] { padding-top: 12px !important; padding-bottom: 12px !important; }
+
+html.v2p-mobile #Main a.tb.v2p-topic-icon-action {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; padding: 0 !important; border: 0;
+  background: transparent; box-sizing: border-box; border-radius: 8px;
+  color: var(--v2p-color-font-secondary) !important;
+}
+html.v2p-mobile #Main :is(.v2p-topic-icon-action,.v2p-topic-tag-icon,.v2p-topic-chat-link) svg { width: 18px; height: 18px; flex: 0 0 18px; vertical-align: middle; }
+html.v2p-mobile #Main .v2p-topic-chat-link { display: inline-flex; align-items: center; gap: 6px; }
+html.v2p-mobile #Main .v2p-mobile-compose-actions { display: flex; align-items: center; gap: 8px; width: 100%; }
+html.v2p-mobile #Main .v2p-mobile-compose-actions > :is(button[type="submit"],input[type="submit"]) { flex: 1 1 auto; min-width: 0; width: auto !important; margin: 0 !important; }
+html.v2p-mobile #Main .v2p-mobile-compose-actions > .v2p-lite-emoji-trigger { flex: 0 0 36px; width: 36px; height: 36px; margin: 0; }
 
 html.v2p-hide-reply-floor #Main .cell[id^="r"] .no {
 display: none !important;
