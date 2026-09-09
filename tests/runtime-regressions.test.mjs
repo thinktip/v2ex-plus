@@ -136,3 +136,24 @@ test('completed response clears its deadline and preserves JSON parsing', async 
   const response = await request('/test', {}, 10); assert.equal((await response.json()).success, true);
   await new Promise(resolve => setTimeout(resolve, 20)); assert.equal(signal.aborted, false);
 });
+
+test('Imgur uses the public default, honors custom IDs, and deletes with the upload ID', async () => {
+  const requests = [];
+  const context = vm.createContext({
+    DEFAULT_IMGUR_CLIENT_ID: '58ede46d11fb61e', IMGUR_CLIENT_ID_KEY: 'id',
+    FormData: class { append() {} },
+    requestWithTimeout: async (url, options) => {
+      requests.push({ url, options });
+      return { ok: true, json: async () => ({ success: true, data: { link: 'https://i.imgur.com/test.png', deletehash: 'test-delete' } }) };
+    },
+    readUploadSetting: async () => 'changed-id',
+  });
+  vm.runInContext(section(source, '  async function uploadImageToImgur(', '  async function deleteUploadedImage('), context);
+  vm.runInContext(section(source, '  async function deleteImgurImage(', '  function createImageUploadError('), context);
+  for (const settings of [{}, { id: '  ' }, { id: ' custom-id ' }]) await context.uploadImageToImgur({}, settings);
+  assert.deepEqual(requests.map(r => r.options.headers.Authorization), ['Client-ID 58ede46d11fb61e', 'Client-ID 58ede46d11fb61e', 'Client-ID custom-id']);
+  const result = await context.uploadImageToImgur({}, { id: 'original-id' });
+  await context.deleteImgurImage(result);
+  assert.equal(requests.at(-1).options.headers.Authorization, 'Client-ID original-id');
+  assert.equal(requests.at(-1).options.method, 'DELETE');
+});

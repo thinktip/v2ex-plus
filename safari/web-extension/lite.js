@@ -1,4 +1,4 @@
-// Generated from userscript/v2ex-plus.user.js 1.13.51. Do not edit directly.
+// Generated from userscript/v2ex-plus.user.js 1.13.52. Do not edit directly.
 (function boot() {
   "use strict";
 
@@ -44,6 +44,7 @@
   const R2_UPLOAD_ENDPOINT_KEY = "v2p_r2_upload_endpoint";
   const DEFAULT_R2_UPLOAD_ENDPOINT = "https://upload-cloud.2smile.top/upload";
   const R2_UPLOAD_TOKEN_KEY = "v2p_r2_upload_token";
+  const DEFAULT_IMGUR_CLIENT_ID = "58ede46d11fb61e";
   const IMGUR_CLIENT_ID_KEY = "v2p_imgur_client_id";
   const DELETE_REMOTE_IMAGE_KEY = "v2p_delete_remote_image";
   const COMPRESS_IMAGES_KEY = "v2p_compress_images";
@@ -2478,15 +2479,7 @@
   }
 
   async function uploadImageToImgur(file, settings) {
-    const clientId = String(settings[IMGUR_CLIENT_ID_KEY] || "").trim();
-    if (!clientId) {
-      throw createImageUploadError(
-        "Imgur Client ID was not provided",
-        isExtensionRuntime()
-          ? "尚未配置 Imgur Client ID，请点击插件图标打开设置。"
-          : "油猴版使用默认设置，未配置图床凭据。请使用 Chrome 扩展配置上传，或手动粘贴图片链接。",
-      );
-    }
+    const clientId = String(settings[IMGUR_CLIENT_ID_KEY] || "").trim() || DEFAULT_IMGUR_CLIENT_ID;
 
     const formData = new FormData();
     formData.append("image", file);
@@ -2512,7 +2505,7 @@
     }
 
     if (response.ok && responseData && responseData.success && responseData.data?.link) {
-      return { url: responseData.data.link, deleteHash: responseData.data.deletehash || "" };
+      return { url: responseData.data.link, deleteHash: responseData.data.deletehash || "", clientId };
     }
 
     const imgurError = responseData?.data?.error;
@@ -2520,7 +2513,7 @@
       ? imgurError
       : imgurError?.message || "HTTP " + response.status;
     const userMessage = response.status === 401 || response.status === 403
-      ? "Imgur Client ID 无效，请点击插件图标重新设置。"
+      ? (isExtensionRuntime() ? "Imgur 拒绝上传，请检查 Client ID 或稍后重试。" : "Imgur 暂时拒绝上传，请稍后重试或更新脚本。")
       : response.status === 429
         ? "Imgur 上传额度已用完，请稍后重试。"
         : "Imgur 上传失败：" + apiMessage;
@@ -2571,7 +2564,7 @@
     if (!uploadResult.deleteHash) {
       throw createImageUploadError("Imgur delete hash is missing", "Imgur 未返回删除凭据，无法删除云端图片。");
     }
-    const clientId = await readUploadSetting(IMGUR_CLIENT_ID_KEY, "");
+    const clientId = uploadResult.clientId || String(await readUploadSetting(IMGUR_CLIENT_ID_KEY, "")).trim() || DEFAULT_IMGUR_CLIENT_ID;
     let response;
     try {
       response = await requestWithTimeout("https://api.imgur.com/3/image/" + encodeURIComponent(uploadResult.deleteHash), {

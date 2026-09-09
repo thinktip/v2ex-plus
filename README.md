@@ -1,8 +1,13 @@
 # V2EX Plus
 
-为 V2EX 提供主题、布局、导航和阅读增强。当前版本 **1.13.51**，提供 **单文件油猴脚本**、**Chrome 扩展**和 **Safari Web Extension**。
+为 V2EX 提供主题、布局、导航和阅读增强。当前版本 **1.13.52**，提供 **单文件油猴脚本**、**Chrome 扩展**和 **Safari Web Extension**。
 
 [安装油猴版](https://raw.githubusercontent.com/thinktip/v2ex-plus/main/userscript/v2ex-plus.user.js) · [下载 Chrome 扩展](https://github.com/thinktip/v2ex-plus/releases/latest) · [Safari 安装说明](#安装-safari-版) · [查看 Chrome 源码](chrome/)
+
+## 1.13.52 更新
+
+- 内置项目专用 Imgur Client ID，油猴版和未配置 ID 的扩展可默认匿名上传；自定义 ID 优先。
+- 图片删除沿用上传时的 Client ID，不受随后修改设置影响。
 
 ## 1.13.51 更新
 
@@ -108,9 +113,9 @@ iOS Safari 用户需在所用脚本管理器中启用本脚本，并允许访问
 | 显示广告 | 关闭 |
 | 图片压缩 / 远端删除 | 关闭 |
 | 压缩质量（开启压缩时） | 82% |
-| 图床 | Imgur，Client ID 默认为空 |
+| 图床 | Imgur，使用项目默认 Client ID |
 
-**油猴版未附带图床凭据，默认不能直接上传图片。** 可手动粘贴图片链接；需要上传功能时，请使用 Chrome 扩展并填写自己的图床配置。脚本不会读取旧油猴版保存的图床凭据。
+**油猴版默认使用项目专用 Imgur Client ID 匿名上传图片，无需额外配置。** 公开 ID 的使用者共享应用额度；图片不绑定个人 Imgur 账户。脚本不会读取旧油猴版保存的图床凭据。
 
 用户脚本的注入时间由浏览器和脚本管理器决定，无法保证深色模式首帧完全无闪烁。
 
@@ -125,7 +130,7 @@ iOS Safari 用户需在所用脚本管理器中启用本脚本，并允许访问
 
 ### 图片上传
 
-在扩展设置中选择 Imgur 或 Cloudflare R2：Imgur 需要填写自己的 Client ID；R2 需要填写与本扩展上传协议兼容的 HTTPS 服务地址和访问令牌。源码保留当前 Chrome 版默认的 R2 服务地址，但不包含访问令牌，也不代表提供公共上传额度。自定义域名可能触发额外站点权限请求。
+在扩展设置中选择 Imgur 或 Cloudflare R2：Imgur 留空使用项目默认 Client ID，也可填写自己的 Client ID；R2 需要填写与本扩展上传协议兼容的 HTTPS 服务地址和访问令牌。源码保留当前 Chrome 版默认的 R2 服务地址，但不包含访问令牌，也不代表提供公共上传额度。自定义域名可能触发额外站点权限请求。
 
 ## 安装 Safari 版
 
