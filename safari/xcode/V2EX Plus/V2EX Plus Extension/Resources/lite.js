@@ -1,4 +1,4 @@
-// Generated from userscript/v2ex-plus.user.js 1.13.52. Do not edit directly.
+// Generated from userscript/v2ex-plus.user.js 1.13.53. Do not edit directly.
 (function boot() {
   "use strict";
 
@@ -934,17 +934,20 @@
       tags: '<path d="m20 13-7 7a2 2 0 0 1-3 0l-8-8V2h10l8 8a2 2 0 0 1 0 3z"/><circle cx="7" cy="7" r="1"/>',
       chat: '<path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5Z"/>',
     };
-    document.querySelectorAll("#Main a.tb").forEach((link) => {
-      if (link.classList.contains("v2p-topic-icon-action")) return;
-      const label = link.textContent.trim();
-      const key = /收藏|favorite|bookmark/i.test(label) ? "bookmark"
-        : /tweet/i.test(label) ? "tweet" : /share|分享/i.test(label) ? "share"
-        : /忽略|ignore/i.test(label) ? "ignore" : /感谢|thank/i.test(label) ? "heart" : null;
+    document.querySelectorAll('#Main a, #Main button, #Main input[type="button"]').forEach((link) => {
+      if (!link.closest(".topic_buttons") && !link.closest(".box")?.querySelector(".topic_content")) return;
+      if (link.closest(".topic_content, .reply_content, #reply-box")) return;
+      const label = (link.value || link.textContent).trim();
+      const key = /^(?:加入收藏|取消收藏|收藏|Favorite|Unfavorite|Bookmark)$/i.test(label) ? "bookmark"
+        : /^tweet$/i.test(label) ? "tweet" : /^(?:share|分享)$/i.test(label) ? "share"
+        : /^(?:忽略主题|取消忽略|ignore)$/i.test(label) ? "ignore" : /^(?:感谢|已感谢|thank|thanks)$/i.test(label) ? "heart" : null;
       if (!key) return;
       link.title = label;
       link.setAttribute("aria-label", label);
       link.classList.add("v2p-topic-icon-action");
-      link.innerHTML = buildSvgIcon(icons[key]);
+      // Keep native content and the original node: handlers may inspect text/value.
+      const svg = buildSvgIcon(icons[key]).replace(/currentColor/g, "#64748b");
+      link.style.setProperty("--v2p-action-image", 'url("data:image/svg+xml,' + encodeURIComponent(svg) + '")');
     });
     document.querySelectorAll("#Main .fa-tags").forEach((icon) => {
       if (icon.classList.contains("v2p-topic-tag-icon")) return;
@@ -954,6 +957,15 @@
     });
     document.querySelectorAll("#Main a, #Main button").forEach((link) => {
       if (!/^(?:💬\s*)?开启对话$/.test(link.textContent.trim()) || link.classList.contains("v2p-topic-chat-link")) return;
+      const container = link.parentElement;
+      if (container) {
+        container.classList.add("v2p-topic-chat-container");
+        Array.from(container.childNodes).forEach((node) => {
+          if (node === link || node.contains?.(link)) return;
+          if (/^[\s\uFE0F]*(?:💬|🗨|🗨️)[\s\uFE0F]*$/.test(node.textContent || "") ||
+              (node.nodeType === 1 && node.matches("img.tool-icon"))) node.remove();
+        });
+      }
       link.classList.add("v2p-topic-chat-link");
       link.replaceChildren();
       link.insertAdjacentHTML("afterbegin", buildSvgIcon(icons.chat));

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "V2EX Plus",
-  "version": "1.13.52",
+  "version": "1.13.53",
   "description": "Safari edition of V2EX Plus.",
   "permissions": [
     "storage",

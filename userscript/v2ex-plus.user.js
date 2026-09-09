@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Plus
 // @namespace    https://v2ex.com/
-// @version      1.13.52
+// @version      1.13.53
 // @description  Lightweight V2EX layout, theme, navigation, reading, reply, and image tools.
 // @match        https://v2ex.com/*
 // @match        https://*.v2ex.com/*
@@ -3431,13 +3431,17 @@ html.v2p-mobile #Main .cell.item .v2p-mobile-topic-meta a[href^="/member/"] { fo
 html.v2p-mobile #Main .cell.item tr > td:last-child { vertical-align: top; }
 html.v2p-mobile #Main .cell[id^="r"] { padding-top: 12px !important; padding-bottom: 12px !important; }
 
-html.v2p-mobile #Main a.tb.v2p-topic-icon-action {
+html.v2p-mobile #Main .v2p-topic-icon-action {
   display: inline-flex; align-items: center; justify-content: center;
   width: 34px; height: 34px; padding: 0 !important; border: 0;
   background: transparent; box-sizing: border-box; border-radius: 8px;
-  color: var(--v2p-color-font-secondary) !important;
+  color: transparent !important; font-size: 0 !important;
+  background-image: var(--v2p-action-image) !important;
+  background-repeat: no-repeat !important; background-position: center !important; background-size: 18px 18px !important;
 }
 html.v2p-mobile #Main :is(.v2p-topic-icon-action,.v2p-topic-tag-icon,.v2p-topic-chat-link) svg { width: 18px; height: 18px; flex: 0 0 18px; vertical-align: middle; }
+html.v2p-mobile #Main .v2p-topic-chat-link::before,
+html.v2p-mobile #Main .v2p-topic-chat-container::before { content: none !important; }
 html.v2p-mobile #Main .v2p-topic-chat-link { display: inline-flex; align-items: center; gap: 6px; }
 html.v2p-mobile #Main .v2p-mobile-compose-actions { display: flex; align-items: center; gap: 8px; width: 100%; }
 html.v2p-mobile #Main .v2p-mobile-compose-actions > :is(button[type="submit"],input[type="submit"]) { flex: 1 1 auto; min-width: 0; width: auto !important; margin: 0 !important; }
@@ -4815,17 +4819,20 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
       tags: '<path d="m20 13-7 7a2 2 0 0 1-3 0l-8-8V2h10l8 8a2 2 0 0 1 0 3z"/><circle cx="7" cy="7" r="1"/>',
       chat: '<path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5Z"/>',
     };
-    document.querySelectorAll("#Main a.tb").forEach((link) => {
-      if (link.classList.contains("v2p-topic-icon-action")) return;
-      const label = link.textContent.trim();
-      const key = /收藏|favorite|bookmark/i.test(label) ? "bookmark"
-        : /tweet/i.test(label) ? "tweet" : /share|分享/i.test(label) ? "share"
-        : /忽略|ignore/i.test(label) ? "ignore" : /感谢|thank/i.test(label) ? "heart" : null;
+    document.querySelectorAll('#Main a, #Main button, #Main input[type="button"]').forEach((link) => {
+      if (!link.closest(".topic_buttons") && !link.closest(".box")?.querySelector(".topic_content")) return;
+      if (link.closest(".topic_content, .reply_content, #reply-box")) return;
+      const label = (link.value || link.textContent).trim();
+      const key = /^(?:加入收藏|取消收藏|收藏|Favorite|Unfavorite|Bookmark)$/i.test(label) ? "bookmark"
+        : /^tweet$/i.test(label) ? "tweet" : /^(?:share|分享)$/i.test(label) ? "share"
+        : /^(?:忽略主题|取消忽略|ignore)$/i.test(label) ? "ignore" : /^(?:感谢|已感谢|thank|thanks)$/i.test(label) ? "heart" : null;
       if (!key) return;
       link.title = label;
       link.setAttribute("aria-label", label);
       link.classList.add("v2p-topic-icon-action");
-      link.innerHTML = buildSvgIcon(icons[key]);
+      // Keep native content and the original node: handlers may inspect text/value.
+      const svg = buildSvgIcon(icons[key]).replace(/currentColor/g, "#64748b");
+      link.style.setProperty("--v2p-action-image", 'url("data:image/svg+xml,' + encodeURIComponent(svg) + '")');
     });
     document.querySelectorAll("#Main .fa-tags").forEach((icon) => {
       if (icon.classList.contains("v2p-topic-tag-icon")) return;
@@ -4835,6 +4842,15 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
     });
     document.querySelectorAll("#Main a, #Main button").forEach((link) => {
       if (!/^(?:💬\s*)?开启对话$/.test(link.textContent.trim()) || link.classList.contains("v2p-topic-chat-link")) return;
+      const container = link.parentElement;
+      if (container) {
+        container.classList.add("v2p-topic-chat-container");
+        Array.from(container.childNodes).forEach((node) => {
+          if (node === link || node.contains?.(link)) return;
+          if (/^[\s\uFE0F]*(?:💬|🗨|🗨️)[\s\uFE0F]*$/.test(node.textContent || "") ||
+              (node.nodeType === 1 && node.matches("img.tool-icon"))) node.remove();
+        });
+      }
       link.classList.add("v2p-topic-chat-link");
       link.replaceChildren();
       link.insertAdjacentHTML("afterbegin", buildSvgIcon(icons.chat));
