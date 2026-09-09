@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Plus
 // @namespace    https://v2ex.com/
-// @version      1.13.46
+// @version      1.13.47
 // @description  Lightweight V2EX layout, theme, navigation, reading, reply, and image tools.
 // @match        https://v2ex.com/*
 // @match        https://*.v2ex.com/*
@@ -3355,11 +3355,11 @@ html.v2p-mobile #Wrapper > #Main.content { padding: 0 8px !important; }
 html.v2p-mobile #Main > .box { padding: 0 8px !important; }
 html.v2p-mobile #Main #Tabs { padding: 5px 0 !important; gap: 3px; }
 html.v2p-mobile #Main #Tabs :is(.tab,.tab_current) { min-height: 32px !important; padding: 4px 8px !important; margin: 0; font-size: 12px; line-height: 20px; }
-html.v2p-mobile #Main .cell.item:has(.item_title > .topic-link) { padding: 8px 0 !important; }
+html.v2p-mobile #Main .cell.item:has(.item_title > .topic-link) { padding: 16px 0 !important; }
 html.v2p-mobile #Main .cell.item tr > td:first-child { width: 30px !important; }
 html.v2p-mobile #Main .cell.item tr > td:nth-child(2) { width: 8px !important; }
 html.v2p-mobile #Main .cell.item .avatar { width: 30px !important; height: 30px !important; max-height: 30px !important; }
-html.v2p-mobile #Main .cell.item .item_title { margin: 3px 0 !important; }
+html.v2p-mobile #Main .cell.item .item_title { display: block; margin: 6px 0 8px !important; }
 html.v2p-mobile #Main .cell.item :is(.item_title,.topic-link) { line-height: 1.4 !important; }
 html.v2p-mobile #Main .cell.item :is(.topic_info,.small) { line-height: 1.4; margin-top: 3px; }
 html.v2p-mobile #Main :is(a.node,.item_node) { font-size: 10px !important; line-height: 16px; padding: 0 5px !important; }
