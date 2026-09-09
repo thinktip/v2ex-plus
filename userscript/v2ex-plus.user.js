@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Plus
 // @namespace    https://v2ex.com/
-// @version      1.13.42
+// @version      1.13.43
 // @description  Lightweight V2EX layout, theme, navigation, reading, reply, and image tools.
 // @match        https://v2ex.com/*
 // @match        https://*.v2ex.com/*
@@ -3281,7 +3281,7 @@ html.v2p-mobile #site-header #site-header-menu #menu-body {
   box-shadow: var(--v2p-widget-shadow);
 }
 html.v2p-mobile #menu-body .cell { padding: 0; border: none; }
-html.v2p-mobile #menu-body .cell > a.top:not([hidden]) {
+html.v2p-mobile #menu-body a.top:not([hidden]) {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -3320,7 +3320,27 @@ html.v2p-mobile #Main .cell[id^="r"] > table > tbody > tr > td:first-child .avat
 html.v2p-mobile #Main .reply_content { overflow-wrap: anywhere; }
 html.v2p-mobile #Main .cell[id^="r"] .cell[id^="r"] { margin-left: 4px; }
 html.v2p-mobile #Main .cell[id^="r"] .cell[id^="r"] .cell[id^="r"] { margin-left: 0; }
-html.v2p-mobile #Main .header > .fr { margin-left: 12px; }
+/* Reserve space for the floated topic author even when the title wraps. */
+html.v2p-mobile #Main .box:has(.topic_content) .header { display: flow-root; }
+html.v2p-mobile #Main .box:has(.topic_content) .header > .fr { margin: 0 0 8px 12px; width: 30px; }
+html.v2p-mobile #Main .header .avatar { width: 30px !important; height: 30px !important; max-height: 30px !important; display: block; }
+html.v2p-mobile body #Main .box:has(.topic_content) .header > h1 {
+  margin-right: 42px; font-size: 18px; line-height: 1.4; overflow-wrap: anywhere;
+}
+html.v2p-mobile #Main .header > small { display: block; font-size: 11px; line-height: 1.5; overflow-wrap: anywhere; }
+html.v2p-mobile #Main .topic_content,
+html.v2p-mobile #Main .reply_content { font-size: 15px !important; line-height: 1.6 !important; }
+html.v2p-mobile #Main .cell .item_title,
+html.v2p-mobile #Main .cell .item_title .topic-link { font-size: 15px; line-height: 1.5; }
+html.v2p-mobile #Main .small { font-size: 11px; }
+html.v2p-mobile #site-header #site-header-menu #menu-body a.top:not([hidden]) { display: flex; align-items: center; font-size: 14px !important; gap: 10px; }
+html.v2p-mobile #site-header #menu-body a.top[hidden] { display: none !important; }
+html.v2p-mobile #Main .box:has(#Tabs) { border-radius: var(--v2p-box-radius) !important; }
+html.v2p-mobile #Main #Tabs { flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; border-radius: var(--v2p-box-radius) var(--v2p-box-radius) 0 0 !important; }
+html.v2p-mobile #Main #Tabs > a { flex: 0 0 auto; }
+html.v2p-mobile #Main #Tabs::-webkit-scrollbar { display: none; }
+html.v2p-mobile #Main .box:has(#Tabs) > :first-child { border-top-left-radius: inherit; border-top-right-radius: inherit; }
+
 
 html.v2p-hide-reply-floor #Main .cell[id^="r"] .no {
 display: none !important;
@@ -4884,10 +4904,14 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
       notes: '<path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/>',
       planet: '<circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><line x1="2" x2="22" y1="12" y2="12"/>',
       settings: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+      login: '<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M3 12h12m-4-4 4 4-4 4"/>',
+      signup: '<circle cx="9" cy="7" r="4"/><path d="M2 21v-2a7 7 0 0 1 14 0v2m3-13v6m-3-3h6"/>',
+      bell: '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9m-8 13h4"/>',
+      bookmark: '<path d="M6 3h12v18l-6-4-6 4z"/>',
       logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>',
     };
 
-    const links = Array.from(document.querySelectorAll("#Top .tools > a.top, #menu-body .cell > a.top"));
+    const links = Array.from(document.querySelectorAll("#Top .tools > a.top, #menu-body a.top"));
     let changed = false;
 
     links.forEach((link) => {
@@ -4904,6 +4928,10 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
       else if (text === "设置" || href === "/settings") iconName = "settings";
       else if (text === "登出" || href.includes("signout")) iconName = "logout";
 
+      else if (href.startsWith("/signin")) iconName = "login";
+      else if (href.startsWith("/signup")) iconName = "signup";
+      else if (href.startsWith("/notifications")) iconName = "bell";
+      else if (href.startsWith("/my/")) iconName = "bookmark";
       if (!iconName) return;
       link.dataset.v2pLiteTopnavIcon = iconName;
       link.classList.add("v2p-lite-topnav-icon");
@@ -6291,7 +6319,7 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
       readBooleanSetting(NESTED_REPLIES_KEY, true),
       readBooleanSetting(EMOJI_PICKER_KEY, true),
       readBooleanSetting(FIXED_SIDEBAR_TOOLS_KEY, true),
-      readBooleanSetting(EXPAND_REPLY_TOOLBAR_KEY, false),
+      readBooleanSetting(EXPAND_REPLY_TOOLBAR_KEY, true),
       readBooleanSetting(NODE_ICONS_KEY, true),
       readBooleanSetting(SHOW_ADS_KEY, false),
     ]);

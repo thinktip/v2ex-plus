@@ -1,4 +1,4 @@
-// Generated from userscript/v2ex-plus.user.js 1.13.42. Do not edit directly.
+// Generated from userscript/v2ex-plus.user.js 1.13.43. Do not edit directly.
 (function boot() {
   "use strict";
 
@@ -1123,10 +1123,14 @@
       notes: '<path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><line x1="10" x2="8" y1="9" y2="9"/>',
       planet: '<circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><line x1="2" x2="22" y1="12" y2="12"/>',
       settings: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+      login: '<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M3 12h12m-4-4 4 4-4 4"/>',
+      signup: '<circle cx="9" cy="7" r="4"/><path d="M2 21v-2a7 7 0 0 1 14 0v2m3-13v6m-3-3h6"/>',
+      bell: '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9m-8 13h4"/>',
+      bookmark: '<path d="M6 3h12v18l-6-4-6 4z"/>',
       logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>',
     };
 
-    const links = Array.from(document.querySelectorAll("#Top .tools > a.top, #menu-body .cell > a.top"));
+    const links = Array.from(document.querySelectorAll("#Top .tools > a.top, #menu-body a.top"));
     let changed = false;
 
     links.forEach((link) => {
@@ -1143,6 +1147,10 @@
       else if (text === "设置" || href === "/settings") iconName = "settings";
       else if (text === "登出" || href.includes("signout")) iconName = "logout";
 
+      else if (href.startsWith("/signin")) iconName = "login";
+      else if (href.startsWith("/signup")) iconName = "signup";
+      else if (href.startsWith("/notifications")) iconName = "bell";
+      else if (href.startsWith("/my/")) iconName = "bookmark";
       if (!iconName) return;
       link.dataset.v2pLiteTopnavIcon = iconName;
       link.classList.add("v2p-lite-topnav-icon");
@@ -2530,7 +2538,7 @@
       readBooleanSetting(NESTED_REPLIES_KEY, true),
       readBooleanSetting(EMOJI_PICKER_KEY, true),
       readBooleanSetting(FIXED_SIDEBAR_TOOLS_KEY, true),
-      readBooleanSetting(EXPAND_REPLY_TOOLBAR_KEY, false),
+      readBooleanSetting(EXPAND_REPLY_TOOLBAR_KEY, true),
       readBooleanSetting(NODE_ICONS_KEY, true),
       readBooleanSetting(SHOW_ADS_KEY, false),
     ]);

@@ -1,4 +1,4 @@
-/* Generated from userscript/v2ex-plus.user.js 1.13.42. Do not edit directly. */
+/* Generated from userscript/v2ex-plus.user.js 1.13.43. Do not edit directly. */
 
 html.v2p-lite-prepaint,
 html.v2p-lite-prepaint body {
@@ -3018,7 +3018,7 @@ html.v2p-mobile #site-header #site-header-menu #menu-body {
   box-shadow: var(--v2p-widget-shadow);
 }
 html.v2p-mobile #menu-body .cell { padding: 0; border: none; }
-html.v2p-mobile #menu-body .cell > a.top:not([hidden]) {
+html.v2p-mobile #menu-body a.top:not([hidden]) {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -3057,7 +3057,27 @@ html.v2p-mobile #Main .cell[id^="r"] > table > tbody > tr > td:first-child .avat
 html.v2p-mobile #Main .reply_content { overflow-wrap: anywhere; }
 html.v2p-mobile #Main .cell[id^="r"] .cell[id^="r"] { margin-left: 4px; }
 html.v2p-mobile #Main .cell[id^="r"] .cell[id^="r"] .cell[id^="r"] { margin-left: 0; }
-html.v2p-mobile #Main .header > .fr { margin-left: 12px; }
+/* Reserve space for the floated topic author even when the title wraps. */
+html.v2p-mobile #Main .box:has(.topic_content) .header { display: flow-root; }
+html.v2p-mobile #Main .box:has(.topic_content) .header > .fr { margin: 0 0 8px 12px; width: 30px; }
+html.v2p-mobile #Main .header .avatar { width: 30px !important; height: 30px !important; max-height: 30px !important; display: block; }
+html.v2p-mobile body #Main .box:has(.topic_content) .header > h1 {
+  margin-right: 42px; font-size: 18px; line-height: 1.4; overflow-wrap: anywhere;
+}
+html.v2p-mobile #Main .header > small { display: block; font-size: 11px; line-height: 1.5; overflow-wrap: anywhere; }
+html.v2p-mobile #Main .topic_content,
+html.v2p-mobile #Main .reply_content { font-size: 15px !important; line-height: 1.6 !important; }
+html.v2p-mobile #Main .cell .item_title,
+html.v2p-mobile #Main .cell .item_title .topic-link { font-size: 15px; line-height: 1.5; }
+html.v2p-mobile #Main .small { font-size: 11px; }
+html.v2p-mobile #site-header #site-header-menu #menu-body a.top:not([hidden]) { display: flex; align-items: center; font-size: 14px !important; gap: 10px; }
+html.v2p-mobile #site-header #menu-body a.top[hidden] { display: none !important; }
+html.v2p-mobile #Main .box:has(#Tabs) { border-radius: var(--v2p-box-radius) !important; }
+html.v2p-mobile #Main #Tabs { flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; border-radius: var(--v2p-box-radius) var(--v2p-box-radius) 0 0 !important; }
+html.v2p-mobile #Main #Tabs > a { flex: 0 0 auto; }
+html.v2p-mobile #Main #Tabs::-webkit-scrollbar { display: none; }
+html.v2p-mobile #Main .box:has(#Tabs) > :first-child { border-top-left-radius: inherit; border-top-right-radius: inherit; }
+
 
 html.v2p-hide-reply-floor #Main .cell[id^="r"] .no {
 display: none !important;

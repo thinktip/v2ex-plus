@@ -160,7 +160,7 @@ async function loadSettings() {
     nestedReplies.checked = values[SETTINGS.nestedReplies] !== false;
     emojiPicker.checked = values[SETTINGS.emojiPicker] !== false;
     fixedSidebarTools.checked = values[SETTINGS.fixedSidebarTools] !== false;
-    expandReplyToolbar.checked = values[SETTINGS.expandReplyToolbar] === true;
+    expandReplyToolbar.checked = values[SETTINGS.expandReplyToolbar] !== false;
     nodeIcons.checked = values[SETTINGS.nodeIcons] !== false;
     showAds.checked = values[SETTINGS.showAds] === true;
     updateCompressionView();
