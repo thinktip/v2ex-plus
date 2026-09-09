@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Plus
 // @namespace    https://v2ex.com/
-// @version      1.13.49
+// @version      1.13.50
 // @description  Lightweight V2EX layout, theme, navigation, reading, reply, and image tools.
 // @match        https://v2ex.com/*
 // @match        https://*.v2ex.com/*
@@ -3351,6 +3351,38 @@ html.v2p-mobile #site-header #site-header-menu #menu-body a.top:not([hidden]) {
   box-sizing: border-box; min-height: 34px; height: auto; line-height: 20px;
   padding: 7px 10px; margin: 0; gap: 8px; border-radius: 6px;
 }
+/* Translucent mobile menu: solid fallback when backdrop blur is unavailable. */
+html.v2p-mobile #site-header #site-header-menu #menu-body {
+  --v2p-menu-glass: rgba(255, 255, 255, .72);
+  --v2p-menu-edge: rgba(255, 255, 255, .65);
+  --v2p-menu-highlight: rgba(255, 255, 255, .48);
+  --v2p-menu-separator: rgba(70, 80, 95, .12);
+  border-color: var(--v2p-menu-edge);
+  box-shadow: 0 12px 32px rgba(20, 30, 45, .16), inset 0 1px 0 var(--v2p-menu-highlight);
+}
+html.v2p-mobile.v2p-theme-dark-default #site-header #site-header-menu #menu-body {
+  --v2p-menu-glass: rgba(35, 39, 47, .78);
+  --v2p-menu-edge: rgba(255, 255, 255, .14);
+  --v2p-menu-highlight: rgba(255, 255, 255, .08);
+  --v2p-menu-separator: rgba(255, 255, 255, .10);
+}
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  html.v2p-mobile #site-header #site-header-menu #menu-body {
+    background: var(--v2p-menu-glass) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    backdrop-filter: blur(24px) saturate(150%);
+  }
+}
+html.v2p-mobile #site-header #site-header-menu #menu-body .cell { background: transparent !important; }
+html.v2p-mobile #site-header #site-header-menu #menu-body .cell + .cell { border-top-color: var(--v2p-menu-separator); }
+@media (prefers-reduced-transparency: reduce) {
+  html.v2p-mobile #site-header #site-header-menu #menu-body {
+    background: var(--v2p-color-bg-content) !important;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
 html.v2p-mobile #Wrapper > #Main.content { padding: 0 8px !important; }
 html.v2p-mobile #Main > .box { padding: 0 8px !important; }
 html.v2p-mobile #Main #Tabs { padding: 5px 0 !important; gap: 3px; }

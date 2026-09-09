@@ -1,4 +1,4 @@
-/* Generated from userscript/v2ex-plus.user.js 1.13.49. Do not edit directly. */
+/* Generated from userscript/v2ex-plus.user.js 1.13.50. Do not edit directly. */
 
 html.v2p-lite-prepaint,
 html.v2p-lite-prepaint body {
@@ -3088,6 +3088,38 @@ html.v2p-mobile #site-header #site-header-menu #menu-body a.top:not([hidden]) {
   box-sizing: border-box; min-height: 34px; height: auto; line-height: 20px;
   padding: 7px 10px; margin: 0; gap: 8px; border-radius: 6px;
 }
+/* Translucent mobile menu: solid fallback when backdrop blur is unavailable. */
+html.v2p-mobile #site-header #site-header-menu #menu-body {
+  --v2p-menu-glass: rgba(255, 255, 255, .72);
+  --v2p-menu-edge: rgba(255, 255, 255, .65);
+  --v2p-menu-highlight: rgba(255, 255, 255, .48);
+  --v2p-menu-separator: rgba(70, 80, 95, .12);
+  border-color: var(--v2p-menu-edge);
+  box-shadow: 0 12px 32px rgba(20, 30, 45, .16), inset 0 1px 0 var(--v2p-menu-highlight);
+}
+html.v2p-mobile.v2p-theme-dark-default #site-header #site-header-menu #menu-body {
+  --v2p-menu-glass: rgba(35, 39, 47, .78);
+  --v2p-menu-edge: rgba(255, 255, 255, .14);
+  --v2p-menu-highlight: rgba(255, 255, 255, .08);
+  --v2p-menu-separator: rgba(255, 255, 255, .10);
+}
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  html.v2p-mobile #site-header #site-header-menu #menu-body {
+    background: var(--v2p-menu-glass) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
+    backdrop-filter: blur(24px) saturate(150%);
+  }
+}
+html.v2p-mobile #site-header #site-header-menu #menu-body .cell { background: transparent !important; }
+html.v2p-mobile #site-header #site-header-menu #menu-body .cell + .cell { border-top-color: var(--v2p-menu-separator); }
+@media (prefers-reduced-transparency: reduce) {
+  html.v2p-mobile #site-header #site-header-menu #menu-body {
+    background: var(--v2p-color-bg-content) !important;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
 html.v2p-mobile #Wrapper > #Main.content { padding: 0 8px !important; }
 html.v2p-mobile #Main > .box { padding: 0 8px !important; }
 html.v2p-mobile #Main #Tabs { padding: 5px 0 !important; gap: 3px; }
@@ -3994,6 +4026,13 @@ color: #6ee7b7 !important;
 
 html.v2p-mobile:not(.v2p-theme-light-default):not(.v2p-theme-dark-default) #LogoMobile { filter: invert(1) brightness(0.9) contrast(0.9); }
 
+html.v2p-mobile:not(.v2p-theme-light-default):not(.v2p-theme-dark-default) #site-header #site-header-menu #menu-body {
+  --v2p-menu-glass: rgba(35, 39, 47, .78);
+  --v2p-menu-edge: rgba(255, 255, 255, .14);
+  --v2p-menu-highlight: rgba(255, 255, 255, .08);
+  --v2p-menu-separator: rgba(255, 255, 255, .10);
+}
+
 html:not(.v2p-theme-light-default):not(.v2p-theme-dark-default) #Rightbar .v2p-lite-member-stats,
 html:not(.v2p-theme-light-default):not(.v2p-theme-dark-default) #Rightbar table:has(a[href="/my/nodes"]):has(a[href="/my/topics"]):has(a[href="/my/following"]) {
   border-color: #343b45;
@@ -4291,6 +4330,13 @@ color: #6ee7b7 !important;
 }
 
 html.v2p-mobile:not(.v2p-theme-light-default):not(.v2p-theme-dark-default):has(#Top img[src*="toggle-light"]) #LogoMobile { filter: invert(1) brightness(0.9) contrast(0.9); }
+
+html.v2p-mobile:not(.v2p-theme-light-default):not(.v2p-theme-dark-default):has(#Top img[src*="toggle-light"]) #site-header #site-header-menu #menu-body {
+  --v2p-menu-glass: rgba(35, 39, 47, .78);
+  --v2p-menu-edge: rgba(255, 255, 255, .14);
+  --v2p-menu-highlight: rgba(255, 255, 255, .08);
+  --v2p-menu-separator: rgba(255, 255, 255, .10);
+}
 
 html:not(.v2p-theme-light-default):not(.v2p-theme-dark-default):has(#Top img[src*="toggle-light"]) #Rightbar .v2p-lite-member-stats,
 html:not(.v2p-theme-light-default):not(.v2p-theme-dark-default):has(#Top img[src*="toggle-light"]) #Rightbar table:has(a[href="/my/nodes"]):has(a[href="/my/topics"]):has(a[href="/my/following"]) {

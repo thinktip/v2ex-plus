@@ -1,4 +1,4 @@
-// Generated from userscript/v2ex-plus.user.js 1.13.49. Do not edit directly.
+// Generated from userscript/v2ex-plus.user.js 1.13.50. Do not edit directly.
 (function boot() {
   "use strict";
 
