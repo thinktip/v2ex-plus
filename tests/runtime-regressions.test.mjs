@@ -157,3 +157,22 @@ test('Imgur uses the public default, honors custom IDs, and deletes with the upl
   assert.equal(requests.at(-1).options.headers.Authorization, 'Client-ID original-id');
   assert.equal(requests.at(-1).options.method, 'DELETE');
 });
+
+test('touch navigation drag preserves mouse behavior, previews order and cancels safely', () => {
+  const listeners = {}, calls = [], frames = new Map(); let frameId = 0, captured = null;
+  const handle = { isConnected: true, addEventListener: (name, fn) => listeners[name] = fn,
+    setPointerCapture: id => captured = id, hasPointerCapture: id => captured === id,
+    releasePointerCapture: () => captured = null };
+  const rows = [0, 1, 2].map(i => ({ getBoundingClientRect: () => ({ top: i * 40, height: 40 }) }));
+  const list = { scrollTop: 0, querySelectorAll: () => rows, getBoundingClientRect: () => ({ top: 0, bottom: 120 }) };
+  const context = vm.createContext({ requestAnimationFrame: fn => { frames.set(++frameId, fn); return frameId; }, cancelAnimationFrame: id => frames.delete(id) });
+  vm.runInContext(section(source, '  function bindTouchNavDrag(', '  function openNavSettings('), context);
+  context.bindTouchNavDrag(handle, rows[0], list, { start: () => calls.push('start'), preview: i => calls.push(i), finish: commit => calls.push(commit) });
+  const emit = (name, y, extra = {}) => listeners[name]({ pointerId: 1, pointerType: 'touch', isPrimary: true, clientY: y, preventDefault() {}, ...extra });
+  emit('pointerdown', 20, { pointerType: 'mouse' }); assert.equal(captured, null);
+  emit('pointerdown', 20); emit('pointermove', 23); assert.deepEqual(calls, []);
+  emit('pointermove', 110); assert.deepEqual(calls, ['start', 2]);
+  frames.values().next().value(); assert.equal(list.scrollTop, 6);
+  emit('pointerup', 110); assert.equal(calls.at(-1), true); assert.equal(captured, null);
+  emit('pointerdown', 20); emit('pointermove', 60); emit('pointercancel', 60); assert.equal(calls.at(-1), false);
+});

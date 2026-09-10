@@ -1,4 +1,4 @@
-/* Generated from userscript/v2ex-plus.user.js 1.13.53. Do not edit directly. */
+/* Generated from userscript/v2ex-plus.user.js 1.13.54. Do not edit directly. */
 
 html.v2p-lite-prepaint,
 html.v2p-lite-prepaint body {
@@ -2294,6 +2294,12 @@ align-items: center;
 cursor: grab;
 opacity: 0.55;
 }
+
+@media (pointer: coarse) {
+  .v2p-nav-drag-handle { width: 32px; height: 32px; justify-content: center; flex: 0 0 32px; }
+}
+.v2p-nav-drag-handle { touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.v2p-nav-menu-list { overscroll-behavior: contain; }
 
 .v2p-nav-dragging {
 opacity: 0.35;

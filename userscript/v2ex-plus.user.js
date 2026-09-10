@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Plus
 // @namespace    https://v2ex.com/
-// @version      1.13.53
+// @version      1.13.54
 // @description  Lightweight V2EX layout, theme, navigation, reading, reply, and image tools.
 // @match        https://v2ex.com/*
 // @match        https://*.v2ex.com/*
@@ -2559,6 +2559,12 @@ cursor: grab;
 opacity: 0.55;
 }
 
+@media (pointer: coarse) {
+  .v2p-nav-drag-handle { width: 32px; height: 32px; justify-content: center; flex: 0 0 32px; }
+}
+.v2p-nav-drag-handle { touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.v2p-nav-menu-list { overscroll-behavior: contain; }
+
 .v2p-nav-dragging {
 opacity: 0.35;
 background-color: var(--v2p-color-bg-hover-btn);
@@ -4906,6 +4912,55 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
     return button;
   }
 
+  function bindTouchNavDrag(handle, row, list, callbacks) {
+    let active = null;
+    let frame = 0;
+    const update = () => {
+      if (!active?.moved) return;
+      const rows = Array.from(list.querySelectorAll(".v2p-nav-menu-row")).filter((node) => node !== row);
+      const index = rows.findIndex((node) => {
+        const rect = node.getBoundingClientRect();
+        return active.y < rect.top + rect.height / 2;
+      });
+      callbacks.preview(index < 0 ? rows.length : index);
+    };
+    const scroll = () => {
+      frame = 0;
+      if (!active?.moved || !handle.isConnected) return;
+      const rect = list.getBoundingClientRect();
+      const delta = active.y < rect.top + 28 ? -6 : active.y > rect.bottom - 28 ? 6 : 0;
+      if (delta) { list.scrollTop += delta; update(); }
+      frame = requestAnimationFrame(scroll);
+    };
+    const finish = (event, commit) => {
+      if (!active || event.pointerId !== active.id) return;
+      const previous = active;
+      active = null;
+      cancelAnimationFrame(frame);
+      frame = 0;
+      if (handle.hasPointerCapture(previous.id)) handle.releasePointerCapture(previous.id);
+      if (previous.moved) callbacks.finish(commit);
+    };
+    handle.addEventListener("pointerdown", (event) => {
+      if (event.pointerType === "mouse" || !event.isPrimary || active) return;
+      event.preventDefault();
+      active = { id: event.pointerId, startY: event.clientY, y: event.clientY, moved: false };
+      handle.setPointerCapture(event.pointerId);
+    });
+    handle.addEventListener("pointermove", (event) => {
+      if (!active || event.pointerId !== active.id) return;
+      active.y = event.clientY;
+      if (!active.moved && Math.abs(active.y - active.startY) < 6) return;
+      event.preventDefault();
+      if (!active.moved) { active.moved = true; callbacks.start(); frame = requestAnimationFrame(scroll); }
+      update();
+    });
+    handle.addEventListener("pointerup", (event) => finish(event, true));
+    handle.addEventListener("pointercancel", (event) => finish(event, false));
+    handle.addEventListener("lostpointercapture", (event) => finish(event, false));
+    handle.addEventListener("click", (event) => { event.preventDefault(); event.stopPropagation(); });
+  }
+
   function openNavSettings(config) {
     const existingMenu = document.getElementById("v2p-nav-menu");
     if (existingMenu) {
@@ -4990,6 +5045,25 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
             },
             { once: true },
           );
+        });
+
+        bindTouchNavDrag(dragHandle, row, list, {
+          start() {
+            dragSrcIndex = index;
+            row.classList.add("v2p-nav-dragging");
+            row.setAttribute("aria-grabbed", "true");
+          },
+          preview: showDropPosition,
+          finish(commit) {
+            const destination = dragDestinationIndex;
+            const changed = commit && destination != null && destination !== index;
+            if (changed) reorderConfig(index, destination);
+            dragSrcIndex = null;
+            clearDropStyles();
+            row.classList.remove("v2p-nav-dragging");
+            row.removeAttribute("aria-grabbed");
+            if (changed) { renderList(); saveAndRefresh(); }
+          },
         });
 
         const checkbox = document.createElement("input");
