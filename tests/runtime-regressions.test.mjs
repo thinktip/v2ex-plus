@@ -215,7 +215,7 @@ test('Imgur compression avoids WebP, preserves alpha, and keeps R2 WebP compress
     let encodedType, released = false;
     const context = vm.createContext({
       File, console, COMPRESS_IMAGES_KEY: 'compress', COMPRESSION_QUALITY_KEY: 'quality', IMAGE_HOST_KEY: 'host',
-      normalizeUploadImage: async f => f,
+      normalizeUploadImage: async f => f, convertUploadImageToSRGB: async f => f,
       readUploadSetting: async (key, fallback) => ({ compress: 'true', host })[key] ?? fallback,
       canCompressImage: () => true, isAnimatedPng: async () => false,
       decodeImageForCanvas: async () => ({ width: 2, height: 2, source: {}, release() { released = true; } }),

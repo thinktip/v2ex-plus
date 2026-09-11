@@ -213,6 +213,7 @@ const css = [
 function createManifest(description) {
   return {
     manifest_version: 3,
+    content_security_policy: { extension_pages: "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';" },
     name: "V2EX Plus",
     version,
     description,

@@ -53,6 +53,8 @@ Chrome / Safari 扩展可填写自己的 Imgur Client ID，留空使用默认值
 
 HEIC/HEIF 会在浏览器支持解码时自动转为 JPEG；不支持 HEIC 解码的浏览器需先导出为 JPEG/PNG。图片压缩默认关闭，开启后 Imgur 使用 JPEG 或保留透明背景的 PNG，避免上传不被接受的 WebP。
 
+JPEG/PNG 如携带 ICC 色彩配置，会在本机自动转为标准 sRGB，再执行可选压缩，避免 P3/PQ 图片上传后发灰。转换关闭压缩时也会执行；首版支持 8 位静态 RGB 图片（最大 2400 万像素、40 MB），保留透明度。特殊格式或浏览器无法运行色彩引擎时会停止上传并提示，不会静默忽略配置。色彩转换可能增大文件体积；HEIC/HDR 的完整色调映射不在此支持范围内。
+
 ## 开发与打包
 
 共同源码为 `userscript/v2ex-plus.user.js`，修改后同步生成扩展文件：
@@ -75,3 +77,5 @@ node --test tests/*.test.mjs
 ## 致谢
 
 基于 [coolpace / V2EX Polish](https://github.com/coolpace/V2EX_Polish) 的设计与实现思路持续调整。
+
+离线色彩引擎采用 [lcms-wasm 1.0.5](https://github.com/mattdesl/lcms-wasm)（MIT），随单文件脚本内嵌，无运行时 CDN 依赖。更新 vendor 后运行 `node scripts/embed-color-engine.mjs`，再执行同步和测试。

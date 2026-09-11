@@ -1,0 +1,1 @@
+Synthetic 2x2 fixtures, generated locally with Pillow/LittleCMS. No user images. The generated sRGB matrix profile uses identity TRCs to represent linear RGB. Mid-grey 128 transforms to approximately 188 in sRGB. PNG contains partial and full transparency.

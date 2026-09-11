@@ -1,7 +1,10 @@
 {
   "manifest_version": 3,
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
+  },
   "name": "V2EX Plus",
-  "version": "1.13.56",
+  "version": "1.13.57",
   "description": "Chrome edition of V2EX Plus.",
   "permissions": [
     "storage",
