@@ -1,4 +1,4 @@
-// Generated from userscript/v2ex-plus.user.js 1.13.55. Do not edit directly.
+// Generated from userscript/v2ex-plus.user.js 1.13.56. Do not edit directly.
 (function boot() {
   "use strict";
 
@@ -2404,10 +2404,12 @@
       if (!context) return { file, compressed: false };
       context.drawImage(decodedImage.source, 0, 0);
 
-      let outputType = supportsCanvasWebPEncoding() ? "image/webp" : "image/jpeg";
+      // Imgur rejects WebP uploads even when the browser can encode them.
+      const imageHost = await readUploadSetting(IMAGE_HOST_KEY, "imgur");
+      let outputType = imageHost === "r2" && supportsCanvasWebPEncoding() ? "image/webp" : "image/jpeg";
       if (outputType === "image/jpeg" && file.type !== "image/jpeg") {
         const canFlattenToJpeg = file.type === "image/png" && !(await pngHasTransparency(file));
-        if (!canFlattenToJpeg) return { file, compressed: false };
+        if (!canFlattenToJpeg) outputType = "image/png";
       }
 
       const blob = await canvasToBlob(canvas, outputType, quality);
@@ -2417,7 +2419,7 @@
 
       const baseName = (file.name || "image").replace(/\.[^.]+$/, "") || "image";
       return {
-        file: new File([blob], baseName + (outputType === "image/webp" ? ".webp" : ".jpg"), {
+        file: new File([blob], baseName + ({ "image/webp": ".webp", "image/png": ".png", "image/jpeg": ".jpg" }[outputType]), {
           type: outputType,
           lastModified: Date.now(),
         }),

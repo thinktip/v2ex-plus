@@ -51,7 +51,7 @@ Safari 原生扩展带设置面板；iOS Safari 可使用上面的油猴版安�
 
 Chrome / Safari 扩展可填写自己的 Imgur Client ID，留空使用默认值；也可选择 Cloudflare R2，填写兼容上传服务的 HTTPS 地址和访问令牌。自定义地址可能需要额外站点权限。图片上传后插入原始 URL，由 V2EX 解析。
 
-HEIC/HEIF 会在浏览器支持解码时自动转为 JPEG，PNG 保留原图；不支持 HEIC 解码的浏览器需先导出为 JPEG/PNG。
+HEIC/HEIF 会在浏览器支持解码时自动转为 JPEG；不支持 HEIC 解码的浏览器需先导出为 JPEG/PNG。图片压缩默认关闭，开启后 Imgur 使用 JPEG 或保留透明背景的 PNG，避免上传不被接受的 WebP。
 
 ## 开发与打包
 

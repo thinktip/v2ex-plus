@@ -204,3 +204,31 @@ test('HEIC conversion runs independently of compression and releases decoded res
   context.decodeImageForCanvas = async () => { throw new Error('unsupported'); };
   await assert.rejects(context.normalizeUploadImage(new File(['xxxxftypheic'], 'photo.heic')), error => /无法转换/.test(error.userMessage));
 });
+
+test('Imgur compression avoids WebP, preserves alpha, and keeps R2 WebP compression', async () => {
+  for (const [host, type, transparent, expected] of [
+    ['imgur', 'image/jpeg', false, 'image/jpeg'],
+    ['imgur', 'image/png', false, 'image/jpeg'],
+    ['imgur', 'image/png', true, 'image/png'],
+    ['r2', 'image/png', true, 'image/webp'],
+  ]) {
+    let encodedType, released = false;
+    const context = vm.createContext({
+      File, console, COMPRESS_IMAGES_KEY: 'compress', COMPRESSION_QUALITY_KEY: 'quality', IMAGE_HOST_KEY: 'host',
+      normalizeUploadImage: async f => f,
+      readUploadSetting: async (key, fallback) => ({ compress: 'true', host })[key] ?? fallback,
+      canCompressImage: () => true, isAnimatedPng: async () => false,
+      decodeImageForCanvas: async () => ({ width: 2, height: 2, source: {}, release() { released = true; } }),
+      document: { createElement: () => ({ getContext: () => ({ drawImage() {} }) }) },
+      supportsCanvasWebPEncoding: () => true, pngHasTransparency: async () => transparent,
+      canvasToBlob: async (_, outputType) => { encodedType = outputType; return new Blob(['tiny'], { type: outputType }); },
+    });
+    vm.runInContext(section(source, '  async function prepareImageForUpload(', '  async function decodeImageForCanvas('), context);
+    const result = await context.prepareImageForUpload(new File(['x'.repeat(100)], 'test.png', { type }));
+    assert.equal(encodedType, expected, `${host} ${type} alpha=${transparent}`);
+    assert.equal(result.file.type, expected);
+    assert.equal(result.compressed, true);
+    assert.match(result.file.name, new RegExp('\\.' + ({ 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' })[expected] + '$'));
+    assert.equal(released, true);
+  }
+});

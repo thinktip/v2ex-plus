@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Plus
 // @namespace    https://v2ex.com/
-// @version      1.13.55
+// @version      1.13.56
 // @description  Lightweight V2EX layout, theme, navigation, reading, reply, and image tools.
 // @match        https://v2ex.com/*
 // @match        https://*.v2ex.com/*
@@ -6295,10 +6295,12 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
       if (!context) return { file, compressed: false };
       context.drawImage(decodedImage.source, 0, 0);
 
-      let outputType = supportsCanvasWebPEncoding() ? "image/webp" : "image/jpeg";
+      // Imgur rejects WebP uploads even when the browser can encode them.
+      const imageHost = await readUploadSetting(IMAGE_HOST_KEY, "imgur");
+      let outputType = imageHost === "r2" && supportsCanvasWebPEncoding() ? "image/webp" : "image/jpeg";
       if (outputType === "image/jpeg" && file.type !== "image/jpeg") {
         const canFlattenToJpeg = file.type === "image/png" && !(await pngHasTransparency(file));
-        if (!canFlattenToJpeg) return { file, compressed: false };
+        if (!canFlattenToJpeg) outputType = "image/png";
       }
 
       const blob = await canvasToBlob(canvas, outputType, quality);
@@ -6308,7 +6310,7 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
 
       const baseName = (file.name || "image").replace(/\.[^.]+$/, "") || "image";
       return {
-        file: new File([blob], baseName + (outputType === "image/webp" ? ".webp" : ".jpg"), {
+        file: new File([blob], baseName + ({ "image/webp": ".webp", "image/png": ".png", "image/jpeg": ".jpg" }[outputType]), {
           type: outputType,
           lastModified: Date.now(),
         }),
