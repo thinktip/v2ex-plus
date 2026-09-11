@@ -176,3 +176,31 @@ test('touch navigation drag preserves mouse behavior, previews order and cancels
   emit('pointerup', 110); assert.equal(calls.at(-1), true); assert.equal(captured, null);
   emit('pointerdown', 20); emit('pointermove', 60); emit('pointercancel', 60); assert.equal(calls.at(-1), false);
 });
+
+test('upload normalization trusts PNG bytes over MIME and extension without changing bytes', async () => {
+  const context = vm.createContext({ File, Uint8Array });
+  vm.runInContext(section(source, '  async function normalizeUploadImage(', '  async function prepareImageForUpload('), context);
+  const data = new Uint8Array([137,80,78,71,13,10,26,10,0,0]);
+  for (const [name,type] of [['photo.png',''],['photo.heic','image/heic'],['photo.bin','application/octet-stream']]) {
+    const input = new File([data], name, { type });
+    const output = await context.normalizeUploadImage(input);
+    assert.equal(output.type, 'image/png'); assert.match(output.name, /\.png$/);
+    assert.deepEqual(new Uint8Array(await output.arrayBuffer()), data);
+  }
+  const valid = new File([data], 'photo.png', { type: 'image/png' });
+  assert.equal(await context.normalizeUploadImage(valid), valid);
+});
+test('HEIC conversion runs independently of compression and releases decoded resources', async () => {
+  let released = false;
+  const context = vm.createContext({ File, Uint8Array,
+    decodeImageForCanvas: async () => ({ width: 2, height: 2, source: {}, release() { released = true; } }),
+    document: { createElement: () => ({ getContext: () => ({ fillRect() {}, drawImage() {} }) }) },
+    canvasToBlob: async () => new Blob(['jpeg'], { type: 'image/jpeg' }),
+    createImageUploadError: (message, userMessage) => Object.assign(new Error(message), { userMessage }),
+  });
+  vm.runInContext(section(source, '  async function normalizeUploadImage(', '  async function prepareImageForUpload('), context);
+  const output = await context.normalizeUploadImage(new File(['xxxxftypheic'], 'photo.png', { type: 'image/png' }));
+  assert.equal(output.type, 'image/jpeg'); assert.equal(output.name, 'photo.jpg'); assert.equal(released, true);
+  context.decodeImageForCanvas = async () => { throw new Error('unsupported'); };
+  await assert.rejects(context.normalizeUploadImage(new File(['xxxxftypheic'], 'photo.heic')), error => /无法转换/.test(error.userMessage));
+});

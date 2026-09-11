@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX Plus
 // @namespace    https://v2ex.com/
-// @version      1.13.54
+// @version      1.13.55
 // @description  Lightweight V2EX layout, theme, navigation, reading, reply, and image tools.
 // @match        https://v2ex.com/*
 // @match        https://*.v2ex.com/*
@@ -6232,7 +6232,49 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
     return (bytes / (1024 * 1024)).toFixed(1) + " MB";
   }
 
+  async function normalizeUploadImage(file) {
+    const bytes = new Uint8Array(await file.slice(0, 64).arrayBuffer());
+    const ascii = (start, end) => String.fromCharCode(...bytes.slice(start, end));
+    let type = "";
+    if (bytes[0] === 137 && ascii(1, 4) === "PNG" && bytes[4] === 13 && bytes[5] === 10) type = "image/png";
+    else if (bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255) type = "image/jpeg";
+    else if (/^GIF8[79]a$/.test(ascii(0, 6))) type = "image/gif";
+    else if (ascii(0, 4) === "RIFF" && ascii(8, 12) === "WEBP") type = "image/webp";
+    else if (ascii(4, 8) === "ftyp") {
+      const brands = ascii(8, 64);
+      if (/avif|avis/.test(brands)) type = "image/avif";
+      else if (/heic|heix|hevc|hevx|mif1|msf1/.test(brands)) type = "image/heic";
+    }
+    type ||= String(file.type || "").toLowerCase();
+    const heic = /image\/hei[cf]/.test(type) || (!type && /\.hei[cf]$/i.test(file.name || ""));
+    if (heic) {
+      let decoded;
+      try {
+        decoded = await decodeImageForCanvas(file);
+        const canvas = document.createElement("canvas");
+        canvas.width = decoded.width;
+        canvas.height = decoded.height;
+        const context = canvas.getContext("2d");
+        if (!context || !canvas.width || !canvas.height) throw new Error("Empty HEIC image");
+        context.fillStyle = "#fff";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(decoded.source, 0, 0);
+        const blob = await canvasToBlob(canvas, "image/jpeg", 0.92);
+        if (!blob || blob.type !== "image/jpeg" || !blob.size) throw new Error("HEIC conversion failed");
+        return new File([blob], (file.name || "image").replace(/\.[^.]+$/, "") + ".jpg", { type: "image/jpeg" });
+      } catch (error) {
+        throw createImageUploadError("HEIC decode failed: " + error.message, "当前浏览器无法转换 HEIC/HEIF，请在照片中导出为 JPEG 或 PNG 后上传；仅修改文件后缀无效。");
+      } finally { decoded?.release(); }
+    }
+    const extension = { "image/png": "png", "image/jpeg": "jpg", "image/gif": "gif", "image/webp": "webp", "image/avif": "avif" }[type];
+    if (extension && (file.type !== type || !new RegExp("\\." + (extension === "jpg" ? "jpe?g" : extension) + "$", "i").test(file.name || ""))) {
+      return new File([file], (file.name || "image").replace(/\.[^.]+$/, "") + "." + extension, { type, lastModified: file.lastModified });
+    }
+    return file;
+  }
+
   async function prepareImageForUpload(file) {
+    file = await normalizeUploadImage(file);
     const compressionEnabled = await readUploadSetting(COMPRESS_IMAGES_KEY, "false") === "true";
     if (!compressionEnabled || !canCompressImage(file)) {
       return { file, compressed: false };
@@ -6282,6 +6324,7 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
 
   async function decodeImageForCanvas(file) {
     if (typeof createImageBitmap === "function") {
+      try {
       const bitmap = await createImageBitmap(file);
       return {
         source: bitmap,
@@ -6289,6 +6332,7 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
         height: bitmap.height,
         release: () => bitmap.close(),
       };
+      } catch { /* Safari may decode HEIC through Image but not createImageBitmap. */ }
     }
 
     const objectUrl = URL.createObjectURL(file);
@@ -6792,7 +6836,7 @@ html.v2p-theme-dark-default #Rightbar .v2p-lite-member-shortcut-chat:hover {
   function isImageFile(file) {
     if (!file) return false;
     if (file.type && file.type.indexOf("image/") === 0) return true;
-    return /\.(apng|avif|gif|jpe?g|png|webp)$/i.test(file.name || "");
+    return /\.(apng|avif|gif|hei[cf]|jpe?g|png|webp)$/i.test(file.name || "");
   }
 
   function getImageFileFromClipboard(event) {
